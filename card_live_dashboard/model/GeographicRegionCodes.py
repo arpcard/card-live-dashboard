@@ -1,5 +1,5 @@
 from types import FunctionType
-
+from pathlib import Path
 import pandas as pd
 import geopandas
 
@@ -10,7 +10,7 @@ class GeographicRegionCodes:
     COUNTRY_CODE = 'geo_area_iso3_code'
     NAME_COL = 'geo_area_name_standard'
 
-    def __init__(self, unm49_filepath: str, use_default_additional_mappings: bool = True):
+    def __init__(self, unm49_filepath: Path, use_default_additional_mappings: bool = True):
         self._unm49_data = pd.read_csv(unm49_filepath, dtype=str)
         self._unm49_mapping = self._load_unm49_region_mapping_table(self._unm49_data)
 

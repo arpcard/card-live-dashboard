@@ -1,7 +1,7 @@
 import pandas as pd
+from pathlib import Path
 import json
 from os import path
-from pathlib import Path
 
 
 class CardLiveDataLoader:
@@ -12,7 +12,7 @@ class CardLiveDataLoader:
         'lmat',
     ]
 
-    def __init__(self, card_live_dir: str = None):
+    def __init__(self, card_live_dir: Path = None):
         self._directory = card_live_dir
 
         self._main_df = None
@@ -24,7 +24,7 @@ class CardLiveDataLoader:
         if self._directory != None:
             self.read_data(self._directory)
 
-    def read_data(self, directory: str):
+    def read_data(self, directory: Path):
         input_files = Path(directory).glob('*')
         json_data = []
         for input_file in input_files:
