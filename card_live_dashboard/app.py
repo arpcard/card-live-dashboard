@@ -10,6 +10,7 @@ import pandas as pd
 from pathlib import Path
 import numpy as np
 from datetime import datetime, timedelta
+from os import path
 
 from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.GeographicRegionCodes import GeographicRegionCodes
@@ -23,7 +24,7 @@ import card_live_dashboard.model as model
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-data = CardLiveDataLoader(Path('data', 'card_live_small'))
+data = CardLiveDataLoader(Path(path.dirname(__file__), '..', 'data', 'card_live_small'))
 
 rgi_parser = RGIParser(data.rgi_df)
 all_drugs = rgi_parser.all_drugs_list()
@@ -68,8 +69,3 @@ def update_geo_time_figure(drug_classes: List[str], time_dropdown):
 
     return (main_pane,
             time_period_options)
-
-if __name__ == '__main__':
-    app.run_server(debug = True,
-                  port = 8050,
-                  host = '0.0.0.0')
