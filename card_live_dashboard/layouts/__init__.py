@@ -1,5 +1,6 @@
 from typing import List
 
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
@@ -7,6 +8,7 @@ side_panel_section_style = {
     'padding': '10px'
 }
 
+external_stylesheets = [dbc.themes.BOOTSTRAP]
 
 def default_layout(number_of_samples: int, last_updated, all_drugs: List[str]):
     layout = html.Div(className='container-fluid', children=[

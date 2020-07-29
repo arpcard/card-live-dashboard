@@ -5,7 +5,6 @@ import geopandas
 
 import card_live_dashboard.model as model
 from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
-from card_live_dashboard.model.GeographicRegionCodes import GeographicRegionCodes
 from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 from card_live_dashboard.model.RGIParser import RGIParser
 
