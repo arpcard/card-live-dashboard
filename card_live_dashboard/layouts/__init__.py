@@ -1,0 +1,54 @@
+from typing import List
+
+import dash_core_components as dcc
+import dash_html_components as html
+
+side_panel_section_style = {
+    'padding': '10px'
+}
+
+
+def default_layout(number_of_samples: int, last_updated, all_drugs: List[str]):
+    layout = html.Div(className='container-fluid', children=[
+        html.Div(className='row', children=[
+            html.Div(className='col-sm-3', children=[
+                html.Div(className='sticky-top', children=[
+                    html.H1([
+                        'CARD:Live'
+                    ]),
+                    html.Span(className='badge badge-secondary', children=[f'{number_of_samples} samples']),
+                    ' ',
+                    html.Span(className='badge badge-secondary', children=[f'Last updated: {last_updated: %b %d, %Y}']),
+                    html.Div(children=['Filter display by drug class: ',
+                                       dcc.Dropdown(
+                                           id='drug-class-select',
+                                           options=[{'label': x, 'value': x} for x in all_drugs],
+                                           multi=True,
+                                           placeholder='Select a drug class',
+                                           style={'color': 'black'},
+                                       ),
+                                       ], style=side_panel_section_style),
+                    html.Div(children=['Select a time period: ',
+                                       dcc.Dropdown(id='time-period-items',
+                                                    value='all',
+                                                    clearable=False,
+                                                    style={'color': 'black'})
+                                       ], style=side_panel_section_style),
+                    html.P(className='text-center', children=[
+                        html.Br(),
+                        html.A(className='badge badge-primary', children=['Code | GitLab'],
+                               href='https://devcard.mcmaster.ca:8888/apetkau/amr-visualization-summer-2020'),
+                    ]),
+                ]),
+            ], style={'background-color': '#2c3e50', 'color': 'white'}),
+            html.Div(className='col', children=[
+                dcc.Loading(children=[
+                    html.Div(className='container', children=[
+                        html.Div(className='row', children=[html.Div(className='col', id='main-pane')]),
+                    ])
+                ]),
+            ], style={'background-color': 'white'})
+        ]),
+    ], style={'background-color': '##2c3e50'})
+
+    return layout
