@@ -18,15 +18,12 @@ from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 from card_live_dashboard.model.RGIParser import RGIParser
 import card_live_dashboard.layouts.figures as figures
 import card_live_dashboard.layouts as layouts
+import card_live_dashboard.model as model
     
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-data_dir = 'data'
-data = CardLiveDataLoader(Path(data_dir, 'card_live_small'))
-region_codes = GeographicRegionCodes(Path('card_live_dashboard', 'model', 'data', 'UN-M49', 'UNSD-Methodology.csv'))
-summaries = GeographicSummaries(region_codes)
-world = region_codes.get_un_m49_regions_naturalearth()
+data = CardLiveDataLoader(Path('data', 'card_live_small'))
 
 rgi_parser = RGIParser(data.rgi_df)
 all_drugs = rgi_parser.all_drugs_list()
@@ -65,7 +62,7 @@ def update_geo_time_figure(drug_classes: List[str], time_dropdown):
         drug_mapping_matches = drug_mapping[drug_mapping['has_drugs']]
         time_dropdown_text[label] = f'Last {label} ({len(drug_mapping_matches)})'
 
-    main_pane = figures.build_main_pane(drug_mapping_subsets[time_dropdown], rgi_parser, region_codes, data, world)
+    main_pane = figures.build_main_pane(drug_mapping_subsets[time_dropdown], rgi_parser, data)
 
     time_period_options = [{'label': time_dropdown_text[x], 'value': x} for x in time_dropdown_text]
 
