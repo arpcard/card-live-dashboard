@@ -1,14 +1,9 @@
 import pandas as pd
-import geopandas
-import numpy as np
-import json
-from os import path
-from pathlib import Path
-from flatten_json import flatten
+
 
 class TaxonomicParser:
 
-    def __init__(self, df_rgi_kmer, df_lmat):
+    def __init__(self, df_rgi_kmer: pd.DataFrame, df_lmat: pd.DataFrame):
         self._df_rgi_kmer = df_rgi_kmer[['rgi_kmer.CARD*kmer Prediction',
                                          'rgi_kmer.Taxonomic kmers',
                                          'rgi_kmer.Genomic kmers',
@@ -24,21 +19,21 @@ class TaxonomicParser:
              'lmat.count': 'float64'}
         )
 
-    def create_contigs_lmat_score(self, df, name):
+    def create_contigs_lmat_score(self, df: pd.DataFrame, name: str) -> pd.DataFrame:
         df_sum = df['lmat.count'].groupby('filename').sum().rename('lmat_count_sum').to_frame()
         df_merged = df_sum.merge(df, how='left', on='filename')
         df_merged[name] = df_merged['lmat.count'] / df_merged['lmat_count_sum']
 
         return df_merged
 
-    def create_filename_lmat_tax(self):
+    def create_filename_lmat_tax(self) -> pd.DataFrame:
         df_lmat_subset = self.create_contigs_lmat_score(self._df_lmat, 'lmat_real_score')
         df_lmat_subset = df_lmat_subset.sort_values(by=['filename', 'lmat_real_score'], ascending=False).groupby(
             'filename').nth(0)
 
         return df_lmat_subset[['lmat.taxonomy_label']]
 
-    def create_filename_rgi_kmer_tax(self):
+    def create_filename_rgi_kmer_tax(self) -> pd.DataFrame:
         df_tax = self._df_rgi_kmer.groupby('filename')['rgi_kmer.CARD*kmer Prediction'].apply(
             lambda x: x.replace(
                 # Remove text like '(chromosome)'
@@ -48,13 +43,13 @@ class TaxonomicParser:
         df_tax = df_tax.rename(columns={'level_1': 'rgi_kmer.taxonomy_label'})['rgi_kmer.taxonomy_label']
         return df_tax.to_frame()
 
-    def matches_column(self, df, left, right):
+    def matches_column(self, df: pd.DataFrame, left: str, right: str) -> pd.DataFrame:
         df_matches = df.copy()
         df_matches['matches'] = (df[left] == df[right])
 
         return df_matches
 
-    def create_file_matches(self):
+    def create_file_matches(self) -> pd.DataFrame:
         df_rgi = self.create_filename_rgi_kmer_tax()
         df_lmat = self.create_filename_lmat_tax()
 
@@ -63,7 +58,7 @@ class TaxonomicParser:
 
         return df_both
 
-    def create_rgi_lmat_both(self):
+    def create_rgi_lmat_both(self) -> pd.DataFrame:
         df_both = self.create_file_matches()
 
         df_both_counts = self.create_rgi_lmat_counts(df_both)
@@ -80,7 +75,7 @@ class TaxonomicParser:
 
         return df_count_all
 
-    def create_rgi_lmat_counts(self, df_both_matches):
+    def create_rgi_lmat_counts(self, df_both_matches: pd.DataFrame) -> pd.DataFrame:
         df_both_counts = df_both_matches[df_both_matches['matches']][
             'rgi_kmer.taxonomy_label'].value_counts().to_frame().rename(
             columns={'rgi_kmer.taxonomy_label': 'count_both'})
@@ -88,7 +83,7 @@ class TaxonomicParser:
 
         return df_both_counts
 
-    def create_unique_counts(self, df_both_matches, label, renamed_label):
+    def create_unique_counts(self, df_both_matches: pd.DataFrame, label: str, renamed_label: str) -> pd.DataFrame:
         df_counts = df_both_matches[~df_both_matches['matches']][label].value_counts().to_frame().rename(
             columns={label: renamed_label})
         df_counts.index.name = 'taxon'

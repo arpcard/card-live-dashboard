@@ -1,10 +1,7 @@
+from types import FunctionType
+
 import pandas as pd
 import geopandas
-import numpy as np
-import json
-from os import path
-from pathlib import Path
-from flatten_json import flatten
 
 
 class GeographicRegionCodes:
@@ -13,7 +10,7 @@ class GeographicRegionCodes:
     COUNTRY_CODE = 'geo_area_iso3_code'
     NAME_COL = 'geo_area_name_standard'
 
-    def __init__(self, unm49_filepath, use_default_additional_mappings=True):
+    def __init__(self, unm49_filepath: str, use_default_additional_mappings: bool = True):
         self._unm49_data = pd.read_csv(unm49_filepath, dtype=str)
         self._unm49_mapping = self._load_unm49_region_mapping_table(self._unm49_data)
 
@@ -23,7 +20,7 @@ class GeographicRegionCodes:
             self.insert_geo_name_na_mapping(lambda x: 'Multiple regions' if int(x) == 0 else None)
             self.insert_geo_name_na_mapping(lambda x: f'N/A [code={x}]')
 
-    def insert_geo_name_na_mapping(self, function):
+    def insert_geo_name_na_mapping(self, function: FunctionType):
         '''
         Inserts a new mapping function letting you customize how m49 codes get mapped to geographic area names for N/A values.
         Used for custom mappings not part of the UN M49 standard (e.g., 0 to 'Mulitiple regions'). Use this like
@@ -37,7 +34,7 @@ class GeographicRegionCodes:
         '''
         self._mapping_functions.append(function)
 
-    def _load_unm49_region_mapping_table(self, df):
+    def _load_unm49_region_mapping_table(self, df: pd.DataFrame) -> pd.DataFrame:
         df_global = df[['Global Code', 'Global Name', 'M49 Code', 'ISO-alpha3 Code']].rename(
             columns={'Global Code': self.TOP_REGION_NAME,
                      'Global Name': self.NAME_COL,
@@ -65,7 +62,7 @@ class GeographicRegionCodes:
         return pd.concat([df_global, df_region, df_sub_region, df_intermediate_region, df_m49]).drop_duplicates(
             keep='first')
 
-    def _apply_mapping_functions(self, data, region_column):
+    def _apply_mapping_functions(self, data: pd.DataFrame, region_column: str):
         for mapping_function in self._mapping_functions:
             data.loc[data[self.NAME_COL].isna(),
                      self.NAME_COL] = data.loc[data[self.NAME_COL].isna(),
@@ -73,7 +70,7 @@ class GeographicRegionCodes:
 
         return data
 
-    def add_region_standard_names(self, data, region_column):
+    def add_region_standard_names(self, data: pd.DataFrame, region_column: str) -> pd.DataFrame:
         data = data.astype({region_column: str})
         region_standard_names = self._unm49_mapping[[self.TOP_REGION_NAME, self.NAME_COL]].drop_duplicates(
             keep='first').dropna()
@@ -84,7 +81,7 @@ class GeographicRegionCodes:
 
         return data_expanded
 
-    def expand_to_country_codes(self, data, region_column):
+    def expand_to_country_codes(self, data: pd.DataFrame, region_column: str) -> pd.DataFrame:
         data = data.astype({region_column: str})
         regions_no_names = self._unm49_mapping.drop(columns=[self.NAME_COL])
         data_expanded = data.merge(regions_no_names, how='left', left_on=region_column, right_on=self.TOP_REGION_NAME)

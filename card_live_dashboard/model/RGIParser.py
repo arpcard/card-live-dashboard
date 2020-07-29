@@ -1,18 +1,16 @@
+from typing import List
+
 import pandas as pd
-import geopandas
 import numpy as np
-import json
-from os import path
-from pathlib import Path
-from flatten_json import flatten
+
 
 class RGIParser:
 
-    def __init__(self, df_rgi):
+    def __init__(self, df_rgi: pd.DataFrame):
         self._df_rgi = df_rgi
         self._drug_mapping = None
 
-    def get_drug_mapping(self, drug_classes=None):
+    def get_drug_mapping(self, drug_classes: List[str] = None) -> pd.DataFrame:
         df_rgi_drug = self._df_rgi.reset_index()[['filename', 'rgi_main.Drug Class']].replace('', np.nan)
         df_rgi_drug['rgi_main.Drug Class'] = df_rgi_drug.loc[
             ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(
@@ -33,7 +31,7 @@ class RGIParser:
 
         return df_rgi_all
 
-    def geo_drug_sets_to_counts(self, df_drug_mapping):
+    def geo_drug_sets_to_counts(self, df_drug_mapping: pd.DataFrame) -> pd.DataFrame:
         df_has_classes = df_drug_mapping.rename(columns={'has_drugs': 'drug_class_count'}).reset_index()
         df_has_classes['drug_class_count'] = df_has_classes['drug_class_count'].apply(lambda x: 1 if x else 0)
         df_has_classes = df_has_classes[['geo_area_code', 'drug_class_count']].set_index('geo_area_code').groupby(
@@ -41,7 +39,7 @@ class RGIParser:
 
         return df_has_classes
 
-    def all_drugs_list(self):
+    def all_drugs_list(self) -> List[str]:
         df_rgi_drug = self._df_rgi[['rgi_main.Drug Class']].replace('', np.nan)
         df_rgi_drug = df_rgi_drug.loc[
             ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(

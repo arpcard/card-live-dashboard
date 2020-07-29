@@ -1,17 +1,13 @@
 import pandas as pd
-import geopandas
-import numpy as np
-import json
-from os import path
-from pathlib import Path
-from flatten_json import flatten
+
+from card_live_dashboard.model.GeographicRegionCodes import GeographicRegionCodes
 
 class GeographicSummaries:
 
-    def __init__(self, region_codes):
+    def __init__(self, region_codes: GeographicRegionCodes):
         self._geographic_region_codes = region_codes
 
-    def create_geo_analysis_table(self, main_df):
+    def create_geo_analysis_table(self, main_df: pd.DataFrame) -> pd.DataFrame:
         df_geo = main_df[['geo_area_code', 'analysis_valid']].copy()
 
         df_geo = df_geo.groupby(
@@ -27,7 +23,7 @@ class GeographicSummaries:
 
         return df_geo
 
-    def create_geo_timestamp_table(self, main_df):
+    def create_geo_timestamp_table(self, main_df: pd.DataFrame) -> pd.DataFrame:
         geo_time = main_df[['timestamp', 'geo_area_code']]
         geo_time = self._geographic_region_codes.add_region_standard_names(geo_time, 'geo_area_code')
         geo_time = geo_time.drop(columns=[self._geographic_region_codes.TOP_REGION_NAME])

@@ -1,10 +1,8 @@
 import pandas as pd
-import geopandas
-import numpy as np
 import json
 from os import path
 from pathlib import Path
-from flatten_json import flatten
+
 
 class CardLiveDataLoader:
     JSON_DATA_FIELDS = [
@@ -14,7 +12,7 @@ class CardLiveDataLoader:
         'lmat',
     ]
 
-    def __init__(self, card_live_dir=None):
+    def __init__(self, card_live_dir: str = None):
         self._directory = card_live_dir
 
         self._main_df = None
@@ -26,7 +24,7 @@ class CardLiveDataLoader:
         if self._directory != None:
             self.read_data(self._directory)
 
-    def read_data(self, directory):
+    def read_data(self, directory: str):
         input_files = Path(directory).glob('*')
         json_data = []
         for input_file in input_files:
@@ -42,20 +40,20 @@ class CardLiveDataLoader:
         self._full_df['timestamp'] = pd.to_datetime(self._full_df['timestamp'])
         self._main_df = self._full_df.drop(columns=self.JSON_DATA_FIELDS)
 
-    def _rows_with_empty_list(self, df, col_name):
+    def _rows_with_empty_list(self, df: pd.DataFrame, col_name: str):
         empty_rows = {}
         for index, row in df.iterrows():
             empty_rows[index] = (len(row[col_name]) == 0)
         return pd.Series(empty_rows)
 
-    def _replace_empty_list_na(self, df, cols):
+    def _replace_empty_list_na(self, df: pd.DataFrame, cols: str):
         dfnew = df.copy()
         for column in cols:
             empty_rows = self._rows_with_empty_list(df, column)
             dfnew.loc[empty_rows, column] = None
         return dfnew
 
-    def _create_analysis_valid_column(self, df, analysis_cols):
+    def _create_analysis_valid_column(self, df: pd.DataFrame, analysis_cols: str):
         df = df.copy()
         df['analysis_valid'] = 'None'
         for col in analysis_cols:
@@ -64,7 +62,7 @@ class CardLiveDataLoader:
             df.loc[~df[col].isna() & (df['analysis_valid'] == 'None'), 'analysis_valid'] = col
         return df.replace(' and '.join(self.JSON_DATA_FIELDS), 'all')
 
-    def _expand_column(self, df, column, na_char=None):
+    def _expand_column(self, df: pd.DataFrame, column: str, na_char: str = None):
         '''
         Expands a particular column in the dataframe from a list of dictionaries to columns.
         That is expands a column like 'col' => [{'key1': 'value1', 'key2': 'value2'}] to a dataframe
@@ -84,11 +82,11 @@ class CardLiveDataLoader:
         return merged_df
 
     @property
-    def main_df(self):
+    def main_df(self) -> pd.DataFrame:
         return self._main_df
 
     @property
-    def rgi_df(self):
+    def rgi_df(self) -> pd.DataFrame:
         if self._rgi_df is None:
             self._rgi_df = self._expand_column(self._full_df, 'rgi_main', na_char='n/a').drop(
                 columns=self.JSON_DATA_FIELDS)
@@ -96,7 +94,7 @@ class CardLiveDataLoader:
         return self._rgi_df
 
     @property
-    def rgi_kmer_df(self):
+    def rgi_kmer_df(self) -> pd.DataFrame:
         if self._rgi_kmer_df is None:
             self._rgi_kmer_df = self._expand_column(self._full_df, 'rgi_kmer', na_char='n/a').drop(
                 columns=self.JSON_DATA_FIELDS)
@@ -104,14 +102,14 @@ class CardLiveDataLoader:
         return self._rgi_kmer_df
 
     @property
-    def mlst_df(self):
+    def mlst_df(self) -> pd.DataFrame:
         if self._mlst_df is None:
             self._mlst_df = self._expand_column(self._full_df, 'mlst', na_char='-').drop(columns=self.JSON_DATA_FIELDS)
 
         return self._mlst_df
 
     @property
-    def lmat_df(self):
+    def lmat_df(self) -> pd.DataFrame:
         if self._lmat_df is None:
             self._lmat_df = self._expand_column(self._full_df, 'lmat', na_char='n/a').drop(
                 columns=self.JSON_DATA_FIELDS)
