@@ -37,6 +37,19 @@ def default_layout():
                     html.Span(className='badge badge-secondary', children=[f'{number_of_samples} samples']),
                     ' ',
                     html.Span(className='badge badge-secondary', children=[f'Last updated: {last_updated: %b %d, %Y}']),
+                    html.Div(children=['RGI cutoff: ',
+                                       dcc.Dropdown(
+                                           id='rgi-cutoff',
+                                           options=[
+                                               {'label': 'Perfect', 'value': 'perfect'},
+                                               {'label': 'Strict', 'value': 'strict'},
+                                               {'label': 'Loose', 'value': 'loose'},
+                                           ],
+                                           multi=True,
+                                           placeholder='Select an RGI cutoff',
+                                           style={'color': 'black'},
+                                       ),
+                                       ], style=side_panel_section_style),
                     html.Div(children=['Filter display by drug class: ',
                                        dcc.Dropdown(
                                            id='drug-class-select',

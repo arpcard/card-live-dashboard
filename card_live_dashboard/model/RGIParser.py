@@ -1,4 +1,5 @@
 from typing import List
+from types import FunctionType
 
 import pandas as pd
 import numpy as np
@@ -9,6 +10,22 @@ class RGIParser:
     def __init__(self, df_rgi: pd.DataFrame):
         self._df_rgi = df_rgi
         self._drug_mapping = None
+
+    def filter_by(self, func: FunctionType):
+        """
+        Applies a filter to the underlying dataframe to select specific columns.
+        Can be run like:
+
+        rgi_parser.filter_by(lambda x: x['column'] == 'value')
+
+        :param func: The filter function.
+        :return: A new instance of RGIParser which is a subset of the old instance.
+        """
+        return RGIParser(self._df_rgi[func(self._df_rgi)])
+
+    def filter_by_cutoff(self, levels: List[str]):
+        levels = [level.lower() for level in levels]
+        return self.filter_by(lambda x: x['rgi_main.Cut_Off'].str.lower().isin(levels))
 
     def get_drug_mapping(self, drug_classes: List[str] = None) -> pd.DataFrame:
         df_rgi_drug = self._df_rgi.reset_index()[['filename', 'rgi_main.Drug Class']].replace('', np.nan)

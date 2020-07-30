@@ -21,18 +21,23 @@ YEAR = timedelta(days=365)
 @app.callback(
     [Output('main-pane', 'children'),
      Output('time-period-items', 'options')],
-    [Input('drug-class-select', 'value'),
+    [Input('rgi-cutoff', 'value'),
+     Input('drug-class-select', 'value'),
      Input('time-period-items', 'value')]
 )
-def update_geo_time_figure(drug_classes: List[str], time_dropdown):
+def update_geo_time_figure(rgi_cutoff: List[str], drug_classes: List[str], time_dropdown):
     """
     Main callback/controller for updating all figures based on user selections.
+    :param rgi_cutoff: A list of RGI cutoff values to filter results.
     :param drug_classes: A list of the drug_classes to display.
     :param time_dropdown: The time selection.
     :return: The figures to place in the main figure region of the page.
     """
     data = CardLiveData.get_data_package()
     rgi_parser = RGIParser(data.rgi_df)
+    if rgi_cutoff and len(rgi_cutoff) > 0:
+        rgi_parser = rgi_parser.filter_by_cutoff(rgi_cutoff)
+
     df_drug_mapping = rgi_parser.get_drug_mapping(drug_classes)
 
     time_now = datetime.now()

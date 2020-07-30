@@ -21,7 +21,7 @@ class GeographicRegionCodes:
             self.insert_geo_name_na_mapping(lambda x: f'N/A [code={x}]')
 
     def insert_geo_name_na_mapping(self, function: FunctionType):
-        '''
+        """
         Inserts a new mapping function letting you customize how m49 codes get mapped to geographic area names for N/A values.
         Used for custom mappings not part of the UN M49 standard (e.g., 0 to 'Mulitiple regions'). Use this like
 
@@ -31,7 +31,7 @@ class GeographicRegionCodes:
         :param function: The function to use for mapping.
 
         :return: None
-        '''
+        """
         self._mapping_functions.append(function)
 
     def _load_unm49_region_mapping_table(self, df: pd.DataFrame) -> pd.DataFrame:
