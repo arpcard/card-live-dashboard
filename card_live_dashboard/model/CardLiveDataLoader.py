@@ -2,6 +2,9 @@ import pandas as pd
 from pathlib import Path
 import json
 from os import path
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CardLiveDataLoader:
@@ -25,6 +28,8 @@ class CardLiveDataLoader:
             self.read_data(self._directory)
 
     def read_data(self, directory: Path):
+        logger.info(f'Loading CARD:Live data from [{directory}]')
+
         input_files = Path(directory).glob('*')
         json_data = []
         for input_file in input_files:
@@ -33,6 +38,8 @@ class CardLiveDataLoader:
                 json_obj = json.load(f)
                 json_obj['filename'] = filename
                 json_data.append(json_obj)
+
+        logger.debug(f'Loaded {len(json_data)} JSON data files')
 
         self._full_df = pd.json_normalize(json_data).set_index('filename')
         self._full_df = self._replace_empty_list_na(self._full_df, self.JSON_DATA_FIELDS)

@@ -15,12 +15,13 @@ side_panel_section_style = {
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
 
-def default_layout():
+def default_layout(data: CardLiveData):
     """
     Builds the default layout of the CARD:Live dashboard.
+
+    :param data: The CardLiveData containing the data to use.
     :return: The default layout of the CARD:Live dashboard.
     """
-    data = CardLiveData.get_data_package()
     rgi_parser = RGIParser(data.rgi_df)
     all_drugs = rgi_parser.all_drugs_list()
 
