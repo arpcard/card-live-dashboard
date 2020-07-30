@@ -8,10 +8,6 @@ import plotly.graph_objects as go
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
 
-side_panel_section_style = {
-    'padding': '10px'
-}
-
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
 
@@ -27,16 +23,27 @@ def default_layout():
     number_of_samples = len(data.main_df)
     last_updated = data.main_df['timestamp'].max()
 
-    layout = html.Div(className='container-fluid', children=[
+    layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
-            html.Div(className='col-sm-3', children=[
+            html.Div(className='card-live-panel col-sm-3', children=[
                 html.Div(className='sticky-top', children=[
                     html.H1([
                         'CARD:Live'
                     ]),
-                    html.Span(className='badge badge-secondary', children=[f'{number_of_samples} samples']),
-                    ' ',
-                    html.Span(className='badge badge-secondary', children=[f'Last updated: {last_updated: %b %d, %Y}']),
+                    html.Div(className='pt-2 pb-1', children=[
+                        'Welcome to the ',
+                        html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
+                        ' dashboard. Please select from the options below to examine subsets of the ',
+                        html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
+                        ' data.',
+                    ]),
+                    html.Div(className='card-live-badges pb-3', children=[
+                        html.Span(className='badge badge-secondary', children=[f'{number_of_samples} samples']),
+                        ' ',
+                        html.Span(className='badge badge-secondary',
+                                  children=[f'Updated: {last_updated: %b %d, %Y}']),
+                    ]),
+                    html.H2('RGI'),
                     html.Div(children=['RGI cutoff: ',
                                        dcc.Dropdown(
                                            id='rgi-cutoff',
@@ -47,40 +54,38 @@ def default_layout():
                                            ],
                                            multi=True,
                                            placeholder='Select an RGI cutoff',
-                                           style={'color': 'black'},
                                        ),
-                                       ], style=side_panel_section_style),
+                                       ]),
                     html.Div(children=['Filter display by drug class: ',
                                        dcc.Dropdown(
                                            id='drug-class-select',
                                            options=[{'label': x, 'value': x} for x in all_drugs],
                                            multi=True,
                                            placeholder='Select a drug class',
-                                           style={'color': 'black'},
                                        ),
-                                       ], style=side_panel_section_style),
+                                       ]),
+                    html.H2('Time'),
                     html.Div(children=['Select a time period: ',
                                        dcc.Dropdown(id='time-period-items',
                                                     value='all',
-                                                    clearable=False,
-                                                    style={'color': 'black'})
-                                       ], style=side_panel_section_style),
-                    html.P(className='text-center', children=[
+                                                    clearable=False)
+                                       ]),
+                    html.P(className='text-center card-live-badges', children=[
                         html.Br(),
                         html.A(className='badge badge-primary', children=['Code | GitLab'],
                                href='https://devcard.mcmaster.ca:8888/apetkau/card-live-dashboard'),
                     ]),
                 ]),
-            ], style={'background-color': '#2c3e50', 'color': 'white'}),
+            ]),
             html.Div(className='col', children=[
                 dcc.Loading(children=[
                     html.Div(className='container', children=[
                         html.Div(className='row', children=[html.Div(className='col', id='main-pane')]),
                     ])
                 ]),
-            ], style={'background-color': 'white'})
+            ])
         ]),
-    ], style={'background-color': '##2c3e50'})
+    ])
 
     return layout
 
