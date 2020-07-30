@@ -1,12 +1,6 @@
 import pandas as pd
 import plotly.express as px
-import dash_core_components as dcc
 import geopandas
-
-import card_live_dashboard.model as model
-from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
-from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
-from card_live_dashboard.model.RGIParser import RGIParser
 
 
 def taxonomic_comparison(df: pd.DataFrame):
@@ -75,30 +69,3 @@ def build_time_histogram(df_drug_mapping: pd.DataFrame, cumulative: bool):
                       height=350)
 
     return fig
-
-
-def build_main_pane(df_drug_mapping: pd.DataFrame, rgi_parser: RGIParser, data: CardLiveDataLoader):
-    geo_drug_classes_count = rgi_parser.geo_drug_sets_to_counts(df_drug_mapping).reset_index()
-    geo_drug_classes_count = model.region_codes.add_region_standard_names(geo_drug_classes_count,
-                                                                          region_column='geo_area_code')
-    fig_map = choropleth_drug(geo_drug_classes_count, model.world)
-    fig_map.update_layout(transition_duration=500)
-
-    df_drug_mapping = df_drug_mapping[df_drug_mapping['has_drugs']]
-
-    fig_histogram_rate = build_time_histogram(df_drug_mapping, cumulative=False)
-    fig_histogram_rate.update_layout(transition_duration=500)
-
-    files_subset = set(df_drug_mapping.index.tolist())
-    df_rgi_kmer_subset = data.rgi_kmer_df.loc[files_subset]
-    df_lmat_subset = data.lmat_df.loc[files_subset]
-    tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
-    df_tax = tax_parse.create_rgi_lmat_both()
-
-    fig_taxonomic_comparison = taxonomic_comparison(df_tax)
-
-    return [
-        dcc.Graph(figure=fig_map),
-        dcc.Graph(figure=fig_histogram_rate),
-        dcc.Graph(figure=fig_taxonomic_comparison),
-    ]
