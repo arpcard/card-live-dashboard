@@ -8,13 +8,7 @@ import card_live_dashboard.layouts as layouts
 import card_live_dashboard.callbacks as callbacks
 from card_live_dashboard.app import app
 
-data = CardLiveDataLoader(Path(path.dirname(__file__), '..', 'data', 'card_live_small'))
-CardLiveData.create_instance(data)
+data_loader = CardLiveDataLoader(Path(path.dirname(__file__), '..', 'data', 'card_live_small'))
+CardLiveData.create_instance(data_loader)
 
-rgi_parser = RGIParser(data.rgi_df)
-all_drugs = rgi_parser.all_drugs_list()
-
-number_of_samples = len(data.main_df)
-last_updated = data.main_df['timestamp'].max()
-
-app.layout = layouts.default_layout(number_of_samples, last_updated, all_drugs)
+app.layout = layouts.default_layout()
