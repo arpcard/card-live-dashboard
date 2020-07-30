@@ -4,9 +4,13 @@ from dash.dependencies import Input, Output
 
 from card_live_dashboard.app import app
 from card_live_dashboard.model.RGIParser import RGIParser
-from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.CardLiveData import CardLiveData
 import card_live_dashboard.layouts.figures as figures
+
+DAY = timedelta(days=1)
+WEEK = timedelta(days=7)
+MONTH = timedelta(days=31)
+YEAR = timedelta(days=365)
 
 @app.callback(
     [Output('main-pane', 'children'),
@@ -23,10 +27,10 @@ def update_geo_time_figure(drug_classes: List[str], time_dropdown):
 
     drug_mapping_subsets = {
         'all': df_drug_mapping,
-        'day': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - timedelta(days=1))],
-        'week': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - timedelta(days=7))],
-        'month': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - timedelta(days=31))],
-        'year': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - timedelta(days=365))],
+        'day': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - DAY)],
+        'week': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - WEEK)],
+        'month': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - MONTH)],
+        'year': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - YEAR)],
     }
 
     # Set time dropdown text to include count of samples in particular time period
