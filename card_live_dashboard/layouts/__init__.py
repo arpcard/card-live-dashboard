@@ -14,7 +14,12 @@ side_panel_section_style = {
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
+
 def default_layout():
+    """
+    Builds the default layout of the CARD:Live dashboard.
+    :return: The default layout of the CARD:Live dashboard.
+    """
     data = CardLiveData.get_data_package()
     rgi_parser = RGIParser(data.rgi_df)
     all_drugs = rgi_parser.all_drugs_list()
@@ -67,7 +72,12 @@ def default_layout():
     return layout
 
 
-def figures_layout(figures_dict: Dict[str,go.Figure]):
+def figures_layout(figures_dict: Dict[str, go.Figure]):
+    """
+    Builds the layout of the figures on the page.
+    :param figures_dict: A dictionary mapping names of constructed figures to the figure objects.
+    :return: A list of figures to place on the page.
+    """
     return [
         dcc.Graph(figure=figures_dict['map']),
         dcc.Graph(figure=figures_dict['timeline']),

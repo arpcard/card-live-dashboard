@@ -26,6 +26,12 @@ YEAR = timedelta(days=365)
      Input('time-period-items', 'value')]
 )
 def update_geo_time_figure(drug_classes: List[str], time_dropdown):
+    """
+    Main callback/controller for updating all figures based on user selections.
+    :param drug_classes: A list of the drug_classes to display.
+    :param time_dropdown: The time selection.
+    :return: The figures to place in the main figure region of the page.
+    """
     data = CardLiveData.get_data_package()
     rgi_parser = RGIParser(data.rgi_df)
     df_drug_mapping = rgi_parser.get_drug_mapping(drug_classes)

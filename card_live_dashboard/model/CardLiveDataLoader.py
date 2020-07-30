@@ -63,7 +63,7 @@ class CardLiveDataLoader:
         return df.replace(' and '.join(self.JSON_DATA_FIELDS), 'all')
 
     def _expand_column(self, df: pd.DataFrame, column: str, na_char: str = None):
-        '''
+        """
         Expands a particular column in the dataframe from a list of dictionaries to columns.
         That is expands a column like 'col' => [{'key1': 'value1', 'key2': 'value2'}] to a dataframe
           with new columns 'col.key1', 'col.key2'.
@@ -73,7 +73,7 @@ class CardLiveDataLoader:
         :param na_char: A character to replace with NA (defaults to no replacement).
 
         :return: A new dataframe with the new columns appended onto it.
-        '''
+        """
         exploded_columns = df[column].explode().apply(pd.Series).add_prefix(f'{column}.')
         if na_char is not None:
             exploded_columns.replace({na_char: None}, inplace=True)
