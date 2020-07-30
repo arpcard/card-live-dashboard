@@ -5,10 +5,8 @@ from dash.dependencies import Input, Output
 from card_live_dashboard.app import app
 from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
+from card_live_dashboard.model.CardLiveData import CardLiveData
 import card_live_dashboard.layouts.figures as figures
-
-rgi_parser: RGIParser = None
-data: CardLiveDataLoader = None
 
 @app.callback(
     [Output('main-pane', 'children'),
@@ -17,6 +15,8 @@ data: CardLiveDataLoader = None
      Input('time-period-items', 'value')]
 )
 def update_geo_time_figure(drug_classes: List[str], time_dropdown):
+    data = CardLiveData.get_data_package()
+    rgi_parser = RGIParser(data.rgi_df)
     df_drug_mapping = rgi_parser.get_drug_mapping(drug_classes)
 
     time_now = datetime.now()
