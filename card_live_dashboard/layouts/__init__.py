@@ -55,7 +55,7 @@ def default_layout():
                     html.P(className='text-center', children=[
                         html.Br(),
                         html.A(className='badge badge-primary', children=['Code | GitLab'],
-                               href='https://devcard.mcmaster.ca:8888/apetkau/amr-visualization-summer-2020'),
+                               href='https://devcard.mcmaster.ca:8888/apetkau/card-live-dashboard'),
                     ]),
                 ]),
             ], style={'background-color': '#2c3e50', 'color': 'white'}),
@@ -79,7 +79,10 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     :return: A list of figures to place on the page.
     """
     return [
-        dcc.Graph(figure=figures_dict['map']),
-        dcc.Graph(figure=figures_dict['timeline']),
-        dcc.Graph(figure=figures_dict['taxonomic_comparison']),
+        html.Div([
+            'This shows a world map of the distribution of samples uploaded to CARD:Live matching the selected criteria.',
+            dcc.Graph(figure=figures_dict['map']),
+            dcc.Graph(figure=figures_dict['timeline']),
+            dcc.Graph(figure=figures_dict['taxonomic_comparison']),
+        ])
     ]

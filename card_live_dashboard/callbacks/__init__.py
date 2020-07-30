@@ -2,7 +2,6 @@ from typing import List
 import pandas as pd
 from datetime import datetime, timedelta
 from dash.dependencies import Input, Output
-import dash_core_components as dcc
 
 from card_live_dashboard.app import app
 from card_live_dashboard.model.RGIParser import RGIParser
@@ -70,20 +69,21 @@ def build_main_pane(df_drug_mapping: pd.DataFrame, rgi_parser: RGIParser, data: 
     geo_drug_classes_count = model.region_codes.add_region_standard_names(geo_drug_classes_count,
                                                                           region_column='geo_area_code')
     fig_map = figures.choropleth_drug(geo_drug_classes_count, model.world)
-    fig_map.update_layout(transition_duration=500)
 
     df_drug_mapping = df_drug_mapping[df_drug_mapping['has_drugs']]
 
     fig_histogram_rate = figures.build_time_histogram(df_drug_mapping, cumulative=False)
-    fig_histogram_rate.update_layout(transition_duration=500)
 
-    files_subset = set(df_drug_mapping.index.tolist())
-    df_rgi_kmer_subset = data.rgi_kmer_df.loc[files_subset]
-    df_lmat_subset = data.lmat_df.loc[files_subset]
-    tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
-    df_tax = tax_parse.create_rgi_lmat_both()
+    if df_drug_mapping.empty:
+        fig_taxonomic_comparison = figures.taxonomic_comparison(pd.DataFrame())
+    else:
+        files_subset = set(df_drug_mapping.index.tolist())
+        df_rgi_kmer_subset = data.rgi_kmer_df.loc[files_subset]
+        df_lmat_subset = data.lmat_df.loc[files_subset]
+        tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
+        df_tax = tax_parse.create_rgi_lmat_both()
 
-    fig_taxonomic_comparison = figures.taxonomic_comparison(df_tax)
+        fig_taxonomic_comparison = figures.taxonomic_comparison(df_tax)
 
     return {
         'map': fig_map,
