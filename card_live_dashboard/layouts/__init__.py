@@ -1,8 +1,9 @@
-from typing import List
+from typing import Dict
 
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.graph_objects as go
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
@@ -64,3 +65,11 @@ def default_layout():
     ], style={'background-color': '##2c3e50'})
 
     return layout
+
+
+def figures_layout(figures_dict: Dict[str,go.Figure]):
+    return [
+        dcc.Graph(figure=figures_dict['map']),
+        dcc.Graph(figure=figures_dict['timeline']),
+        dcc.Graph(figure=figures_dict['taxonomic_comparison']),
+    ]

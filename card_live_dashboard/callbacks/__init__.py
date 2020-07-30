@@ -10,6 +10,7 @@ from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 import card_live_dashboard.layouts.figures as figures
+import card_live_dashboard.layouts as layouts
 import card_live_dashboard.model as model
 
 DAY = timedelta(days=1)
@@ -49,7 +50,8 @@ def update_geo_time_figure(drug_classes: List[str], time_dropdown):
         drug_mapping_matches = drug_mapping[drug_mapping['has_drugs']]
         time_dropdown_text[label] = f'Last {label} ({len(drug_mapping_matches)})'
 
-    main_pane = build_main_pane(drug_mapping_subsets[time_dropdown], rgi_parser, data)
+    main_pane_figures = build_main_pane(drug_mapping_subsets[time_dropdown], rgi_parser, data)
+    main_pane = layouts.figures_layout(main_pane_figures)
 
     time_period_options = [{'label': time_dropdown_text[x], 'value': x} for x in time_dropdown_text]
 
@@ -77,8 +79,8 @@ def build_main_pane(df_drug_mapping: pd.DataFrame, rgi_parser: RGIParser, data: 
 
     fig_taxonomic_comparison = figures.taxonomic_comparison(df_tax)
 
-    return [
-        dcc.Graph(figure=fig_map),
-        dcc.Graph(figure=fig_histogram_rate),
-        dcc.Graph(figure=fig_taxonomic_comparison),
-    ]
+    return {
+        'map': fig_map,
+        'timeline': fig_histogram_rate,
+        'taxonomic_comparison': fig_taxonomic_comparison,
+    }
