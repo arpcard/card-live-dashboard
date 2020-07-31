@@ -26,7 +26,12 @@ a:focus {
     background-color: white;
 }
 
-.dash-dropdown {
+.sidepanel-selection {
     padding: 10px;
     color: black;
+}
+
+.sidepanel-selection-light {
+    padding: 10px;
+    color: white;
 }

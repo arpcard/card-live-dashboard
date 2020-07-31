@@ -23,9 +23,8 @@ class RGIParser:
         """
         return RGIParser(self._df_rgi[func(self._df_rgi)])
 
-    def filter_by_cutoff(self, levels: List[str]):
-        levels = [level.lower() for level in levels]
-        return self.filter_by(lambda x: x['rgi_main.Cut_Off'].str.lower().isin(levels))
+    def filter_by_cutoff(self, level: List[str]):
+        return self.filter_by(lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
 
     def get_drug_mapping(self, drug_classes: List[str] = None) -> pd.DataFrame:
         df_rgi_drug = self._df_rgi.reset_index()[['filename', 'rgi_main.Drug Class']].replace('', np.nan)
