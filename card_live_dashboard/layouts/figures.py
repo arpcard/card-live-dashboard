@@ -54,13 +54,13 @@ def taxonomic_comparison(df: pd.DataFrame):
 
 
 def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDataFrame):
-    if geo_drug_classes_count.empty or geo_drug_classes_count['drug_class_count'].sum() == 0:
+    if geo_drug_classes_count.empty or geo_drug_classes_count['count'].sum() == 0:
         fig = go.Figure(go.Scattergeo())
     else:
         fig = px.choropleth(geo_drug_classes_count, geojson=world, locations='geo_area_code',
                             featureidkey='properties.un_m49_numeric',
-                            color='drug_class_count', color_continuous_scale='YlGnBu',
-                            labels={'drug_class_count': 'Count'},
+                            color='count', color_continuous_scale='YlGnBu',
+                            labels={'count': 'Count'},
                             hover_data=['geo_area_name_standard'],
                             center={'lat': 0, 'lon': 0.01},
                             )
@@ -79,11 +79,11 @@ def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDa
     return fig
 
 
-def build_time_histogram(df_drug_mapping: pd.DataFrame, cumulative: bool):
-    if df_drug_mapping.empty:
+def build_time_histogram(df_time: pd.DataFrame, cumulative: bool):
+    if df_time.empty:
         fig = empty_figure
     else:
-        fig = px.histogram(df_drug_mapping, x='timestamp',
+        fig = px.histogram(df_time, x='timestamp',
                            nbins=50,
                            labels={'count': 'Count',
                                    'timestamp': 'Date'},

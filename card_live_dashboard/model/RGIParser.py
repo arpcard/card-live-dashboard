@@ -1,5 +1,6 @@
-from typing import List
-from types import FunctionType
+from typing import List, Set
+from typing import Callable
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -11,7 +12,7 @@ class RGIParser:
         self._df_rgi = df_rgi
         self._drug_mapping = None
 
-    def filter_by(self, func: FunctionType):
+    def filter_by(self, func: Callable):
         """
         Applies a filter to the underlying dataframe to select specific columns.
         Can be run like:
@@ -21,41 +22,120 @@ class RGIParser:
         :param func: The filter function.
         :return: A new instance of RGIParser which is a subset of the old instance.
         """
-        return RGIParser(self._df_rgi[func(self._df_rgi)])
+        return RGIParser(self._df_rgi[func(self._df_rgi)].copy())
 
-    def filter_by_cutoff(self, level: List[str]):
-        return self.filter_by(lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
+    def filter_by_cutoff(self, level: str):
+        """
+        Given a cutoff level, returns an RGIParser object on the subset of data with files
+        containing RGI hits at that level.
 
-    def get_drug_mapping(self, drug_classes: List[str] = None) -> pd.DataFrame:
+        :param level: The level to match (e.g., 'Perfect', 'Strict', 'Loose').
+        :return: An RGIParsesr object on the subset of matched data.
+        """
+        if level is None or level == 'all':
+            return self
+        else:
+            return self.filter_by(lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
+
+    def filter_by_drugclass(self, drug_classes: List[str] = None):
+        """
+        Given a list of drug classes, returns an RGIParser object on the subset of data with files
+        containing all of the passed drug classes.
+
+        :param drug_classes: A list of drug class names to match. An empty list matches everything.
+        :return: An RGIParsesr object on the subset of matched data.
+        """
+        df_drugclass = self._get_drugclass_matches(drug_classes)
+        filename_matches = set(df_drugclass[df_drugclass['matches']].index.tolist())
+
+        return RGIParser(self._df_rgi.loc[filename_matches])
+
+    def filter_by_time(self, start: datetime, end: datetime):
+        """
+        Filters the data to be within the start and end time periods.
+
+        :param start: The start time.
+        :param end: The end time.
+
+        :return: An RGIParser object on the subset of matched data.
+        """
+        return self.filter_by(lambda x: (x['timestamp'] >= start) & (x['timestamp'] <= end))
+
+    def _get_drugclass_matches(self, drug_classes: List[str] = None) -> pd.DataFrame:
+        """
+        Given a list of drug classes, returns a DataFrame indexed by 'filename' with a column 'matches'
+        indicating if the particular file contains all of the passed drug classes.
+
+        :param drug_classes: A list of drug class names to match. An empty list matches everything.
+        :return: A DataFrame which indicates of a particular file matched all of the passed drugs.
+        """
         df_rgi_drug = self._df_rgi.reset_index()[['filename', 'rgi_main.Drug Class']].replace('', np.nan)
         df_rgi_drug['rgi_main.Drug Class'] = df_rgi_drug.loc[
             ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(
             lambda x: set(y.strip() for y in x))
 
         if drug_classes is None or len(drug_classes) == 0:
-            df_rgi_drug['has_drugs'] = True
+            df_rgi_drug['matches'] = True
         else:
-            df_rgi_drug['has_drugs'] = df_rgi_drug['rgi_main.Drug Class'].dropna().apply(
+            df_rgi_drug['matches'] = df_rgi_drug['rgi_main.Drug Class'].dropna().apply(
                 lambda rgi_drugs: all(drug in rgi_drugs for drug in drug_classes))
 
-        df_rgi_drug['has_drugs'] = df_rgi_drug['has_drugs'].fillna(False)
-        df_rgi_drug = df_rgi_drug[['filename', 'has_drugs']].set_index('filename')
+        df_rgi_drug['matches'] = df_rgi_drug['matches'].fillna(False)
+        df_rgi_drug = df_rgi_drug[['filename', 'matches']].set_index('filename')
         df_rgi_drug = df_rgi_drug.groupby(['filename']).agg('any')
 
-        df_rgi_all = self._df_rgi[['timestamp', 'geo_area_code']].groupby(['filename']).first()
-        df_rgi_all = df_rgi_all.merge(df_rgi_drug, on='filename', how='left')
+        return df_rgi_drug
 
-        return df_rgi_all
+    def value_counts(self, col: str) -> pd.DataFrame:
+        """
+        Given a column, counts the number of files in the underlying dataframe for each category of that column.
 
-    def geo_drug_sets_to_counts(self, df_drug_mapping: pd.DataFrame) -> pd.DataFrame:
-        df_has_classes = df_drug_mapping.rename(columns={'has_drugs': 'drug_class_count'}).reset_index()
-        df_has_classes['drug_class_count'] = df_has_classes['drug_class_count'].apply(lambda x: 1 if x else 0)
-        df_has_classes = df_has_classes[['geo_area_code', 'drug_class_count']].set_index('geo_area_code').groupby(
-            'geo_area_code').sum()
+        :param col: The column to count by.
+        :return: A dataframe with counts by the given column's values.
+        """
+        counts_frame = self._df_rgi[col].groupby('filename').first().value_counts().to_frame()
+        counts_frame = counts_frame.rename(columns={col: 'count'})
+        counts_frame.index.name = col
+        return counts_frame
 
-        return df_has_classes
+    def count_files(self) -> int:
+        """
+        Counts the number of files contained in the results set.
+
+        :return: The count of the files in the results set.
+        """
+        return len(self._df_rgi.groupby('filename').first())
+
+    def timestamps(self) -> pd.DataFrame:
+        """
+        Gets all timestamps from this dataframe.
+
+        :return: All timestamps from this dataframe.
+        """
+        return self._df_rgi.groupby('filename').first()[['timestamp']]
+
+    def empty(self) -> bool:
+        """
+        Whether or not there's any data represented in this object.
+
+        :return: True if there is no data, False otherwise.
+        """
+        return self._df_rgi.empty
+
+    def files(self) -> Set[str]:
+        """
+        Returns the set of files in this object.
+
+        :return: The set of files in this object.
+        """
+        return set(self._df_rgi.index.tolist())
 
     def all_drugs_list(self) -> List[str]:
+        """
+        Gets a list of all possible drug classes.
+
+        :return: A list of all possible drug classes.
+        """
         df_rgi_drug = self._df_rgi[['rgi_main.Drug Class']].replace('', np.nan)
         df_rgi_drug = df_rgi_drug.loc[
             ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(

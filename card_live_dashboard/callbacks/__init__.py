@@ -36,62 +36,52 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], time
     """
     data = CardLiveData.get_data_package()
     total_samples_count = len(data.main_df)
-
-    rgi_parser = RGIParser(data.rgi_df)
-    if rgi_cutoff_select and rgi_cutoff_select != 'all':
-        rgi_parser = rgi_parser.filter_by_cutoff(rgi_cutoff_select)
-
-    df_drug_mapping = rgi_parser.get_drug_mapping(drug_classes)
-
     time_now = datetime.now()
 
-    drug_mapping_subsets = {
-        'all': df_drug_mapping,
-        'day': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - DAY)],
-        'week': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - WEEK)],
-        'month': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - MONTH)],
-        'year': df_drug_mapping[df_drug_mapping['timestamp'] >= (time_now - YEAR)],
+    rgi_parser_no_timefilter = RGIParser(data.rgi_df).filter_by_cutoff(
+        rgi_cutoff_select).filter_by_drugclass(drug_classes)
+
+    time_subsets = {
+        'all': rgi_parser_no_timefilter,
+        'day': rgi_parser_no_timefilter.filter_by_time(time_now - DAY, time_now),
+        'week': rgi_parser_no_timefilter.filter_by_time(time_now - WEEK, time_now),
+        'month': rgi_parser_no_timefilter.filter_by_time(time_now - MONTH, time_now),
+        'year': rgi_parser_no_timefilter.filter_by_time(time_now - YEAR, time_now),
     }
 
-    # Set time dropdown text to include count of samples in particular time period
-    # Should produce a dictionary like {'all': 'All (500)', ...}
-    time_dropdown_text = {}
-    all_drug_mapping_has_drugs = drug_mapping_subsets['all'][drug_mapping_subsets['all']['has_drugs']]
-    time_dropdown_text['all'] = f'All ({len(all_drug_mapping_has_drugs)})'
-    for label in ['day', 'week', 'month', 'year']:
-        drug_mapping = drug_mapping_subsets[label]
-        drug_mapping_matches = drug_mapping[drug_mapping['has_drugs']]
-        time_dropdown_text[label] = f'Last {label} ({len(drug_mapping_matches)})'
-
-    main_pane_figures = build_main_pane(drug_mapping_subsets[time_dropdown], rgi_parser, data)
+    main_pane_figures = build_main_pane(time_subsets[time_dropdown], data)
     main_pane = layouts.figures_layout(main_pane_figures)
 
-    time_period_options = [{'label': time_dropdown_text[x], 'value': x} for x in time_dropdown_text]
+    # Set time dropdown text to include count of samples in particular time period
+    # Should produce a list of dictionaries like [{'label': 'All (500)', 'value': 'all'}, ...]
+    time_dropdown_text = [{'label': f'All ({time_subsets["all"].count_files()})', 'value': 'all'}]
+    for value in ['day', 'week', 'month', 'year']:
+        time_dropdown_text.append({
+            'label': f'Last {value} ({time_subsets[value].count_files()})',
+            'value': value,
+        })
 
-    samples_subset_count = len(drug_mapping_subsets[time_dropdown][drug_mapping_subsets[time_dropdown]['has_drugs']])
-    samples_count_string = f'{samples_subset_count}/{total_samples_count}'
+    samples_count_string = f'{time_subsets[time_dropdown].count_files()}/{total_samples_count}'
 
     return (main_pane,
-            time_period_options,
+            time_dropdown_text,
             samples_count_string)
 
 
-def build_main_pane(df_drug_mapping: pd.DataFrame, rgi_parser: RGIParser, data: CardLiveDataLoader):
-    geo_drug_classes_count = rgi_parser.geo_drug_sets_to_counts(df_drug_mapping).reset_index()
-    geo_drug_classes_count = model.region_codes.add_region_standard_names(geo_drug_classes_count,
+def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader):
+    matches_count = rgi_parser.value_counts('geo_area_code').reset_index()
+    matches_count = model.region_codes.add_region_standard_names(matches_count,
                                                                           region_column='geo_area_code')
-    fig_map = figures.choropleth_drug(geo_drug_classes_count, model.world)
+    fig_map = figures.choropleth_drug(matches_count, model.world)
 
-    df_drug_mapping = df_drug_mapping[df_drug_mapping['has_drugs']]
+    fig_histogram_rate = figures.build_time_histogram(rgi_parser.timestamps(), cumulative=False)
 
-    fig_histogram_rate = figures.build_time_histogram(df_drug_mapping, cumulative=False)
-
-    if df_drug_mapping.empty:
+    if rgi_parser.empty():
         fig_taxonomic_comparison = figures.taxonomic_comparison(pd.DataFrame())
     else:
-        files_subset = set(df_drug_mapping.index.tolist())
-        df_rgi_kmer_subset = data.rgi_kmer_df.loc[files_subset]
-        df_lmat_subset = data.lmat_df.loc[files_subset]
+        files_set = rgi_parser.files()
+        df_rgi_kmer_subset = data.rgi_kmer_df.loc[files_set]
+        df_lmat_subset = data.lmat_df.loc[files_set]
         tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
         df_tax = tax_parse.create_rgi_lmat_both()
 
