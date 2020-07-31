@@ -23,16 +23,26 @@ def taxonomic_comparison(df: pd.DataFrame):
     if df.empty:
         fig = empty_figure
     else:
-        df = df.sort_values(by='Total').reset_index()
-
-        label = 'Other (count <= 3)'
-        df.loc[df['Total'] <= 3, 'taxon'] = label
+        CATEGORY_LIMIT = 10
         df = df.groupby('taxon').sum().sort_values(
             by=['Total', 'taxon'], ascending=True)
-        df_old_index = df.index.tolist()
-        df_old_index.pop(df.index.get_loc(label))
-        df_new_index = [label] + df_old_index
-        df = df.reindex(df_new_index)
+
+        if len(df) > CATEGORY_LIMIT:
+            df = df.reset_index()
+            label = 'Other'
+            df['selected'] = False
+            # CATEGORY_LIMIT - 1 so that the 'Other' label becomes the final category
+            df.loc[df.tail(CATEGORY_LIMIT - 1).index.tolist(), 'selected'] = True
+            df.loc[~df['selected'], 'taxon'] = label
+            df = df.drop(columns=['selected'])
+            df = df.groupby('taxon').sum().sort_values(
+                by=['Total', 'taxon'], ascending=True)
+
+            # Shift 'Other' label to bottom
+            df_old_index = df.index.tolist()
+            df_old_index.pop(df.index.get_loc(label))
+            df_new_index = [label] + df_old_index
+            df = df.reindex(df_new_index)
 
         df = df.rename(columns={'count_both': 'Both LMAT and RGI Kmer',
                                 'rgi_counts': 'Unique to RGI Kmer',
