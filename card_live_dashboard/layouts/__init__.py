@@ -33,9 +33,7 @@ def default_layout():
                     html.Div(className='pt-2 pb-1', children=[
                         'Welcome to the ',
                         html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
-                        ' dashboard. Please select from the options below to examine subsets of the ',
-                        html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
-                        ' data.',
+                        ' dashboard.'
                     ]),
                     html.Div(className='card-live-badges pb-3', children=[
                         html.Span(className='badge badge-secondary', children=[f'{number_of_samples} samples']),
@@ -43,7 +41,22 @@ def default_layout():
                         html.Span(className='badge badge-secondary',
                                   children=[f'Updated: {last_updated: %b %d, %Y}']),
                     ]),
-                    html.H2('RGI'),
+                    html.Div([
+                        html.H2('Selection criteria'),
+                        html.P([
+                            'Please select from the options below to examine subsets of the ',
+                            html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
+                            ' data.',
+                            html.Div(className='card-live-badges pt-1', children=[
+                                html.Span(className='badge badge-secondary', children=[
+                                    'Showing ', html.Span(id='selected-samples-count',
+                                                          children=[f'{number_of_samples}/{number_of_samples}']),
+                                    ' samples'
+                                ]),
+                            ]),
+                        ]),
+                    ]),
+                    html.H3('RGI'),
                     html.Div(children=['RGI cutoff: ',
                                        dbc.RadioItems(
                                            id='rgi-cutoff-select',
@@ -66,7 +79,7 @@ def default_layout():
                                            placeholder='Select a drug class',
                                        ),
                     ]),
-                    html.H2('Time'),
+                    html.H3('Time'),
                     html.Div(children=['Select a time period: ',
                                        dcc.Dropdown(id='time-period-items',
                                                     className='sidepanel-selection',
@@ -81,9 +94,11 @@ def default_layout():
                 ]),
             ]),
             html.Div(className='col', children=[
-                dcc.Loading(children=[
-                    html.Div(className='container', children=[
-                        html.Div(className='row', children=[html.Div(className='col', id='main-pane')]),
+                dcc.Loading(
+                    type='circle',
+                    children=[
+                        html.Div(className='container', children=[
+                            html.Div(className='row', children=[html.Div(className='col', id='main-pane')]),
                     ])
                 ]),
             ])

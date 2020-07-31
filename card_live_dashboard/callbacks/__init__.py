@@ -20,7 +20,8 @@ YEAR = timedelta(days=365)
 
 @app.callback(
     [Output('main-pane', 'children'),
-     Output('time-period-items', 'options')],
+     Output('time-period-items', 'options'),
+     Output('selected-samples-count', 'children')],
     [Input('rgi-cutoff-select', 'value'),
      Input('drug-class-select', 'value'),
      Input('time-period-items', 'value')]
@@ -34,6 +35,8 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], time
     :return: The figures to place in the main figure region of the page.
     """
     data = CardLiveData.get_data_package()
+    total_samples_count = len(data.main_df)
+
     rgi_parser = RGIParser(data.rgi_df)
     if rgi_cutoff_select and rgi_cutoff_select != 'all':
         rgi_parser = rgi_parser.filter_by_cutoff(rgi_cutoff_select)
@@ -65,8 +68,12 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], time
 
     time_period_options = [{'label': time_dropdown_text[x], 'value': x} for x in time_dropdown_text]
 
+    samples_subset_count = len(drug_mapping_subsets[time_dropdown][drug_mapping_subsets[time_dropdown]['has_drugs']])
+    samples_count_string = f'{samples_subset_count}/{total_samples_count}'
+
     return (main_pane,
-            time_period_options)
+            time_period_options,
+            samples_count_string)
 
 
 def build_main_pane(df_drug_mapping: pd.DataFrame, rgi_parser: RGIParser, data: CardLiveDataLoader):
