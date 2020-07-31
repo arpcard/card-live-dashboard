@@ -99,7 +99,10 @@ def default_layout():
                     type='circle',
                     children=[
                         html.Div(className='container', children=[
-                            html.Div(className='row', children=[html.Div(className='col', id='main-pane')]),
+                            html.Div(className='row', children=[html.Div(className='col', id='main-pane',
+                                                                         # Initial empty <div> so that loading animation
+                                                                         # Is not squished against top of page initially
+                                                                         children=[html.Div(style={'height': '400px'})])]),
                     ])
                 ]),
             ])
