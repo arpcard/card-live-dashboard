@@ -73,8 +73,8 @@ def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader):
     matches_count = model.region_codes.add_region_standard_names(matches_count,
                                                                           region_column='geo_area_code')
     fig_map = figures.choropleth_drug(matches_count, model.world)
-
     fig_histogram_rate = figures.build_time_histogram(rgi_parser.timestamps(), cumulative=False)
+    fig_geographic_totals = figures.geographic_totals(matches_count)
 
     if rgi_parser.empty():
         fig_taxonomic_comparison = figures.taxonomic_comparison(pd.DataFrame())
@@ -91,4 +91,5 @@ def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader):
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'taxonomic_comparison': fig_taxonomic_comparison,
+        'geographic_totals': fig_geographic_totals,
     }

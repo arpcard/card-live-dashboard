@@ -122,6 +122,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
         html.Div([
             'This shows a world map of the distribution of samples uploaded to CARD:Live matching the selected criteria.',
             dcc.Graph(figure=figures_dict['map']),
+            dcc.Graph(figure=figures_dict['geographic_totals']),
             dcc.Graph(figure=figures_dict['timeline']),
             dcc.Graph(figure=figures_dict['taxonomic_comparison']),
         ])

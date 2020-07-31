@@ -56,12 +56,27 @@ def taxonomic_comparison(df: pd.DataFrame):
                              'taxon': 'Taxononmic category'},
                      title='Breakdown of genome to taxonomic category assignments')
         fig.update_layout(
-            yaxis=dict(tickfont=dict(size=12), dtick=1),
-            font={'size': 18}
+            yaxis=dict(tickfont=dict(size=14), dtick=1),
+            font={'size': 14}
         )
 
     return fig
 
+
+def geographic_totals(df):
+    if df.empty:
+        fig = go.Figure(go.Scattergeo())
+    else:
+        df = df.sort_values(by=['count'], ascending=True)
+        fig = px.bar(df, y='geo_area_name_standard', x='count',
+                     labels={'count': 'Count'},
+                     title='Samples by region',
+        )
+        fig.update_layout(font={'size': 14},
+                          yaxis={'title': '', 'dtick': 1}
+        )
+
+    return fig
 
 def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDataFrame):
     if geo_drug_classes_count.empty or geo_drug_classes_count['count'].sum() == 0:
@@ -97,9 +112,10 @@ def build_time_histogram(df_time: pd.DataFrame, cumulative: bool):
                            nbins=50,
                            labels={'count': 'Count',
                                    'timestamp': 'Date'},
-                           title='Histogram of samples over time',
-                           )
+                           title='Samples by date',
+        )
         fig.update_traces(cumulative_enabled=cumulative)
-        fig.update_layout(font={'size': 16},
-                          height=350)
+        fig.update_layout(font={'size': 14},
+                          yaxis={'title': 'Count'}
+        )
     return fig
