@@ -19,6 +19,7 @@ def default_layout():
     data = CardLiveData.get_data_package()
     rgi_parser = RGIParser(data.rgi_df)
     all_drugs = rgi_parser.all_drugs_list()
+    all_drugs.sort()
 
     number_of_samples = len(data.main_df)
     last_updated = data.main_df['timestamp'].max()

@@ -62,6 +62,8 @@ class RGIParser:
             lambda x: set(y.strip() for y in x)).to_frame()
 
         all_drugs_list = df_rgi_drug['rgi_main.Drug Class'].dropna().tolist()
-        all_drugs = set(y for x in all_drugs_list for y in x)
+
+        # Store as 'set' first to remove duplicates
+        all_drugs = list(set(y for x in all_drugs_list for y in x))
 
         return all_drugs
