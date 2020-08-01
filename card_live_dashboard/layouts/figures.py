@@ -65,7 +65,7 @@ def taxonomic_comparison(df: pd.DataFrame):
 
 def geographic_totals(df):
     if df.empty:
-        fig = go.Figure(go.Scattergeo())
+        fig = empty_figure
     else:
         df = df.sort_values(by=['count'], ascending=True)
         fig = px.bar(df, y='geo_area_name_standard', x='count',

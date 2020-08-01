@@ -12,19 +12,38 @@ class RGIParser:
         self._df_rgi = df_rgi
         self._drug_mapping = None
 
-    def filter_by(self, func: Callable):
+    def select(self, by: str, type: str = None, **kwargs):
         """
-        Applies a filter to the underlying dataframe to select specific columns.
+        Selects data from the RGIParser based on the matched criteria.
+        :param by: The method we will use to select by.
+        :param type: The type of data to select ('data', or 'file').
+        :param **kwargs: Additional arguments for the underlying selection method.
+        :return: A new RGIParser object which matches the passed criteria.
+        """
+        if by == 'cutoff':
+            return self.select_by_cutoff(**kwargs)
+        elif by == 'drug':
+            return self.select_by_drugclass(**kwargs)
+        elif by == 'aro':
+            return self.select_by_besthit_aro(**kwargs)
+        elif by == 'time':
+            return self.select_by_time(**kwargs)
+        else:
+            raise Exception(f'Unknown value [by={by}]')
+
+    def select_by(self, func: Callable):
+        """
+        Selects data from the underlying dataframe.
         Can be run like:
 
-        rgi_parser.filter_by(lambda x: x['column'] == 'value')
+        rgi_parser.select_by(lambda x: x['column'] == 'value')
 
-        :param func: The filter function.
+        :param func: The select function.
         :return: A new instance of RGIParser which is a subset of the old instance.
         """
         return RGIParser(self._df_rgi[func(self._df_rgi)].copy())
 
-    def filter_by_cutoff(self, level: str):
+    def select_by_cutoff(self, level: str):
         """
         Given a cutoff level, returns an RGIParser object on the subset of data with files
         containing RGI hits at that level.
@@ -35,9 +54,9 @@ class RGIParser:
         if level is None or level == 'all':
             return self
         else:
-            return self.filter_by(lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
+            return self.select_by(lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
 
-    def filter_by_drugclass(self, drug_classes: List[str] = None):
+    def select_by_drugclass(self, drug_classes: List[str] = None):
         """
         Given a list of drug classes, returns an RGIParser object on the subset of data with files
         containing all of the passed drug classes.
@@ -50,9 +69,9 @@ class RGIParser:
 
         return RGIParser(self._df_rgi.loc[filename_matches])
 
-    def filter_by_besthit_aro(self, besthit_aro: List[str] = None):
+    def select_by_besthit_aro(self, besthit_aro: List[str] = None):
         """
-        Given a list of Best Hit ARO selections, filters this RGIParser object to those containing only files with some match.
+        Given a list of Best Hit ARO selections, selects data containing only files with some match.
 
         :param besthit_aro: A list of Best Hit ARO selections.
         :return: An RGIParser object on the subset of matched data.
@@ -77,16 +96,16 @@ class RGIParser:
             files = set(matches_files.index.tolist())
             return RGIParser(self._df_rgi.loc[files].copy())
 
-    def filter_by_time(self, start: datetime, end: datetime):
+    def select_by_time(self, start: datetime, end: datetime):
         """
-        Filters the data to be within the start and end time periods.
+        Selects the data within the start and end time periods.
 
         :param start: The start time.
         :param end: The end time.
 
         :return: An RGIParser object on the subset of matched data.
         """
-        return self.filter_by(lambda x: (x['timestamp'] >= start) & (x['timestamp'] <= end))
+        return self.select_by(lambda x: (x['timestamp'] >= start) & (x['timestamp'] <= end))
 
     def _get_drugclass_matches(self, drug_classes: List[str] = None) -> pd.DataFrame:
         """
