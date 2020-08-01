@@ -71,6 +71,13 @@ def geographic_totals(df):
         fig = px.bar(df, y='geo_area_name_standard', x='count',
                      labels={'count': 'Count'},
                      title='Samples by region',
+                     hover_data=['geo_area_name_standard'],
+        )
+        fig.update_traces(
+            hovertemplate=(
+                '<b style="font-size: 125%;">%{customdata[0]}</b><br>'
+                '<b>Count:</b>  %{x}<br>'
+            )
         )
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'dtick': 1}
