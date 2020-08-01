@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 import pandas as pd
 from datetime import datetime, timedelta
 from dash.dependencies import Input, Output
@@ -21,7 +21,9 @@ YEAR = timedelta(days=365)
 @app.callback(
     [Output('main-pane', 'children'),
      Output('time-period-items', 'options'),
-     Output('selected-samples-count', 'children')],
+     Output('selected-samples-count', 'children'),
+     Output('drug-class-select', 'options'),
+     Output('besthit-aro-select', 'options'),],
     [Input('rgi-cutoff-select', 'value'),
      Input('drug-class-select', 'value'),
      Input('besthit-aro-select', 'value'),
@@ -66,10 +68,29 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], best
 
     samples_count_string = f'{time_subsets[time_dropdown].count_files()}/{total_samples_count}'
 
+    drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].all_drugs())
+    besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].all_besthit_aro())
+
     return (main_pane,
             time_dropdown_text,
-            samples_count_string)
+            samples_count_string,
+            drug_class_options,
+            besthit_aro_options)
 
+
+def build_options(selected_options: List[str], all_available_options: Set[str]):
+    if selected_options is None or len(selected_options) == 0:
+        selected_options_set = set()
+    else:
+        selected_options_set = set(selected_options)
+
+    if all_available_options is None or len(all_available_options) == 0:
+        all_available_options_set = set()
+    else:
+        all_available_options_set = all_available_options
+
+    return [{'label': x, 'value': x} for x in sorted(
+        all_available_options_set.union(selected_options_set))]
 
 def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader):
     matches_count = rgi_parser.value_counts('geo_area_code').reset_index()

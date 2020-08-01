@@ -17,12 +17,6 @@ def default_layout():
     :return: The default layout of the CARD:Live dashboard.
     """
     data = CardLiveData.get_data_package()
-    rgi_parser = RGIParser(data.rgi_df)
-    all_drugs = rgi_parser.all_drugs_list()
-    all_drugs.sort()
-    all_besthit_aro = rgi_parser.all_besthit_aro()
-    all_besthit_aro.sort()
-
     number_of_samples = len(data.main_df)
     last_updated = data.main_df['timestamp'].max()
 
@@ -77,7 +71,6 @@ def default_layout():
                                        dcc.Dropdown(
                                            id='drug-class-select',
                                            className='sidepanel-selection',
-                                           options=[{'label': x, 'value': x} for x in all_drugs],
                                            multi=True,
                                            placeholder='Select a drug class',
                                        ),
@@ -86,7 +79,6 @@ def default_layout():
                                        dcc.Dropdown(
                                            id='besthit-aro-select',
                                            className='sidepanel-selection',
-                                           options=[{'label': x, 'value': x} for x in all_besthit_aro],
                                            multi=True,
                                            placeholder='Select a Best Hit ARO value',
                                        ),

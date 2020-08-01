@@ -157,9 +157,9 @@ class RGIParser:
         """
         return set(self._df_rgi.index.tolist())
 
-    def all_drugs_list(self) -> List[str]:
+    def all_drugs(self) -> Set[str]:
         """
-        Gets a list of all possible drug classes.
+        Gets a set of all possible drug classes.
 
         :return: A list of all possible drug classes.
         """
@@ -171,14 +171,14 @@ class RGIParser:
         all_drugs_list = df_rgi_drug['rgi_main.Drug Class'].dropna().tolist()
 
         # Store as 'set' first to remove duplicates
-        all_drugs = list(set(y for x in all_drugs_list for y in x))
+        all_drugs = set(y for x in all_drugs_list for y in x)
 
         return all_drugs
 
-    def all_besthit_aro(self) -> List[str]:
+    def all_besthit_aro(self) -> Set[str]:
         """
-        Gets a list of all possible Best Hit ARO values.
+        Gets a set of all possible Best Hit ARO values.
 
         :return: A set of all Best Hit ARO values.
         """
-        return list(set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist()))
+        return set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist())
