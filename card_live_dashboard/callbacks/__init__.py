@@ -1,7 +1,7 @@
 from typing import List, Set
 import pandas as pd
 from datetime import datetime, timedelta
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 from card_live_dashboard.app import app
 from card_live_dashboard.model.RGIParser import RGIParser
@@ -17,6 +17,25 @@ WEEK = timedelta(days=7)
 MONTH = timedelta(days=31)
 YEAR = timedelta(days=365)
 
+@app.callback(
+    Output('rgi-parameters', 'is_open'),
+    [Input('rgi-parameters-toggle', 'n_clicks')],
+    [State('rgi-parameters', 'is_open')],
+)
+def toggle_rgi_parameters_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
+
+@app.callback(
+    Output('time-parameters', 'is_open'),
+    [Input('time-parameters-toggle', 'n_clicks')],
+    [State('time-parameters', 'is_open')],
+)
+def toggle_time_parameters_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 @app.callback(
     [Output('main-pane', 'children'),
@@ -29,7 +48,7 @@ YEAR = timedelta(days=365)
      Input('besthit-aro-select', 'value'),
      Input('time-period-items', 'value')]
 )
-def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str], time_dropdown):
+def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str], time_dropdown: List[str]):
     """
     Main callback/controller for updating all figures based on user selections.
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
