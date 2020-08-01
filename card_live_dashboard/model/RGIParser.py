@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List, Set
 from typing import Callable
 from datetime import datetime
@@ -12,26 +13,26 @@ class RGIParser:
         self._df_rgi = df_rgi
         self._drug_mapping = None
 
-    def select(self, by: str, type: str = None, **kwargs):
+    def select(self, by: str, type: str = None, **kwargs) -> RGIParser:
         """
         Selects data from the RGIParser based on the matched criteria.
         :param by: The method we will use to select by.
-        :param type: The type of data to select ('data', or 'file').
+        :param type: The type of data to select ('row', or 'file').
         :param **kwargs: Additional arguments for the underlying selection method.
         :return: A new RGIParser object which matches the passed criteria.
         """
         if by == 'cutoff':
-            return self.select_by_cutoff(**kwargs)
+            return self.select_by_cutoff(type=type, **kwargs)
         elif by == 'drug':
-            return self.select_by_drugclass(**kwargs)
+            return self.select_by_drugclass(type=type, **kwargs)
         elif by == 'aro':
-            return self.select_by_besthit_aro(**kwargs)
+            return self.select_by_besthit_aro(type=type, **kwargs)
         elif by == 'time':
-            return self.select_by_time(**kwargs)
+            return self.select_by_time(type=type, **kwargs)
         else:
-            raise Exception(f'Unknown value [by={by}]')
+            raise Exception(f'Unknown value [by={by}].')
 
-    def select_by(self, func: Callable):
+    def select_by(self, func: Callable, type: str = 'row') -> RGIParser:
         """
         Selects data from the underlying dataframe.
         Can be run like:
@@ -39,46 +40,69 @@ class RGIParser:
         rgi_parser.select_by(lambda x: x['column'] == 'value')
 
         :param func: The select function.
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
         :return: A new instance of RGIParser which is a subset of the old instance.
         """
-        return RGIParser(self._df_rgi[func(self._df_rgi)].copy())
+        if type == 'row':
+            return RGIParser(self._df_rgi[func(self._df_rgi)].copy())
+        elif type == 'file':
+            matched_rows = self._df_rgi[func(self._df_rgi)]
+            matched_files = set(matched_rows.index)
+            return RGIParser(self._df_rgi.loc[matched_files])
+        else:
+            raise Exception(f'Unknown value [type={type}]. Must be one of ["row", "file"].')
 
-    def select_by_cutoff(self, level: str):
+    def select_by_cutoff(self, type: str, level: str) -> RGIParser:
         """
-        Given a cutoff level, returns an RGIParser object on the subset of data with files
-        containing RGI hits at that level.
+        Given a cutoff level, returns an RGIParser object on the subset of data.
 
         :param level: The level to match (e.g., 'Perfect', 'Strict', 'Loose').
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
         :return: An RGIParsesr object on the subset of matched data.
         """
         if level is None or level == 'all':
             return self
         else:
-            return self.select_by(lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
+            return self.select_by(type=type, func=lambda x: x['rgi_main.Cut_Off'].str.lower() == level)
 
-    def select_by_drugclass(self, drug_classes: List[str] = None):
+    def select_by_drugclass(self, type: str, drug_classes: List[str] = None) -> RGIParser:
         """
-        Given a list of drug classes, returns an RGIParser object on the subset of data with files
+        Given a list of drug classes, returns an RGIParser object on the subset of data
         containing all of the passed drug classes.
 
         :param drug_classes: A list of drug class names to match. An empty list matches everything.
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
         :return: An RGIParser object on the subset of matched data.
         """
         df_drugclass = self._get_drugclass_matches(drug_classes)
-        filename_matches = set(df_drugclass[df_drugclass['matches']].index.tolist())
 
-        return RGIParser(self._df_rgi.loc[filename_matches])
+        if type == 'row':
+            return RGIParser(df_drugclass)
+        elif type == 'file':
+            filename_matches = set(df_drugclass[df_drugclass['matches']].index.tolist())
+            return RGIParser(self._df_rgi.loc[filename_matches])
+        else:
+            raise Exception(f'Unknown value [type={type}]')
 
-    def select_by_besthit_aro(self, besthit_aro: List[str] = None):
+    def select_by_besthit_aro(self, type: str, besthit_aro: List[str] = None) -> RGIParser:
         """
         Given a list of Best Hit ARO selections, selects data containing only files with some match.
 
         :param besthit_aro: A list of Best Hit ARO selections.
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
         :return: An RGIParser object on the subset of matched data.
         """
         if besthit_aro is None or len(besthit_aro) == 0:
             return self
-        else:
+        elif type == 'file':
             # Convert 'rgi_main.Best_Hit_ARO' column to a 'Set' of entries. For example
             # | index | rgi_main.Best_Hit_ARO |
             # |-------|-----------------------|
@@ -95,17 +119,24 @@ class RGIParser:
             matches_files = collapsed_aro_sets[collapsed_aro_sets['matches']]
             files = set(matches_files.index.tolist())
             return RGIParser(self._df_rgi.loc[files].copy())
+        elif type == 'row':
+            raise Exception('Unsupported for type=row')
+        else:
+            raise Exception(f'Unknown value [type={type}]')
 
-    def select_by_time(self, start: datetime, end: datetime):
+    def select_by_time(self, type: str, start: datetime, end: datetime) -> RGIParser:
         """
         Selects the data within the start and end time periods.
 
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
         :param start: The start time.
         :param end: The end time.
 
         :return: An RGIParser object on the subset of matched data.
         """
-        return self.select_by(lambda x: (x['timestamp'] >= start) & (x['timestamp'] <= end))
+        return self.select_by(type=type, func=lambda x: (x['timestamp'] >= start) & (x['timestamp'] <= end))
 
     def _get_drugclass_matches(self, drug_classes: List[str] = None) -> pd.DataFrame:
         """

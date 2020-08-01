@@ -42,16 +42,16 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], best
     time_now = datetime.now()
 
     rgi_parser_no_timefilter = RGIParser(data.rgi_df)\
-        .select(by='cutoff', level=rgi_cutoff_select)\
-        .select(by='drug', drug_classes=drug_classes)\
-        .select(by='aro', besthit_aro=besthit_aro)
+        .select(by='cutoff', type='row', level=rgi_cutoff_select)\
+        .select(by='drug', type='file', drug_classes=drug_classes)\
+        .select(by='aro', type='file', besthit_aro=besthit_aro)
 
     time_subsets = {
         'all': rgi_parser_no_timefilter,
-        'day': rgi_parser_no_timefilter.select(by='time', start=time_now - DAY, end=time_now),
-        'week': rgi_parser_no_timefilter.select(by='time', start=time_now - WEEK, end=time_now),
-        'month': rgi_parser_no_timefilter.select(by='time', start=time_now - MONTH, end=time_now),
-        'year': rgi_parser_no_timefilter.select(by='time', start=time_now - YEAR, end=time_now),
+        'day': rgi_parser_no_timefilter.select(by='time', type='row', start=time_now - DAY, end=time_now),
+        'week': rgi_parser_no_timefilter.select(by='time', type='row', start=time_now - WEEK, end=time_now),
+        'month': rgi_parser_no_timefilter.select(by='time', type='row', start=time_now - MONTH, end=time_now),
+        'year': rgi_parser_no_timefilter.select(by='time', type='row', start=time_now - YEAR, end=time_now),
     }
 
     main_pane_figures = build_main_pane(time_subsets[time_dropdown], data)
