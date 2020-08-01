@@ -20,6 +20,8 @@ def default_layout():
     rgi_parser = RGIParser(data.rgi_df)
     all_drugs = rgi_parser.all_drugs_list()
     all_drugs.sort()
+    all_besthit_aro = rgi_parser.all_besthit_aro()
+    all_besthit_aro.sort()
 
     number_of_samples = len(data.main_df)
     last_updated = data.main_df['timestamp'].max()
@@ -78,6 +80,15 @@ def default_layout():
                                            options=[{'label': x, 'value': x} for x in all_drugs],
                                            multi=True,
                                            placeholder='Select a drug class',
+                                       ),
+                    ]),
+                    html.Div(children=['Filter display by Best Hit ARO: ',
+                                       dcc.Dropdown(
+                                           id='besthit-aro-select',
+                                           className='sidepanel-selection',
+                                           options=[{'label': x, 'value': x} for x in all_besthit_aro],
+                                           multi=True,
+                                           placeholder='Select a Best Hit ARO value',
                                        ),
                     ]),
                     html.H3('Time'),

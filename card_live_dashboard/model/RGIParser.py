@@ -43,12 +43,39 @@ class RGIParser:
         containing all of the passed drug classes.
 
         :param drug_classes: A list of drug class names to match. An empty list matches everything.
-        :return: An RGIParsesr object on the subset of matched data.
+        :return: An RGIParser object on the subset of matched data.
         """
         df_drugclass = self._get_drugclass_matches(drug_classes)
         filename_matches = set(df_drugclass[df_drugclass['matches']].index.tolist())
 
         return RGIParser(self._df_rgi.loc[filename_matches])
+
+    def filter_by_besthit_aro(self, besthit_aro: List[str] = None):
+        """
+        Given a list of Best Hit ARO selections, filters this RGIParser object to those containing only files with some match.
+
+        :param besthit_aro: A list of Best Hit ARO selections.
+        :return: An RGIParser object on the subset of matched data.
+        """
+        if besthit_aro is None or len(besthit_aro) == 0:
+            return self
+        else:
+            # Convert 'rgi_main.Best_Hit_ARO' column to a 'Set' of entries. For example
+            # | index | rgi_main.Best_Hit_ARO |
+            # |-------|-----------------------|
+            # | file1 | {'aro1', 'aro2'}      |
+            # | file2 | {'aro4', 'aro5'}      |
+            collapsed_aro_sets = self._df_rgi.groupby('filename').apply(
+                lambda x: set(y for y in x['rgi_main.Best_Hit_ARO'])).to_frame().rename(
+                columns={0: 'rgi_main.Best_Hit_ARO'})
+
+            # Set 'matches' column to True if the 'besthit_aro' list is a subset of 'rgi_main.Best_Hit_ARO'
+            collapsed_aro_sets['matches'] = collapsed_aro_sets['rgi_main.Best_Hit_ARO'].apply(
+                lambda x: set(besthit_aro).issubset(x))
+
+            matches_files = collapsed_aro_sets[collapsed_aro_sets['matches']]
+            files = set(matches_files.index.tolist())
+            return RGIParser(self._df_rgi.loc[files].copy())
 
     def filter_by_time(self, start: datetime, end: datetime):
         """
@@ -147,3 +174,11 @@ class RGIParser:
         all_drugs = list(set(y for x in all_drugs_list for y in x))
 
         return all_drugs
+
+    def all_besthit_aro(self) -> List[str]:
+        """
+        Gets a list of all possible Best Hit ARO values.
+
+        :return: A set of all Best Hit ARO values.
+        """
+        return list(set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist()))

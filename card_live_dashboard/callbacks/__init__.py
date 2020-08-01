@@ -24,9 +24,10 @@ YEAR = timedelta(days=365)
      Output('selected-samples-count', 'children')],
     [Input('rgi-cutoff-select', 'value'),
      Input('drug-class-select', 'value'),
+     Input('besthit-aro-select', 'value'),
      Input('time-period-items', 'value')]
 )
-def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], time_dropdown):
+def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str], time_dropdown):
     """
     Main callback/controller for updating all figures based on user selections.
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -38,8 +39,10 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], time
     total_samples_count = len(data.main_df)
     time_now = datetime.now()
 
-    rgi_parser_no_timefilter = RGIParser(data.rgi_df).filter_by_cutoff(
-        rgi_cutoff_select).filter_by_drugclass(drug_classes)
+    rgi_parser_no_timefilter = RGIParser(
+        data.rgi_df).filter_by_cutoff(
+        rgi_cutoff_select).filter_by_drugclass(
+        drug_classes).filter_by_besthit_aro(besthit_aro)
 
     time_subsets = {
         'all': rgi_parser_no_timefilter,
