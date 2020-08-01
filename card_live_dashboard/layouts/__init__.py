@@ -133,10 +133,29 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     """
     return [
         html.Div([
-            'This shows a world map of the distribution of samples uploaded to CARD:Live matching the selected criteria.',
-            dcc.Graph(figure=figures_dict['map']),
-            dcc.Graph(figure=figures_dict['geographic_totals']),
-            dcc.Graph(figure=figures_dict['timeline']),
-            dcc.Graph(figure=figures_dict['taxonomic_comparison']),
+            dbc.Card(className='p-2', children=[
+                dbc.CardBody([
+                    dbc.CardHeader(html.H3('Geographic map')),
+                    dcc.Graph(figure=figures_dict['map']),
+                ]),
+            ]),
+            dbc.Card(children=[
+                dbc.CardBody([
+                    dbc.CardHeader(html.H3('Geographic totals')),
+                    dcc.Graph(figure=figures_dict['geographic_totals']),
+                ]),
+            ]),
+            dbc.Card(children=[
+                dbc.CardBody([
+                    dbc.CardHeader(html.H3('Timeline')),
+                    dcc.Graph(figure=figures_dict['timeline']),
+                ]),
+            ]),
+            dbc.Card(children=[
+                dbc.CardBody([
+                    dbc.CardHeader(html.H3('Taxonomic comparison')),
+                    dcc.Graph(figure=figures_dict['taxonomic_comparison']),
+                ]),
+            ]),
         ])
     ]
