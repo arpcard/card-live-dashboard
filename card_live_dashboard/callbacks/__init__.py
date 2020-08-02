@@ -39,6 +39,7 @@ def toggle_time_parameters_collapse(n, is_open):
         return not is_open
     return is_open
 
+
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
                   drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, RGIParser]:
     time_now = datetime.now()
@@ -64,10 +65,9 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
      Output('selected-samples-count', 'children'),
      Output('drug-class-select', 'options'),
      Output('besthit-aro-select', 'options'),
-     Output('geographic-map-id', 'figure'),
-     Output('timeline-id', 'figure'),
-     Output('geographic-totals-id', 'figure'),
-     Output('taxonomic-comparison-id', 'figure')],
+     Output('figure-geographic-map-id', 'figure'),
+     Output('figure-timeline-id', 'figure'),
+     Output('figure-totals-id', 'figure')],
     [Input('rgi-cutoff-select', 'value'),
      Input('drug-class-select', 'value'),
      Input('besthit-aro-select', 'value'),
@@ -117,8 +117,7 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
             besthit_aro_options,
             main_pane_figures['map'],
             main_pane_figures['timeline'],
-            main_pane_figures['geographic_totals'],
-            main_pane_figures['taxonomic_comparison'])
+            main_pane_figures['totals'])
 
 
 def build_options(selected_options: List[str], all_available_options: Set[str]):
@@ -136,7 +135,7 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
         all_available_options_set.union(selected_options_set))]
 
 
-def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_settings: Dict[str, Dict[str,str]]):
+def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_settings: Dict[str, Dict[str, str]]):
     matches_count = rgi_parser.value_counts('geo_area_code').reset_index()
     matches_count = model.region_codes.add_region_standard_names(matches_count,
                                                                  region_column='geo_area_code')
@@ -154,22 +153,10 @@ def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_setting
 
     fig_histogram_rate = figures.build_time_histogram(df_timeline, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])
-    fig_geographic_totals = figures.geographic_totals(matches_count)
-
-    if rgi_parser.empty():
-        fig_taxonomic_comparison = figures.taxonomic_comparison(pd.DataFrame())
-    else:
-        files_set = rgi_parser.files()
-        df_rgi_kmer_subset = data.rgi_kmer_df.loc[files_set]
-        df_lmat_subset = data.lmat_df.loc[files_set]
-        tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
-        df_tax = tax_parse.create_rgi_lmat_both()
-
-        fig_taxonomic_comparison = figures.taxonomic_comparison(df_tax)
+    fig_totals = figures.geographic_totals(matches_count)
 
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
-        'taxonomic_comparison': fig_taxonomic_comparison,
-        'geographic_totals': fig_geographic_totals,
+        'totals': fig_totals,
     }

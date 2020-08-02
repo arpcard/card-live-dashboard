@@ -27,8 +27,7 @@ EMPTY_MAP = go.Figure(go.Scattergeo())
 EMPTY_FIGURE_DICT = {
         'map': EMPTY_MAP,
         'timeline': EMPTY_FIGURE,
-        'taxonomic_comparison': EMPTY_FIGURE,
-        'geographic_totals': EMPTY_FIGURE,
+        'totals': EMPTY_FIGURE,
 }
 
 
@@ -151,7 +150,9 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
                            color=color,
                            labels={'count': 'Count',
                                    'timestamp': 'Date',
-                                   'geo_area_name_standard': 'Geographic region'},
+                                   'geo_area_name_standard': 'Geographic region',
+                                   'rgi_kmer.taxonomy_label': 'Organism (RGI Kmer)',
+                                   'lmat.taxonomy_label': 'Organism (LMAT)'},
                            title='Samples by date',
         )
         fig.update_traces(cumulative_enabled=cumulative)

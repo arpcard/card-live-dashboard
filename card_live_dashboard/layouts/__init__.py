@@ -133,11 +133,11 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     return [
         html.Div(className='cardlive-figures', children=[
             single_figure_layout(title='Geographic map',
-                                 id='geographic-map-id',
+                                 id='figure-geographic-map-id',
                                  fig=figures_dict['map']
             ),
             single_figure_layout(title='Timeline',
-                                 id='timeline-id',
+                                 id='figure-timeline-id',
                                  fig=figures_dict['timeline'],
                                  dropdowns=html.Div(className='d-flex align-items-center', children=[
                                       html.Div(['Type:']),
@@ -166,13 +166,9 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      )]),
                                  ]),
             ),
-            single_figure_layout(title='Geographic totals',
-                                 id='geographic-totals-id',
-                                 fig=figures_dict['geographic_totals']
-            ),
-            single_figure_layout(title='Taxonomic comparison',
-                                 id='taxonomic-comparison-id',
-                                 fig=figures_dict['taxonomic_comparison']
+            single_figure_layout(title='Totals',
+                                 id='figure-totals-id',
+                                 fig=figures_dict['totals']
             ),
         ])
     ]
