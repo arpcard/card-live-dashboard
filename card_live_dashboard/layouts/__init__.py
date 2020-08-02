@@ -136,16 +136,12 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  id='geographic-map-id',
                                  fig=figures_dict['map']
             ),
-            single_figure_layout(title='Geographic totals',
-                                 id='geographic-totals-id',
-                                 fig=figures_dict['geographic_totals']
-            ),
             single_figure_layout(title='Timeline',
                                  id='timeline-id',
                                  fig=figures_dict['timeline'],
                                  dropdowns=html.Div(className='d-flex align-items-center', children=[
                                       html.Div(['Type:']),
-                                      html.Div(className='flex-grow-1 ml-2', children=[dcc.Dropdown(
+                                      html.Div(className='ml-2', children=[dcc.Dropdown(
                                           id='timeline-type-select',
                                           options=[
                                               {'label': 'Rate', 'value': 'rate'},
@@ -155,7 +151,22 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                           clearable=False,
                                           value='rate',
                                       )]),
+                                     html.Div(className='ml-3', children=['Color by:']),
+                                     html.Div(className='ml-2', children=[dcc.Dropdown(
+                                         id='timeline-color-select',
+                                         options=[
+                                             {'label': 'Default', 'value': 'default'},
+                                             {'label': 'Geographic region', 'value': 'geographic'}
+                                         ],
+                                         searchable=False,
+                                         clearable=False,
+                                         value='default',
+                                     )]),
                                  ]),
+            ),
+            single_figure_layout(title='Geographic totals',
+                                 id='geographic-totals-id',
+                                 fig=figures_dict['geographic_totals']
             ),
             single_figure_layout(title='Taxonomic comparison',
                                  id='taxonomic-comparison-id',

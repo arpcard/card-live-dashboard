@@ -3,6 +3,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import geopandas
 
+import card_live_dashboard.model as model
+
 # Creation of empty figure adapted from https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497
 EMPTY_FIGURE = go.Figure(layout={
     'xaxis': {'visible': False},
@@ -122,7 +124,7 @@ def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDa
     return fig
 
 
-def build_time_histogram(df_time: pd.DataFrame, fig_type: str):
+def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
     if df_time.empty:
         fig = EMPTY_FIGURE
     else:
@@ -133,10 +135,20 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str):
         else:
             raise Exception(f'Unknown value [fig_type={fig_type}]')
 
+        if color_by == 'default':
+            color = None
+        elif color_by == 'geographic':
+            df_time = model.region_codes.add_region_standard_names(df_time, 'geo_area_code')
+            color = 'geo_area_name_standard'
+        else:
+            raise Exception(f'Unknown value [color_by={color_by}]')
+
         fig = px.histogram(df_time, x='timestamp',
                            nbins=50,
+                           color=color,
                            labels={'count': 'Count',
-                                   'timestamp': 'Date'},
+                                   'timestamp': 'Date',
+                                   'geo_area_name_standard': 'Geographic region'},
                            title='Samples by date',
         )
         fig.update_traces(cumulative_enabled=cumulative)

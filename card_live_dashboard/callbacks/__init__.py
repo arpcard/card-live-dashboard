@@ -42,18 +42,20 @@ def toggle_time_parameters_collapse(n, is_open):
 
 @app.callback(
     Output('timeline-id', 'figure'),
-    [Input('timeline-type-select', 'value')],
+    [Input('timeline-type-select', 'value'),
+     Input('timeline-color-select', 'value')],
     [State('rgi-cutoff-select', 'value'),
      State('drug-class-select', 'value'),
      State('besthit-aro-select', 'value'),
      State('time-period-items', 'value')]
 )
-def timeline_figure_type(fig_type: str, rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str],
-                         time_dropdown: List[str]):
+def timeline_figure_settings(fig_type: str, fig_color_by: str, rgi_cutoff_select: str,
+                             drug_classes: List[str], besthit_aro: List[str], time_dropdown: List[str]):
     data = CardLiveData.get_data_package()
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
     rgi_parser_filtered = time_subsets[time_dropdown]
-    fig_histogram_rate = figures.build_time_histogram(rgi_parser_filtered.timestamps(), fig_type=fig_type)
+    fig_histogram_rate = figures.build_time_histogram(rgi_parser_filtered.data_by_file(), fig_type=fig_type,
+                                                      color_by=fig_color_by)
     return fig_histogram_rate
 
 
@@ -97,6 +99,7 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
     :param drug_classes: A list of the drug_classes to display.
     :param time_dropdown: The time selection.
+    :param timeline_type_select: The selection for the timeline type.
     :return: The figures to place in the main figure region of the page.
     """
     data = CardLiveData.get_data_package()
@@ -104,11 +107,11 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
 
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
 
-    fig_types = {
-        'timeline': timeline_type_select,
+    fig_settings = {
+        'timeline': {'type': timeline_type_select, 'color': 'default'}
     }
 
-    main_pane_figures = build_main_pane(time_subsets[time_dropdown], data, fig_types)
+    main_pane_figures = build_main_pane(time_subsets[time_dropdown], data, fig_settings)
     main_pane = layouts.figures_layout(main_pane_figures)
 
     # Set time dropdown text to include count of samples in particular time period
@@ -147,12 +150,13 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
         all_available_options_set.union(selected_options_set))]
 
 
-def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_types: Dict[str, str]):
+def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_settings: Dict[str, Dict[str,str]]):
     matches_count = rgi_parser.value_counts('geo_area_code').reset_index()
     matches_count = model.region_codes.add_region_standard_names(matches_count,
                                                                  region_column='geo_area_code')
     fig_map = figures.choropleth_drug(matches_count, model.world)
-    fig_histogram_rate = figures.build_time_histogram(rgi_parser.timestamps(), fig_type=fig_types['timeline'])
+    fig_histogram_rate = figures.build_time_histogram(rgi_parser.data_by_file(), fig_type=fig_settings['timeline']['type'],
+                                                      color_by=fig_settings['timeline']['color'])
     fig_geographic_totals = figures.geographic_totals(matches_count)
 
     if rgi_parser.empty():

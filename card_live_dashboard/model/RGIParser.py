@@ -183,13 +183,13 @@ class RGIParser:
         """
         return len(self._df_rgi.groupby('filename').first())
 
-    def timestamps(self) -> pd.DataFrame:
+    def data_by_file(self) -> pd.DataFrame:
         """
-        Gets all timestamps from this dataframe.
+        Gets all data from this dataframe grouped by file.
 
         :return: All timestamps from this dataframe.
         """
-        return self._df_rgi.groupby('filename').first()[['timestamp']]
+        return self._df_rgi.groupby('filename').first()
 
     def empty(self) -> bool:
         """
