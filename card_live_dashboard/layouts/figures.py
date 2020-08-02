@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import geopandas
 
 # Creation of empty figure adapted from https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497
-empty_figure = go.Figure(layout={
+EMPTY_FIGURE = go.Figure(layout={
     'xaxis': {'visible': False},
     'yaxis': {'visible': False},
     'annotations': [{
@@ -18,10 +18,21 @@ empty_figure = go.Figure(layout={
     }]
 })
 
+# Create empty geographic map
+EMPTY_MAP = go.Figure(go.Scattergeo())
+
+# Empty figures to display initially
+EMPTY_FIGURE_DICT = {
+        'map': EMPTY_MAP,
+        'timeline': EMPTY_FIGURE,
+        'taxonomic_comparison': EMPTY_FIGURE,
+        'geographic_totals': EMPTY_FIGURE,
+}
+
 
 def taxonomic_comparison(df: pd.DataFrame):
     if df.empty:
-        fig = empty_figure
+        fig = EMPTY_FIGURE
     else:
         CATEGORY_LIMIT = 10
         df = df.groupby('taxon').sum().sort_values(
@@ -65,7 +76,7 @@ def taxonomic_comparison(df: pd.DataFrame):
 
 def geographic_totals(df):
     if df.empty:
-        fig = empty_figure
+        fig = EMPTY_FIGURE
     else:
         df = df.sort_values(by=['count'], ascending=True)
         fig = px.bar(df, y='geo_area_name_standard', x='count',
@@ -87,7 +98,7 @@ def geographic_totals(df):
 
 def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDataFrame):
     if geo_drug_classes_count.empty or geo_drug_classes_count['count'].sum() == 0:
-        fig = go.Figure(go.Scattergeo())
+        fig = EMPTY_MAP
     else:
         fig = px.choropleth(geo_drug_classes_count, geojson=world, locations='geo_area_code',
                             featureidkey='properties.un_m49_numeric',
@@ -113,7 +124,7 @@ def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDa
 
 def build_time_histogram(df_time: pd.DataFrame, cumulative: bool):
     if df_time.empty:
-        fig = empty_figure
+        fig = EMPTY_FIGURE
     else:
         fig = px.histogram(df_time, x='timestamp',
                            nbins=50,

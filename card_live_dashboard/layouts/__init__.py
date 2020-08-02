@@ -5,8 +5,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
 
+import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.model.RGIParser import RGIParser
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
@@ -108,17 +108,16 @@ def default_layout():
                 ]),
             ]),
             html.Div(className='col', children=[
-                dcc.Loading(
-                    type='circle',
-                    children=[
-                        html.Div(className='container', children=[
-                            html.Div(className='row', children=[html.Div(className='col', id='main-pane',
-                                                                         # Initial empty <div> so that loading animation
-                                                                         # Is not squished against top of page initially
-                                                                         children=[html.Div(style={'height': '400px'})])]),
-                    ])
+                html.Div(className='container', children=[
+                    html.Div(className='row', children=[
+                        html.Div(className='col', id='main-pane',
+                            # Need to display initial empty figures
+                            # So callbacks can be linked up correctly
+                            children=figures_layout(figures.EMPTY_FIGURE_DICT)
+                        ),
+                    ]),
                 ]),
-            ])
+            ]),
         ]),
     ])
 
@@ -133,29 +132,50 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     """
     return [
         html.Div([
-            dbc.Card(className='p-2', children=[
-                dbc.CardBody([
-                    dbc.CardHeader(html.H3('Geographic map')),
-                    dcc.Graph(figure=figures_dict['map']),
-                ]),
-            ]),
-            dbc.Card(children=[
-                dbc.CardBody([
-                    dbc.CardHeader(html.H3('Geographic totals')),
-                    dcc.Graph(figure=figures_dict['geographic_totals']),
-                ]),
-            ]),
-            dbc.Card(children=[
-                dbc.CardBody([
-                    dbc.CardHeader(html.H3('Timeline')),
-                    dcc.Graph(figure=figures_dict['timeline']),
-                ]),
-            ]),
-            dbc.Card(children=[
-                dbc.CardBody([
-                    dbc.CardHeader(html.H3('Taxonomic comparison')),
-                    dcc.Graph(figure=figures_dict['taxonomic_comparison']),
-                ]),
-            ]),
+            single_figure_layout(title='Geographic map',
+                                 id='geographic-map-id',
+                                 fig=figures_dict['map']
+            ),
+            single_figure_layout(title='Geographic totals',
+                                 id='geographic-totals-id',
+                                 fig=figures_dict['geographic_totals']
+            ),
+            single_figure_layout(title='Timeline',
+                                 id='timeline-id',
+                                 fig=figures_dict['timeline'],
+                                 dropdowns=html.Div(children=[
+                                      'Type:',
+                                      dcc.Dropdown(
+                                          id='map-type-select',
+                                          options=[
+                                              {'label': 'Rate', 'value': 'rate'},
+                                              {'label': 'Cumulative', 'value': 'cumulative'}
+                                          ],
+                                          searchable=False,
+                                          clearable=False,
+                                          value='rate',
+                                      ),
+                                 ]),
+            ),
+            single_figure_layout(title='Taxonomic comparison',
+                                 id='taxonomic-comparison-id',
+                                 fig=figures_dict['taxonomic_comparison']
+            ),
         ])
     ]
+
+
+def single_figure_layout(title: str, id: str, fig: go.Figure, dropdowns: html.Div = None):
+    component = dbc.Card(className='my-3', children=[
+        dbc.CardHeader(children=[
+            html.H4(title),
+            dropdowns,
+        ]),
+        dcc.Loading(type='circle', children=[
+            dbc.CardBody(children=[
+                        dcc.Graph(id=id, figure=fig),
+            ]),
+        ]),
+    ])
+
+    return component
