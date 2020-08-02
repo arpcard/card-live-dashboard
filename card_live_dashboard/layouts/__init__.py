@@ -132,7 +132,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     """
     return [
         html.Div(className='cardlive-figures', children=[
-            single_figure_layout(title='Geographic map',
+            single_figure_layout(title='Map',
                                  id='figure-geographic-map-id',
                                  fig=figures_dict['map']
             ),

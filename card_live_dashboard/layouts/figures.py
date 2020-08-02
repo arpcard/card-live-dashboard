@@ -97,11 +97,11 @@ def geographic_totals(df):
 
     return fig
 
-def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDataFrame):
-    if geo_drug_classes_count.empty or geo_drug_classes_count['count'].sum() == 0:
+def choropleth_drug(df_geo: pd.DataFrame, world: geopandas.GeoDataFrame):
+    if df_geo.empty or df_geo['count'].sum() == 0:
         fig = EMPTY_MAP
     else:
-        fig = px.choropleth(geo_drug_classes_count, geojson=world, locations='geo_area_code',
+        fig = px.choropleth(df_geo, geojson=world, locations='geo_area_code',
                             featureidkey='properties.un_m49_numeric',
                             color='count', color_continuous_scale='YlGnBu',
                             labels={'count': 'Count'},
