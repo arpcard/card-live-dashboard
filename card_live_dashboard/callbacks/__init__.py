@@ -39,26 +39,6 @@ def toggle_time_parameters_collapse(n, is_open):
         return not is_open
     return is_open
 
-
-@app.callback(
-    Output('timeline-id', 'figure'),
-    [Input('timeline-type-select', 'value'),
-     Input('timeline-color-select', 'value')],
-    [State('rgi-cutoff-select', 'value'),
-     State('drug-class-select', 'value'),
-     State('besthit-aro-select', 'value'),
-     State('time-period-items', 'value')]
-)
-def timeline_figure_settings(fig_type: str, fig_color_by: str, rgi_cutoff_select: str,
-                             drug_classes: List[str], besthit_aro: List[str], time_dropdown: List[str]):
-    data = CardLiveData.get_data_package()
-    time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
-    rgi_parser_filtered = time_subsets[time_dropdown]
-    fig_histogram_rate = figures.build_time_histogram(rgi_parser_filtered.data_by_file(), fig_type=fig_type,
-                                                      color_by=fig_color_by)
-    return fig_histogram_rate
-
-
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
                   drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, RGIParser]:
     time_now = datetime.now()
@@ -80,20 +60,24 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
 
 @app.callback(
-    [Output('main-pane', 'children'),
-     Output('time-period-items', 'options'),
+    [Output('time-period-items', 'options'),
      Output('selected-samples-count', 'children'),
      Output('drug-class-select', 'options'),
-     Output('besthit-aro-select', 'options'), ],
+     Output('besthit-aro-select', 'options'),
+     Output('geographic-map-id', 'figure'),
+     Output('timeline-id', 'figure'),
+     Output('geographic-totals-id', 'figure'),
+     Output('taxonomic-comparison-id', 'figure')],
     [Input('rgi-cutoff-select', 'value'),
      Input('drug-class-select', 'value'),
      Input('besthit-aro-select', 'value'),
-     Input('time-period-items', 'value')],
-    [State('timeline-type-select', 'value')]
+     Input('time-period-items', 'value'),
+     Input('timeline-type-select', 'value'),
+     Input('timeline-color-select', 'value')]
 )
 def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
                            besthit_aro: List[str], time_dropdown: List[str],
-                           timeline_type_select: str):
+                           timeline_type_select: str, timeline_color_select: str):
     """
     Main callback/controller for updating all figures based on user selections.
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -108,11 +92,10 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
 
     fig_settings = {
-        'timeline': {'type': timeline_type_select, 'color': 'default'}
+        'timeline': {'type': timeline_type_select, 'color': timeline_color_select}
     }
 
     main_pane_figures = build_main_pane(time_subsets[time_dropdown], data, fig_settings)
-    main_pane = layouts.figures_layout(main_pane_figures)
 
     # Set time dropdown text to include count of samples in particular time period
     # Should produce a list of dictionaries like [{'label': 'All (500)', 'value': 'all'}, ...]
@@ -128,11 +111,14 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].all_drugs())
     besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].all_besthit_aro())
 
-    return (main_pane,
-            time_dropdown_text,
+    return (time_dropdown_text,
             samples_count_string,
             drug_class_options,
-            besthit_aro_options)
+            besthit_aro_options,
+            main_pane_figures['map'],
+            main_pane_figures['timeline'],
+            main_pane_figures['geographic_totals'],
+            main_pane_figures['taxonomic_comparison'])
 
 
 def build_options(selected_options: List[str], all_available_options: Set[str]):
