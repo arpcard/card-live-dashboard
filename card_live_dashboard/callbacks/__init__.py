@@ -17,6 +17,7 @@ WEEK = timedelta(days=7)
 MONTH = timedelta(days=31)
 YEAR = timedelta(days=365)
 
+
 @app.callback(
     Output('rgi-parameters', 'is_open'),
     [Input('rgi-parameters-toggle', 'n_clicks')],
@@ -26,6 +27,7 @@ def toggle_rgi_parameters_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
+
 
 @app.callback(
     Output('time-parameters', 'is_open'),
@@ -37,33 +39,31 @@ def toggle_time_parameters_collapse(n, is_open):
         return not is_open
     return is_open
 
+
 @app.callback(
     Output('timeline-id', 'figure'),
-    [Input('map-type-select', 'value')],
+    [Input('timeline-type-select', 'value')],
     [State('rgi-cutoff-select', 'value'),
      State('drug-class-select', 'value'),
      State('besthit-aro-select', 'value'),
      State('time-period-items', 'value')]
 )
-def timeline_figure_type(fig_type: str, rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str], time_dropdown: List[str]):
+def timeline_figure_type(fig_type: str, rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str],
+                         time_dropdown: List[str]):
     data = CardLiveData.get_data_package()
-    time_now = datetime.now()
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
     rgi_parser_filtered = time_subsets[time_dropdown]
-    if fig_type == 'rate':
-        cumulative = False
-    else:
-        cumulative = True
-    fig_histogram_rate = figures.build_time_histogram(rgi_parser_filtered.timestamps(), cumulative=cumulative)
+    fig_histogram_rate = figures.build_time_histogram(rgi_parser_filtered.timestamps(), fig_type=fig_type)
     return fig_histogram_rate
 
+
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
-                        drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, RGIParser]:
+                  drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, RGIParser]:
     time_now = datetime.now()
 
-    rgi_parser = RGIParser(data.rgi_df)\
-        .select(by='cutoff', type='row', level=rgi_cutoff_select)\
-        .select(by='drug', type='file', drug_classes=drug_classes)\
+    rgi_parser = RGIParser(data.rgi_df) \
+        .select(by='cutoff', type='row', level=rgi_cutoff_select) \
+        .select(by='drug', type='file', drug_classes=drug_classes) \
         .select(by='aro', type='file', besthit_aro=besthit_aro)
 
     time_subsets = {
@@ -76,18 +76,22 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
     return time_subsets
 
+
 @app.callback(
     [Output('main-pane', 'children'),
      Output('time-period-items', 'options'),
      Output('selected-samples-count', 'children'),
      Output('drug-class-select', 'options'),
-     Output('besthit-aro-select', 'options'),],
+     Output('besthit-aro-select', 'options'), ],
     [Input('rgi-cutoff-select', 'value'),
      Input('drug-class-select', 'value'),
      Input('besthit-aro-select', 'value'),
-     Input('time-period-items', 'value')]
+     Input('time-period-items', 'value')],
+    [State('timeline-type-select', 'value')]
 )
-def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], besthit_aro: List[str], time_dropdown: List[str]):
+def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
+                           besthit_aro: List[str], time_dropdown: List[str],
+                           timeline_type_select: str):
     """
     Main callback/controller for updating all figures based on user selections.
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -100,7 +104,11 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str], best
 
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
 
-    main_pane_figures = build_main_pane(time_subsets[time_dropdown], data)
+    fig_types = {
+        'timeline': timeline_type_select,
+    }
+
+    main_pane_figures = build_main_pane(time_subsets[time_dropdown], data, fig_types)
     main_pane = layouts.figures_layout(main_pane_figures)
 
     # Set time dropdown text to include count of samples in particular time period
@@ -138,12 +146,13 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
     return [{'label': x, 'value': x} for x in sorted(
         all_available_options_set.union(selected_options_set))]
 
-def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader):
+
+def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_types: Dict[str, str]):
     matches_count = rgi_parser.value_counts('geo_area_code').reset_index()
     matches_count = model.region_codes.add_region_standard_names(matches_count,
-                                                                          region_column='geo_area_code')
+                                                                 region_column='geo_area_code')
     fig_map = figures.choropleth_drug(matches_count, model.world)
-    fig_histogram_rate = figures.build_time_histogram(rgi_parser.timestamps(), cumulative=False)
+    fig_histogram_rate = figures.build_time_histogram(rgi_parser.timestamps(), fig_type=fig_types['timeline'])
     fig_geographic_totals = figures.geographic_totals(matches_count)
 
     if rgi_parser.empty():

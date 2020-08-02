@@ -131,7 +131,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     :return: A list of figures to place on the page.
     """
     return [
-        html.Div([
+        html.Div(className='cardlive-figures', children=[
             single_figure_layout(title='Geographic map',
                                  id='geographic-map-id',
                                  fig=figures_dict['map']
@@ -143,10 +143,10 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
             single_figure_layout(title='Timeline',
                                  id='timeline-id',
                                  fig=figures_dict['timeline'],
-                                 dropdowns=html.Div(children=[
-                                      'Type:',
-                                      dcc.Dropdown(
-                                          id='map-type-select',
+                                 dropdowns=html.Div(className='d-flex align-items-center', children=[
+                                      html.Div(['Type:']),
+                                      html.Div(className='flex-grow-1 ml-2', children=[dcc.Dropdown(
+                                          id='timeline-type-select',
                                           options=[
                                               {'label': 'Rate', 'value': 'rate'},
                                               {'label': 'Cumulative', 'value': 'cumulative'}
@@ -154,7 +154,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                           searchable=False,
                                           clearable=False,
                                           value='rate',
-                                      ),
+                                      )]),
                                  ]),
             ),
             single_figure_layout(title='Taxonomic comparison',

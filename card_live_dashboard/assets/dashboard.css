@@ -13,7 +13,7 @@ a:focus {
     outline-offset:-2px
 }
 
-.card-live-badges > .badge {
+.card-live-badges .badge {
     font-size: 85%;
 }
 
@@ -38,4 +38,9 @@ a:focus {
 
 .cardlive-collapse {
     color: white;
+}
+
+.cardlive-figures .dash-dropdown {
+    width: 50%;
+    min-width: 200px;
 }

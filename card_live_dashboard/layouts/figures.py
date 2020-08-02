@@ -122,10 +122,17 @@ def choropleth_drug(geo_drug_classes_count: pd.DataFrame, world: geopandas.GeoDa
     return fig
 
 
-def build_time_histogram(df_time: pd.DataFrame, cumulative: bool):
+def build_time_histogram(df_time: pd.DataFrame, fig_type: str):
     if df_time.empty:
         fig = EMPTY_FIGURE
     else:
+        if fig_type == 'cumulative':
+            cumulative = True
+        elif fig_type == 'rate':
+            cumulative = False
+        else:
+            raise Exception(f'Unknown value [fig_type={fig_type}]')
+
         fig = px.histogram(df_time, x='timestamp',
                            nbins=50,
                            labels={'count': 'Count',
