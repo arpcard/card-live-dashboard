@@ -141,7 +141,18 @@ def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_setting
     matches_count = model.region_codes.add_region_standard_names(matches_count,
                                                                  region_column='geo_area_code')
     fig_map = figures.choropleth_drug(matches_count, model.world)
-    fig_histogram_rate = figures.build_time_histogram(rgi_parser.data_by_file(), fig_type=fig_settings['timeline']['type'],
+
+    df_rgi_kmer_subset = data.rgi_kmer_df.loc[rgi_parser.files()]
+    df_lmat_subset = data.lmat_df.loc[rgi_parser.files()]
+    tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
+
+    # Add all data to timeline dataframe for color_by option
+    df_timeline = rgi_parser.data_by_file()
+    if len(df_timeline) > 0:
+        df_timeline = df_timeline.merge(tax_parse.create_file_matches(), left_index=True, right_index=True, how='left')
+        df_timeline = model.region_codes.add_region_standard_names(df_timeline, 'geo_area_code')
+
+    fig_histogram_rate = figures.build_time_histogram(df_timeline, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])
     fig_geographic_totals = figures.geographic_totals(matches_count)
 

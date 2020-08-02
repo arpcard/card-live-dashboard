@@ -156,7 +156,9 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                          id='timeline-color-select',
                                          options=[
                                              {'label': 'Default', 'value': 'default'},
-                                             {'label': 'Geographic region', 'value': 'geographic'}
+                                             {'label': 'Geographic region', 'value': 'geographic'},
+                                             {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
+                                             {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'}
                                          ],
                                          searchable=False,
                                          clearable=False,

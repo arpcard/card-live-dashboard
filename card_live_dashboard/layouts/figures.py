@@ -138,8 +138,11 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
         if color_by == 'default':
             color = None
         elif color_by == 'geographic':
-            df_time = model.region_codes.add_region_standard_names(df_time, 'geo_area_code')
             color = 'geo_area_name_standard'
+        elif color_by == 'organism_lmat':
+            color = 'lmat.taxonomy_label'
+        elif color_by == 'organism_rgi_kmer':
+            color = 'rgi_kmer.taxonomy_label'
         else:
             raise Exception(f'Unknown value [color_by={color_by}]')
 
