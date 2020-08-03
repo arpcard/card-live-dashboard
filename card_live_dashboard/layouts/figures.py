@@ -97,7 +97,7 @@ def taxonomic_comparison(df: pd.DataFrame):
     return fig
 
 
-def geographic_totals(data: CardLiveData, tax_parse: TaxonomicParser, type_value: str, color_by_value: str) -> go.Figure:
+def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
     color_col = TOTALS_COLUMN_SELECT_NAMES[color_by_value]
     if type_col == color_col or color_by_value == 'default':
@@ -159,9 +159,10 @@ def choropleth_drug(df_geo: pd.DataFrame, world: geopandas.GeoDataFrame):
         fig = px.choropleth(df_geo, geojson=world, locations='geo_area_code',
                             featureidkey='properties.un_m49_numeric',
                             color='count', color_continuous_scale='YlGnBu',
-                            labels={'count': 'Count'},
+                            labels={'count': 'Samples count'},
                             hover_data=['geo_area_name_standard'],
                             center={'lat': 0, 'lon': 0.01},
+                            title='Samples by geographic region',
                             )
         fig.update_traces(
             hovertemplate=(
@@ -171,7 +172,7 @@ def choropleth_drug(df_geo: pd.DataFrame, world: geopandas.GeoDataFrame):
         )
 
     fig.update_layout(
-        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        margin={"r": 0, "t": 35, "l": 0, "b": 0},
         height=400,
     )
 

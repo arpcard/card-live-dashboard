@@ -130,4 +130,6 @@ class GeographicRegionCodes:
         world.loc[world['name'] == 'Somaliland', 'iso_a3'] = 'SOM'
         world.loc[world['name'] == 'Kosovo', 'iso_a3'] = 'RKS'
 
+        #print(world[world['iso_a3'] == 'FRA'])
+
         return self.dissolve_un_m49_regions(world)
