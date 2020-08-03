@@ -100,22 +100,27 @@ def taxonomic_comparison(df: pd.DataFrame):
 def geographic_totals(data: CardLiveData, tax_parse: TaxonomicParser, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
     color_col = TOTALS_COLUMN_SELECT_NAMES[color_by_value]
-    if type_col == color_col:
+    if type_col == color_col or color_by_value == 'default':
         count_by_columns = [type_col]
     else:
         count_by_columns = [type_col, color_col]
 
     tax_df = tax_parse.create_file_matches()
     totals_df = data.value_counts(count_by_columns, include_df=tax_df).reset_index()
-    totals_df = model.region_codes.add_region_standard_names(totals_df, region_column='geo_area_code')
+
+    if type_value == 'geographic' or color_by_value == 'geographic':
+        totals_df = model.region_codes.add_region_standard_names(totals_df, region_column='geo_area_code')
 
     if totals_df.empty:
         fig = EMPTY_FIGURE
     else:
-        totals_df = totals_df.sort_values(by=['count'], ascending=True)
-        print(totals_df)
-        fig = px.bar(totals_df, y=TOTALS_COLUMN_DATAFRAME_NAMES[type_value], x='count',
-                     color=TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value],
+        type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
+        color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
+        sorted_labels = totals_df.groupby(type_col_name).sum().sort_values(
+             by=['count'], ascending=False).index.tolist()
+        fig = px.bar(totals_df, y=type_col_name, x='count',
+                     color=color_col_name,
+                     category_orders={type_col_name: sorted_labels},
                      labels={'count': 'Count'},
                      title=TOTALS_FIGURE_TITLES[type_value],
                      # hover_data=['geo_area_name_standard'],
