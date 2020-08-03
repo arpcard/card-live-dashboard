@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -139,33 +139,23 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
             single_figure_layout(title='Timeline',
                                  id='figure-timeline-id',
                                  fig=figures_dict['timeline'],
-                                 dropdowns=html.Div(className='d-flex align-items-center', children=[
-                                     html.Div(['Type:']),
-                                     html.Div(className='ml-2', children=[dcc.Dropdown(
-                                         id='timeline-type-select',
-                                         options=[
-                                             {'label': 'Cumulative', 'value': 'cumulative'},
-                                             {'label': 'Rate', 'value': 'rate'},
-                                         ],
-                                         searchable=False,
-                                         clearable=False,
-                                         value='cumulative',
-                                     )]),
-                                     html.Div(className='ml-3', children=['Color by:']),
-                                     html.Div(className='ml-2', children=[dcc.Dropdown(
-                                         id='timeline-color-select',
-                                         options=[
-                                             {'label': 'Default', 'value': 'default'},
-                                             {'label': 'Geographic region', 'value': 'geographic'},
-                                             {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
-                                             {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'}
-                                         ],
-                                         searchable=False,
-                                         clearable=False,
-                                         value='default',
-                                     )]),
-                                 ]),
+                                 dropdowns=figure_menus_layout(
+                                     id_type='timeline-type-select',
+                                     options_type=[
+                                        {'label': 'Cumulative', 'value': 'cumulative'},
+                                        {'label': 'Rate', 'value': 'rate'},
+                                     ],
+                                     value_type='cumulative',
+                                     id_color='timeline-color-select',
+                                     options_color=[
+                                        {'label': 'Default', 'value': 'default'},
+                                        {'label': 'Geographic region', 'value': 'geographic'},
+                                        {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
+                                        {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'}
+                                     ],
+                                     value_color='default'
                                  ),
+                             ),
             single_figure_layout(title='Totals',
                                  id='figure-totals-id',
                                  fig=figures_dict['totals']
@@ -188,3 +178,25 @@ def single_figure_layout(title: str, id: str, fig: go.Figure, dropdowns: html.Di
     ])
 
     return component
+
+
+def figure_menus_layout(id_type: str, options_type: List[Dict[str,str]], value_type: str,
+                        id_color: str, options_color: List[Dict[str,str]], value_color: str) -> html.Div:
+    return html.Div(className='d-flex align-items-center', children=[
+        html.Div(['Type:']),
+        html.Div(className='ml-2', children=[dcc.Dropdown(
+            id=id_type,
+            options=options_type,
+            searchable=False,
+            clearable=False,
+            value=value_type,
+        )]),
+        html.Div(className='ml-3', children=['Color by:']),
+        html.Div(className='ml-2', children=[dcc.Dropdown(
+            id=id_color,
+            options=options_color,
+            searchable=False,
+            clearable=False,
+            value=value_color,
+        )]),
+    ])
