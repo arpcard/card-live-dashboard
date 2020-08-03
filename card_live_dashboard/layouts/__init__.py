@@ -144,12 +144,12 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      html.Div(className='ml-2', children=[dcc.Dropdown(
                                          id='timeline-type-select',
                                          options=[
+                                             {'label': 'Cumulative', 'value': 'cumulative'},
                                              {'label': 'Rate', 'value': 'rate'},
-                                             {'label': 'Cumulative', 'value': 'cumulative'}
                                          ],
                                          searchable=False,
                                          clearable=False,
-                                         value='rate',
+                                         value='cumulative',
                                      )]),
                                      html.Div(className='ml-3', children=['Color by:']),
                                      html.Div(className='ml-2', children=[dcc.Dropdown(

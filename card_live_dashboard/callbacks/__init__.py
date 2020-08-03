@@ -77,8 +77,10 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     Main callback/controller for updating all figures based on user selections.
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
     :param drug_classes: A list of the drug_classes to display.
+    :param besthit_aro: The list of best hit ARO values to select by.
     :param time_dropdown: The time selection.
     :param timeline_type_select: The selection for the timeline type.
+    :param timeline_color_select: The color selection for the timeline.
     :return: The figures to place in the main figure region of the page.
     """
     data = CardLiveData.get_data_package()
