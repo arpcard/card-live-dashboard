@@ -85,14 +85,20 @@ class CardLiveData:
     def latest_update(self) -> datetime:
         return self.main_df['timestamp'].max()
 
-    def value_counts(self, cols: List[str]) -> pd.DataFrame:
+    def value_counts(self, cols: List[str], include_df: pd.DataFrame = None) -> pd.DataFrame:
         """
         Given a list of columns, counts the number of files in the underlying dataframe for each category of that column.
 
         :param cols: The columns to count by.
+        :param include_df: An additional table to merge onto the main table to count by additional information.
         :return: A dataframe with counts by the given column's values.
         """
-        reduced_frame = self.main_df.groupby('filename').first()
+        if include_df is not None:
+            reduced_frame = self.main_df.merge(include_df, how='left', left_index=True, right_index=True)
+        else:
+            reduced_frame = self.main_df
+
+        reduced_frame = reduced_frame.groupby('filename').first()
         counts_frame = reduced_frame[cols].groupby(cols).size().to_frame()
         return counts_frame.rename(columns={0: 'count'})
 

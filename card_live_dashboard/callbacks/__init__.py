@@ -152,7 +152,7 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
     fig_histogram_rate = figures.build_time_histogram(df_timeline, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])
 
-    fig_totals = figures.geographic_totals(data, type_value=fig_settings['totals']['type'],
+    fig_totals = figures.geographic_totals(data, tax_parse, type_value=fig_settings['totals']['type'],
                                            color_by_value=fig_settings['totals']['color'])
 
     return {
