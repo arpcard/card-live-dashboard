@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Callable, Set
 from datetime import datetime
 import pandas as pd
 
@@ -17,30 +18,66 @@ class CardLiveData:
         self._lmat_df = lmat_df
         self._mlst_df = mlst_df
 
-    def select(self, table: str, **kwargs) -> CardLiveData:
+    def select(self, table: str, by: str, **kwargs) -> CardLiveData:
         """
         Selects data from the CardLiveData object based on the matched criteria.
         :param table: The particular table of data to select from ['main', 'rgi'].
+        :param by: The type of selection to perform. See underlying implementation classes
+                      for the particular table (either this class or RGIParser) for details.
         :param kwargs: Additional arguments for the underlying selection method.
         :return: A new CardLiveData object which matches the passed criteria.
         """
-        if table == 'rgi':
-            rgi_parser_subset = self.rgi_parser.select(**kwargs)
-            files = rgi_parser_subset.files()
-            main_df_subset = self.main_df.loc[files]
-            rgi_kmer_subset = self.rgi_kmer_df.loc[files]
-            lmat_subset = self.lmat_df.loc[files]
-            mlst_subset = self.mlst_df.loc[files]
-
-            return CardLiveData(
-                main_df=main_df_subset,
-                rgi_parser=rgi_parser_subset,
-                rgi_kmer_df=rgi_kmer_subset,
-                lmat_df=lmat_subset,
-                mlst_df=mlst_subset
-            )
+        if table == 'main':
+            if by == 'time':
+                return self.select_by_time(**kwargs)
+            else:
+                raise Exception(f'Unknown value[by={by}]')
+        elif table == 'rgi':
+            rgi_parser_subset = self.rgi_parser.select(by=by, **kwargs)
+            return self.select_from_rgi_parser(rgi_parser_subset)
         else:
             raise Exception(f'Unknown value [table={table}].')
+
+    def select_by_time(self, start: datetime, end: datetime) -> CardLiveData:
+        """
+        Selects the data within the start and end time periods.
+        :param start: The start time.
+        :param end: The end time.
+
+        :return: A CardLiveData object on the subset of matched data.
+        """
+        files = set(self.main_df[
+                        (self.main_df['timestamp'] >= start) & (self.main_df['timestamp'] <= end)].index.tolist())
+        return self.select_by_files(files)
+
+    def select_from_rgi_parser(self, rgi_parser: RGIParser):
+        """
+        Selects a subset of data based on the results in the passed RGIParser.
+        :param rgi_parser: The RGIParser to select from.
+        :return: The subset of data from data in the passed RGIParser.
+        """
+        files = rgi_parser.files()
+        main_df_subset = self.main_df.loc[files]
+        rgi_kmer_subset = self.rgi_kmer_df.loc[files]
+        lmat_subset = self.lmat_df.loc[files]
+        mlst_subset = self.mlst_df.loc[files]
+
+        return CardLiveData(
+            main_df=main_df_subset,
+            rgi_parser=rgi_parser,
+            rgi_kmer_df=rgi_kmer_subset,
+            lmat_df=lmat_subset,
+            mlst_df=mlst_subset
+        )
+
+    def select_by_files(self, files: Set[str]) -> CardLiveData:
+        """
+        Selects a subset of data based on the set of files.
+        :param files: The set of files to select by.
+        :return: Those results on the subset of the passed files.
+        """
+        rgi_parser_subset = self.rgi_parser.select_by_files(files)
+        return self.select_from_rgi_parser(rgi_parser_subset)
 
     def samples_count(self) -> int:
         return len(self._main_df)

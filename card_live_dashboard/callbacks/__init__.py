@@ -46,10 +46,10 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
     time_subsets = {
         'all': data,
-        'day': data.select(table='rgi', by='time', type='row', start=time_now - DAY, end=time_now),
-        'week': data.select(table='rgi', by='time', type='row', start=time_now - WEEK, end=time_now),
-        'month': data.select(table='rgi', by='time', type='row', start=time_now - MONTH, end=time_now),
-        'year': data.select(table='rgi', by='time', type='row', start=time_now - YEAR, end=time_now),
+        'day': data.select(table='main', by='time', start=time_now - DAY, end=time_now),
+        'week': data.select(table='main', by='time', start=time_now - WEEK, end=time_now),
+        'month': data.select(table='main', by='time', start=time_now - MONTH, end=time_now),
+        'year': data.select(table='main', by='time', start=time_now - YEAR, end=time_now),
     }
 
     return time_subsets

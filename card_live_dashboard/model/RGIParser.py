@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import List, Set
 from typing import Callable
-from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -53,6 +52,14 @@ class RGIParser:
             return RGIParser(self._df_rgi.loc[matched_files])
         else:
             raise Exception(f'Unknown value [type={type}]. Must be one of ["row", "file"].')
+
+    def select_by_files(self, files) -> RGIParser:
+        """
+        Selects a subset of data based on the set of files.
+        :param files: The set of files to select by.
+        :return: Those results on the subset of the passed files.
+        """
+        return RGIParser(self._df_rgi.loc[files])
 
     def select_by_cutoff(self, type: str, level: str) -> RGIParser:
         """
@@ -123,20 +130,6 @@ class RGIParser:
             raise Exception('Unsupported for type=row')
         else:
             raise Exception(f'Unknown value [type={type}]')
-
-    def select_by_time(self, type: str, start: datetime, end: datetime) -> RGIParser:
-        """
-        Selects the data within the start and end time periods.
-
-        :param type: The type of results to select.
-            'row' means that the function is used to select rows in the data frame.
-            'file' means that all data for files matching the criteria are selected.
-        :param start: The start time.
-        :param end: The end time.
-
-        :return: An RGIParser object on the subset of matched data.
-        """
-        return self.select_by(type=type, func=lambda x: (x['timestamp'] >= start) & (x['timestamp'] <= end))
 
     def _get_drugclass_matches(self, drug_classes: List[str] = None) -> pd.DataFrame:
         """
