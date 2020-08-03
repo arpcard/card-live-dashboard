@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import geopandas
 
 import card_live_dashboard.model as model
+from card_live_dashboard.model.CardLiveData import CardLiveData
 
 # Creation of empty figure adapted from https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497
 EMPTY_FIGURE = go.Figure(layout={
@@ -25,9 +26,23 @@ EMPTY_MAP = go.Figure(go.Scattergeo())
 
 # Empty figures to display initially
 EMPTY_FIGURE_DICT = {
-        'map': EMPTY_MAP,
-        'timeline': EMPTY_FIGURE,
-        'totals': EMPTY_FIGURE,
+    'map': EMPTY_MAP,
+    'timeline': EMPTY_FIGURE,
+    'totals': EMPTY_FIGURE,
+}
+
+TOTALS_COLUMN_SELECT_NAMES = {
+    'default': 'geo_area_code',
+    'geographic': 'geo_area_code',
+}
+
+TOTALS_COLUMN_DATAFRAME_NAMES = {
+    'default': None,
+    'geographic': 'geo_area_name_standard',
+}
+
+TOTALS_FIGURE_TITLES = {
+    'geographic': 'Geographic region'
 }
 
 
@@ -75,27 +90,44 @@ def taxonomic_comparison(df: pd.DataFrame):
     return fig
 
 
-def geographic_totals(df):
-    if df.empty:
+def geographic_totals(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
+    type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
+    color_col = TOTALS_COLUMN_SELECT_NAMES[color_by_value]
+    if type_col == color_col:
+        count_by_columns = [type_col]
+    else:
+        count_by_columns = [type_col, color_col]
+
+    totals_df = data.value_counts(count_by_columns).reset_index()
+
+    if type_value == 'geographic':
+        totals_df = model.region_codes.add_region_standard_names(totals_df, region_column='geo_area_code')
+
+    print(totals_df)
+    print(color_by_value)
+
+    if totals_df.empty:
         fig = EMPTY_FIGURE
     else:
-        df = df.sort_values(by=['count'], ascending=True)
-        fig = px.bar(df, y='geo_area_name_standard', x='count',
+        totals_df = totals_df.sort_values(by=['count'], ascending=True)
+        fig = px.bar(totals_df, y=TOTALS_COLUMN_DATAFRAME_NAMES[type_value], x='count',
+                     color=TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value],
                      labels={'count': 'Count'},
-                     title='Samples by region',
-                     hover_data=['geo_area_name_standard'],
-        )
-        fig.update_traces(
-            hovertemplate=(
-                '<b style="font-size: 125%;">%{customdata[0]}</b><br>'
-                '<b>Count:</b>  %{x}<br>'
-            )
-        )
+                     title=TOTALS_FIGURE_TITLES[type_value],
+                     # hover_data=['geo_area_name_standard'],
+                     )
+        # fig.update_traces(
+        #     hovertemplate=(
+        #         '<b style="font-size: 125%;">%{customdata[0]}</b><br>'
+        #         '<b>Count:</b>  %{x}<br>'
+        #     )
+        # )
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'dtick': 1}
-        )
+                          )
 
     return fig
+
 
 def choropleth_drug(df_geo: pd.DataFrame, world: geopandas.GeoDataFrame):
     if df_geo.empty or df_geo['count'].sum() == 0:
@@ -154,9 +186,9 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
                                    'rgi_kmer.taxonomy_label': 'Organism (RGI Kmer)',
                                    'lmat.taxonomy_label': 'Organism (LMAT)'},
                            title='Samples by date',
-        )
+                           )
         fig.update_traces(cumulative_enabled=cumulative)
         fig.update_layout(font={'size': 14},
                           yaxis={'title': 'Count'}
-        )
+                          )
     return fig

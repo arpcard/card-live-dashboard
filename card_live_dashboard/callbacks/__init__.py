@@ -68,11 +68,14 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
      Input('besthit-aro-select', 'value'),
      Input('time-period-items', 'value'),
      Input('timeline-type-select', 'value'),
-     Input('timeline-color-select', 'value')]
+     Input('timeline-color-select', 'value'),
+     Input('totals-type-select', 'value'),
+     Input('totals-color-select', 'value')]
 )
 def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
                            besthit_aro: List[str], time_dropdown: str,
-                           timeline_type_select: str, timeline_color_select: str):
+                           timeline_type_select: str, timeline_color_select: str,
+                           totals_type_select: str, totals_color_select: str):
     """
     Main callback/controller for updating all figures based on user selections.
     :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -89,7 +92,8 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
 
     fig_settings = {
-        'timeline': {'type': timeline_type_select, 'color': timeline_color_select}
+        'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
+        'totals': {'type': totals_type_select, 'color': totals_color_select}
     }
 
     main_pane_figures = build_main_pane(time_subsets[time_dropdown], fig_settings)
@@ -133,10 +137,10 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
 
 
 def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]]):
-    matches_count = data.rgi_parser.value_counts('geo_area_code').reset_index()
-    matches_count = model.region_codes.add_region_standard_names(matches_count,
+    geographic_counts = data.value_counts(['geo_area_code']).reset_index()
+    geographic_counts = model.region_codes.add_region_standard_names(geographic_counts,
                                                                  region_column='geo_area_code')
-    fig_map = figures.choropleth_drug(matches_count, model.world)
+    fig_map = figures.choropleth_drug(geographic_counts, model.world)
     tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
 
     # Add all data to timeline dataframe for color_by option
@@ -147,7 +151,9 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
 
     fig_histogram_rate = figures.build_time_histogram(df_timeline, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])
-    fig_totals = figures.geographic_totals(matches_count)
+
+    fig_totals = figures.geographic_totals(data, type_value=fig_settings['totals']['type'],
+                                           color_by_value=fig_settings['totals']['color'])
 
     return {
         'map': fig_map,

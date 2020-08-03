@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Set
+from typing import Set, List
 from datetime import datetime
 import pandas as pd
 
@@ -84,6 +84,17 @@ class CardLiveData:
 
     def latest_update(self) -> datetime:
         return self.main_df['timestamp'].max()
+
+    def value_counts(self, cols: List[str]) -> pd.DataFrame:
+        """
+        Given a list of columns, counts the number of files in the underlying dataframe for each category of that column.
+
+        :param cols: The columns to count by.
+        :return: A dataframe with counts by the given column's values.
+        """
+        reduced_frame = self.main_df.groupby('filename').first()
+        counts_frame = reduced_frame[cols].groupby(cols).size().to_frame()
+        return counts_frame.rename(columns={0: 'count'})
 
     @property
     def main_df(self) -> pd.DataFrame:

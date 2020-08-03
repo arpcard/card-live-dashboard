@@ -158,8 +158,25 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                              ),
             single_figure_layout(title='Totals',
                                  id='figure-totals-id',
-                                 fig=figures_dict['totals']
+                                 fig=figures_dict['totals'],
+                                 dropdowns=figure_menus_layout(
+                                     id_type='totals-type-select',
+                                     options_type=[
+                                         {'label': 'Geographic region', 'value': 'geographic'},
+                                         {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
+                                         {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'},
+                                     ],
+                                     value_type='geographic',
+                                     id_color='totals-color-select',
+                                     options_color=[
+                                         {'label': 'Default', 'value': 'default'},
+                                         {'label': 'Geographic region', 'value': 'geographic'},
+                                         {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
+                                         {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'}
+                                     ],
+                                     value_color='default'
                                  ),
+                             ),
         ])
     ]
 
