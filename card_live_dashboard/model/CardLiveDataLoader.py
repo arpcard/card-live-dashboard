@@ -1,3 +1,4 @@
+from typing import List
 import pandas as pd
 from pathlib import Path
 import json
@@ -46,14 +47,14 @@ class CardLiveDataLoader:
             empty_rows[index] = (len(row[col_name]) == 0)
         return pd.Series(empty_rows)
 
-    def _replace_empty_list_na(self, df: pd.DataFrame, cols: str):
+    def _replace_empty_list_na(self, df: pd.DataFrame, cols: List[str]):
         dfnew = df.copy()
         for column in cols:
             empty_rows = self._rows_with_empty_list(df, column)
             dfnew.loc[empty_rows, column] = None
         return dfnew
 
-    def _create_analysis_valid_column(self, df: pd.DataFrame, analysis_cols: str):
+    def _create_analysis_valid_column(self, df: pd.DataFrame, analysis_cols: List[str]):
         df = df.copy()
         df['analysis_valid'] = 'None'
         for col in analysis_cols:

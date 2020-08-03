@@ -17,8 +17,8 @@ def default_layout():
     :return: The default layout of the CARD:Live dashboard.
     """
     data = CardLiveData.get_data_package()
-    number_of_samples = len(data.main_df)
-    last_updated = data.main_df['timestamp'].max()
+    number_of_samples = data.samples_count()
+    last_updated = data.latest_update()
 
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
@@ -69,7 +69,7 @@ def default_layout():
                                                    value='all',
                                                    inline=True,
                                                ),
-                            ]),
+                                               ]),
                             html.Div(children=['Filter display by drug class: ',
                                                dcc.Dropdown(
                                                    id='drug-class-select',
@@ -77,7 +77,7 @@ def default_layout():
                                                    multi=True,
                                                    placeholder='Select a drug class',
                                                ),
-                            ]),
+                                               ]),
                             html.Div(children=['Filter display by Best Hit ARO: ',
                                                dcc.Dropdown(
                                                    id='besthit-aro-select',
@@ -85,7 +85,7 @@ def default_layout():
                                                    multi=True,
                                                    placeholder='Select a Best Hit ARO value',
                                                ),
-                            ]),
+                                               ]),
                         ]),
                     ]),
                     html.Div([
@@ -97,7 +97,7 @@ def default_layout():
                                                             className='sidepanel-selection',
                                                             value='all',
                                                             clearable=False)
-                           ]),
+                                               ]),
                         ]),
                     ]),
                     html.P(className='text-center card-live-badges', children=[
@@ -111,10 +111,10 @@ def default_layout():
                 html.Div(className='container', children=[
                     html.Div(className='row', children=[
                         html.Div(className='col', id='main-pane',
-                            # Need to display initial empty figures
-                            # So callbacks can be linked up correctly
-                            children=figures_layout(figures.EMPTY_FIGURE_DICT)
-                        ),
+                                 # Need to display initial empty figures
+                                 # So callbacks can be linked up correctly
+                                 children=figures_layout(figures.EMPTY_FIGURE_DICT)
+                                 ),
                     ]),
                 ]),
             ]),
@@ -135,22 +135,22 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
             single_figure_layout(title='Map',
                                  id='figure-geographic-map-id',
                                  fig=figures_dict['map']
-            ),
+                                 ),
             single_figure_layout(title='Timeline',
                                  id='figure-timeline-id',
                                  fig=figures_dict['timeline'],
                                  dropdowns=html.Div(className='d-flex align-items-center', children=[
-                                      html.Div(['Type:']),
-                                      html.Div(className='ml-2', children=[dcc.Dropdown(
-                                          id='timeline-type-select',
-                                          options=[
-                                              {'label': 'Rate', 'value': 'rate'},
-                                              {'label': 'Cumulative', 'value': 'cumulative'}
-                                          ],
-                                          searchable=False,
-                                          clearable=False,
-                                          value='rate',
-                                      )]),
+                                     html.Div(['Type:']),
+                                     html.Div(className='ml-2', children=[dcc.Dropdown(
+                                         id='timeline-type-select',
+                                         options=[
+                                             {'label': 'Rate', 'value': 'rate'},
+                                             {'label': 'Cumulative', 'value': 'cumulative'}
+                                         ],
+                                         searchable=False,
+                                         clearable=False,
+                                         value='rate',
+                                     )]),
                                      html.Div(className='ml-3', children=['Color by:']),
                                      html.Div(className='ml-2', children=[dcc.Dropdown(
                                          id='timeline-color-select',
@@ -165,11 +165,11 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                          value='default',
                                      )]),
                                  ]),
-            ),
+                                 ),
             single_figure_layout(title='Totals',
                                  id='figure-totals-id',
                                  fig=figures_dict['totals']
-            ),
+                                 ),
         ])
     ]
 
@@ -182,7 +182,7 @@ def single_figure_layout(title: str, id: str, fig: go.Figure, dropdowns: html.Di
         ]),
         dcc.Loading(type='circle', children=[
             dbc.CardBody(children=[
-                        dcc.Graph(id=id, figure=fig),
+                dcc.Graph(id=id, figure=fig),
             ]),
         ]),
     ])

@@ -1,15 +1,11 @@
 from typing import List, Set, Dict
-import pandas as pd
 from datetime import datetime, timedelta
 from dash.dependencies import Input, Output, State
 
 from card_live_dashboard.app import app
-from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 import card_live_dashboard.layouts.figures as figures
-import card_live_dashboard.layouts as layouts
 import card_live_dashboard.model as model
 
 DAY = timedelta(days=1)
@@ -41,20 +37,19 @@ def toggle_time_parameters_collapse(n, is_open):
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
-                  drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, RGIParser]:
+                  drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
-    rgi_parser = RGIParser(data.rgi_df) \
-        .select(by='cutoff', type='row', level=rgi_cutoff_select) \
-        .select(by='drug', type='file', drug_classes=drug_classes) \
-        .select(by='aro', type='file', besthit_aro=besthit_aro)
+    data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
+               .select(table='rgi', by='drug', type='file', drug_classes=drug_classes) \
+               .select(table='rgi', by='aro', type='file', besthit_aro=besthit_aro)
 
     time_subsets = {
-        'all': rgi_parser,
-        'day': rgi_parser.select(by='time', type='row', start=time_now - DAY, end=time_now),
-        'week': rgi_parser.select(by='time', type='row', start=time_now - WEEK, end=time_now),
-        'month': rgi_parser.select(by='time', type='row', start=time_now - MONTH, end=time_now),
-        'year': rgi_parser.select(by='time', type='row', start=time_now - YEAR, end=time_now),
+        'all': data,
+        'day': data.select(table='rgi', by='time', type='row', start=time_now - DAY, end=time_now),
+        'week': data.select(table='rgi', by='time', type='row', start=time_now - WEEK, end=time_now),
+        'month': data.select(table='rgi', by='time', type='row', start=time_now - MONTH, end=time_now),
+        'year': data.select(table='rgi', by='time', type='row', start=time_now - YEAR, end=time_now),
     }
 
     return time_subsets
@@ -76,7 +71,7 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
      Input('timeline-color-select', 'value')]
 )
 def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
-                           besthit_aro: List[str], time_dropdown: List[str],
+                           besthit_aro: List[str], time_dropdown: str,
                            timeline_type_select: str, timeline_color_select: str):
     """
     Main callback/controller for updating all figures based on user selections.
@@ -87,7 +82,7 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     :return: The figures to place in the main figure region of the page.
     """
     data = CardLiveData.get_data_package()
-    total_samples_count = len(data.main_df)
+    total_samples_count = data.samples_count()
 
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
 
@@ -95,21 +90,21 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
         'timeline': {'type': timeline_type_select, 'color': timeline_color_select}
     }
 
-    main_pane_figures = build_main_pane(time_subsets[time_dropdown], data, fig_settings)
+    main_pane_figures = build_main_pane(time_subsets[time_dropdown], fig_settings)
 
     # Set time dropdown text to include count of samples in particular time period
     # Should produce a list of dictionaries like [{'label': 'All (500)', 'value': 'all'}, ...]
-    time_dropdown_text = [{'label': f'All ({time_subsets["all"].count_files()})', 'value': 'all'}]
+    time_dropdown_text = [{'label': f'All ({time_subsets["all"].samples_count()})', 'value': 'all'}]
     for value in ['day', 'week', 'month', 'year']:
         time_dropdown_text.append({
-            'label': f'Last {value} ({time_subsets[value].count_files()})',
+            'label': f'Last {value} ({time_subsets[value].samples_count()})',
             'value': value,
         })
 
-    samples_count_string = f'{time_subsets[time_dropdown].count_files()}/{total_samples_count}'
+    samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{total_samples_count}'
 
-    drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].all_drugs())
-    besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].all_besthit_aro())
+    drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].rgi_parser.all_drugs())
+    besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].rgi_parser.all_besthit_aro())
 
     return (time_dropdown_text,
             samples_count_string,
@@ -135,18 +130,15 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
         all_available_options_set.union(selected_options_set))]
 
 
-def build_main_pane(rgi_parser: RGIParser, data: CardLiveDataLoader, fig_settings: Dict[str, Dict[str, str]]):
-    matches_count = rgi_parser.value_counts('geo_area_code').reset_index()
+def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]]):
+    matches_count = data.rgi_parser.value_counts('geo_area_code').reset_index()
     matches_count = model.region_codes.add_region_standard_names(matches_count,
                                                                  region_column='geo_area_code')
     fig_map = figures.choropleth_drug(matches_count, model.world)
-
-    df_rgi_kmer_subset = data.rgi_kmer_df.loc[rgi_parser.files()]
-    df_lmat_subset = data.lmat_df.loc[rgi_parser.files()]
-    tax_parse = TaxonomicParser(df_rgi_kmer_subset, df_lmat_subset)
+    tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
 
     # Add all data to timeline dataframe for color_by option
-    df_timeline = rgi_parser.data_by_file()
+    df_timeline = data.rgi_parser.data_by_file()
     if len(df_timeline) > 0:
         df_timeline = df_timeline.merge(tax_parse.create_file_matches(), left_index=True, right_index=True, how='left')
         df_timeline = model.region_codes.add_region_standard_names(df_timeline, 'geo_area_code')

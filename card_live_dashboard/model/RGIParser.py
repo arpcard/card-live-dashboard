@@ -18,7 +18,7 @@ class RGIParser:
         Selects data from the RGIParser based on the matched criteria.
         :param by: The method we will use to select by.
         :param type: The type of data to select ('row', or 'file').
-        :param **kwargs: Additional arguments for the underlying selection method.
+        :param kwargs: Additional arguments for the underlying selection method.
         :return: A new RGIParser object which matches the passed criteria.
         """
         if by == 'cutoff':
@@ -232,3 +232,7 @@ class RGIParser:
         :return: A set of all Best Hit ARO values.
         """
         return set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist())
+
+    @property
+    def df_rgi(self):
+        return self._df_rgi
