@@ -1,7 +1,12 @@
-from types import FunctionType
+from typing import Dict, Union, Callable
 from pathlib import Path
 import pandas as pd
+import numpy as np
 import geopandas
+import shapely.geometry.multipolygon as multipolygon
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GeographicRegionCodes:
@@ -20,7 +25,7 @@ class GeographicRegionCodes:
             self.insert_geo_name_na_mapping(lambda x: 'Multiple regions' if int(x) == 0 else None)
             self.insert_geo_name_na_mapping(lambda x: f'N/A [code={x}]')
 
-    def insert_geo_name_na_mapping(self, function: FunctionType):
+    def insert_geo_name_na_mapping(self, function: Callable):
         """
         Inserts a new mapping function letting you customize how m49 codes get mapped to geographic area names for N/A values.
         Used for custom mappings not part of the UN M49 standard (e.g., 0 to 'Mulitiple regions'). Use this like
@@ -130,6 +135,77 @@ class GeographicRegionCodes:
         world.loc[world['name'] == 'Somaliland', 'iso_a3'] = 'SOM'
         world.loc[world['name'] == 'Kosovo', 'iso_a3'] = 'RKS'
 
-        #print(world[world['iso_a3'] == 'FRA'])
+        world = self.split_france_french_guiana(world)
 
         return self.dissolve_un_m49_regions(world)
+
+    def split_france_french_guiana(self, world: geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
+        """
+        Splits up France into two regions: (1) main France and (2) French Guiana.
+         This is done because the Natural Earth map combines both these regions together (so French Guiana
+         is a part of Europe). But, the UN standard region codes groups French Guiana as part of South America.
+
+        :param world: The GeoDataFrame representing the world.
+        :return: A new GeoDataFrame with France and French Guiana split (or the original data frame if some error occured).
+        """
+        world_new = world
+
+        if len(world[world['iso_a3'] == 'GUF']) != 0:
+            logger.info('French Guiana [GUF] already exists in world map. Will not attempt to split France region.')
+        else:
+            shapes_france = world[world['iso_a3'] == 'FRA']['geometry'].values[0]
+            split_regions = self.split_geoms_france(shapes_france)
+            if split_regions is not None:
+                world_new = world.copy()
+
+                # Update France geometry
+                original_france_entry = world_new.loc[world_new['iso_a3'] == 'FRA', 'geometry']
+                new_france_entry = geopandas.GeoSeries(split_regions['FRA'], index=original_france_entry.index)
+                world_new.loc[world_new['iso_a3'] == 'FRA', 'geometry'] = new_france_entry
+
+                # Add French Guiana geometry
+                french_guiana_row = world_new.loc[world_new['iso_a3'] == 'FRA'].reset_index().drop(columns=['index'])
+                french_guiana_row['iso_a3'] = 'GUF'
+                french_guiana_row['name'] = 'French Guiana'
+                french_guiana_row['continent'] = 'South America'
+                french_guiana_row['geometry'] = split_regions['GUF']
+                world_new = world_new.append(french_guiana_row)
+        return world_new
+
+    def split_geoms_france(self, france_shape: multipolygon.MultiPolygon
+                           ) -> Union[Dict[str, multipolygon.MultiPolygon], None]:
+        """
+        Splits up geometries of France into the main country and French Guiana.
+        Used for merging French Guiana into the South American continent.
+
+        :param france_shape: The Shapely shape of France.
+        :return: A dictionary of the split shapes, like {'FRA': shape, 'GUI': shape}
+                  or None to ignore spliting country.
+        """
+
+        # Area of French Guiana used to pull out Polygon from list of shapes
+        # Area is based on units from coordinates of underlying object (lat/long), not distance units.
+        GUF_AREA = 6.94
+
+        split_regions = {'FRA': []}
+        geoms = france_shape.geoms
+        for g in geoms:
+            if np.isclose(g.area, GUF_AREA, atol=1e-02):
+                if not 'GUF' in split_regions:
+                    split_regions['GUF'] = g
+                else:
+                    raise Exception('Already found French Guiana region')
+            else:
+                split_regions['FRA'].append(g)
+
+        # Merge separate Polygon objects to single MultiPolygon
+        if 'GUF' not in split_regions:
+            logger.warning(('Could not find correct region for French Guiana [GUF] in French shape in map. '
+                            f'Map areas: {[g.area for g in geoms]}. '
+                            f'GUF assumed to have area [{GUF_AREA}]. '
+                            'Will ignore trying to split region and leave map as default.')
+                           )
+            return None
+        else:
+            split_regions['FRA'] = multipolygon.MultiPolygon(split_regions['FRA'])
+            return split_regions
