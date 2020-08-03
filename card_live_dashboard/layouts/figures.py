@@ -116,12 +116,26 @@ def geographic_totals(data: CardLiveData, tax_parse: TaxonomicParser, type_value
     else:
         type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
-        sorted_labels = totals_df.groupby(type_col_name).sum().sort_values(
+
+        # Sort labels by count to reorder display of bars in chart
+        category_orders = {}
+        sorted_type_labels = totals_df.groupby(type_col_name).sum().sort_values(
              by=['count'], ascending=False).index.tolist()
+        category_orders[type_col_name] = sorted_type_labels
+
+        if color_by_value != 'default':
+            sorted_color_labels = totals_df.groupby(color_col_name).sum().sort_values(
+                 by=['count'], ascending=False).index.tolist()
+            category_orders[color_col_name] = sorted_color_labels
+
         fig = px.bar(totals_df, y=type_col_name, x='count',
                      color=color_col_name,
-                     category_orders={type_col_name: sorted_labels},
-                     labels={'count': 'Count'},
+                     height=600,
+                     category_orders=category_orders,
+                     labels={'count': 'Samples count',
+                             'geo_area_name_standard': 'Geographic region',
+                             'rgi_kmer.taxonomy_label': 'Organism (RGI Kmer)',
+                             'lmat.taxonomy_label': 'Organism (LMAT)'},
                      title=TOTALS_FIGURE_TITLES[type_value],
                      # hover_data=['geo_area_name_standard'],
                      )
@@ -198,6 +212,6 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
                            )
         fig.update_traces(cumulative_enabled=cumulative)
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': 'Count'}
+                          yaxis={'title': 'Samples count'}
                           )
     return fig
