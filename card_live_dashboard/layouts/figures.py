@@ -200,9 +200,16 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
         else:
             raise Exception(f'Unknown value [color_by={color_by}]')
 
+        # Count and sort labels to re-order decreasing
+        category_orders = {}
+        if color is not None:
+            labels = df_time.groupby(color).size().sort_values(ascending=False).index.tolist()
+            category_orders = {color: labels}
+
         fig = px.histogram(df_time, x='timestamp',
                            nbins=50,
                            color=color,
+                           category_orders=category_orders,
                            labels={'count': 'Count',
                                    'timestamp': 'Date',
                                    'geo_area_name_standard': 'Geographic region',
