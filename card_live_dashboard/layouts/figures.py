@@ -105,15 +105,15 @@ def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: st
     else:
         count_by_columns = [type_col, color_col]
 
-    tax_df = tax_parse.create_file_matches()
-    totals_df = data.value_counts(count_by_columns, include_df=tax_df).reset_index()
-
-    if type_value == 'geographic' or color_by_value == 'geographic':
-        totals_df = model.region_codes.add_region_standard_names(totals_df, region_column='geo_area_code')
-
-    if totals_df.empty:
+    if data.samples_count() == 0:
         fig = EMPTY_FIGURE
     else:
+        tax_df = tax_parse.create_file_matches()
+        totals_df = data.value_counts(count_by_columns, include_df=tax_df).reset_index()
+
+        if type_value == 'geographic' or color_by_value == 'geographic':
+            totals_df = model.region_codes.add_region_standard_names(totals_df, region_column='geo_area_code')
+
         type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
 
