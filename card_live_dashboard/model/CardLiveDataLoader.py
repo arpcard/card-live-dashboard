@@ -13,7 +13,7 @@ class CardLiveDataLoader:
         'lmat',
     ]
 
-    def __init__(self, card_live_dir: Path = None):
+    def __init__(self, card_live_dir: Path):
         self._directory = card_live_dir
 
         self._main_df = None
@@ -22,7 +22,11 @@ class CardLiveDataLoader:
         self._mlst_df = None
         self._lmat_df = None
 
-        if self._directory != None:
+        if self._directory == None:
+            raise Exception('Invalid value [card_live_dir=None]')
+        elif not self._directory.exists():
+            raise Exception(f'Data directory [card_live_dir={card_live_dir}] does not exist')
+        else:
             self.read_data(self._directory)
 
     def read_data(self, directory: Path):

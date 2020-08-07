@@ -1,7 +1,7 @@
 from datetime import datetime
 import pandas as pd
 
-from card_live_dashboard import RGIParser
+from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.CardLiveData import CardLiveData
 
 TIME_FMT = '%Y-%m-%d %H:%M:%S'

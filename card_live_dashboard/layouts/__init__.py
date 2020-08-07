@@ -6,7 +6,6 @@ import dash_html_components as html
 import plotly.graph_objects as go
 
 import card_live_dashboard.layouts.figures as figures
-from card_live_dashboard.model.CardLiveData import CardLiveData
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
@@ -16,10 +15,6 @@ def default_layout():
     Builds the default layout of the CARD:Live dashboard.
     :return: The default layout of the CARD:Live dashboard.
     """
-    data = CardLiveData.get_data_package()
-    number_of_samples = data.samples_count()
-    last_updated = data.latest_update()
-
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
             html.Div(className='card-live-panel col-sm-3', children=[
@@ -33,10 +28,12 @@ def default_layout():
                         ' dashboard.'
                     ]),
                     html.Div(className='card-live-badges pb-3', children=[
-                        html.Span(className='badge badge-secondary', children=[f'{number_of_samples} samples']),
+                        html.Span(className='badge badge-secondary', children=[
+                            html.Span(id='global-sample-count', children=['[loading]']),
+                            ' samples']),
                         ' ',
                         html.Span(className='badge badge-secondary',
-                                  children=[f'Updated: {last_updated: %b %d, %Y}']),
+                                  children=[f'Updated: ', html.Span(id='global-last-updated', children=['[loading]'])]),
                     ]),
                     html.Div([
                         html.H2('Selection criteria'),
@@ -47,7 +44,7 @@ def default_layout():
                             html.Div(className='card-live-badges pt-1', children=[
                                 html.Span(className='badge badge-secondary', children=[
                                     'Showing ', html.Span(id='selected-samples-count',
-                                                          children=[f'{number_of_samples}/{number_of_samples}']),
+                                                          children=['[loading]']),
                                     ' samples'
                                 ]),
                             ]),

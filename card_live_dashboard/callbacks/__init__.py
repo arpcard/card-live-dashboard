@@ -56,7 +56,9 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
 
 @app.callback(
-    [Output('time-period-items', 'options'),
+    [Output('global-sample-count', 'children'),
+     Output('global-last-updated', 'children'),
+     Output('time-period-items', 'options'),
      Output('selected-samples-count', 'children'),
      Output('drug-class-select', 'options'),
      Output('besthit-aro-select', 'options'),
@@ -87,7 +89,8 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
     :return: The figures to place in the main figure region of the page.
     """
     data = CardLiveData.get_data_package()
-    total_samples_count = data.samples_count()
+    global_samples_count = len(data)
+    global_last_updated = f'{data.latest_update(): %b %d, %Y}'
 
     time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
 
@@ -107,12 +110,14 @@ def update_geo_time_figure(rgi_cutoff_select: str, drug_classes: List[str],
             'value': value,
         })
 
-    samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{total_samples_count}'
+    samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
     drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].rgi_parser.all_drugs())
     besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].rgi_parser.all_besthit_aro())
 
-    return (time_dropdown_text,
+    return (global_samples_count,
+            global_last_updated,
+            time_dropdown_text,
             samples_count_string,
             drug_class_options,
             besthit_aro_options,
