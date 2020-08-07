@@ -26,7 +26,7 @@ RGI_DF = pd.DataFrame(
     columns=['filename', 'timestamp', 'rgi_main.Cut_Off', 'rgi_main.Drug Class'],
     data=[['file1', '2020-08-05 16:27:32.996157', 'Perfect', 'class1; class2'],
           ['file1', '2020-08-05 16:27:32.996157', 'Strict', 'class1; class2; class3'],
-          ['file2', '2020-08-06 16:27:32.996157', 'Perfect', 'class1; class4'],
+          ['file2', '2020-08-06 16:27:32.996157', 'Perfect', 'class1; class2; class4'],
           ['file3', '2020-08-07 16:27:32.996157', None, None],
           ]
 ).set_index('filename')
@@ -164,3 +164,63 @@ def test_select_rgi_cutoff_all():
     assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 3 == len(data.lmat_df), 'Invalid number after selection'
     assert 3 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_drugclass_all():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='drug', type='file', drug_classes=[])
+    assert 3 == len(data), 'Invalid number after selection'
+    assert 3 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
+    assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'class1', 'class2', 'class3', 'class4'} == data.rgi_parser.all_drugs(), 'Invalid drug classes'
+    assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 3 == len(data.lmat_df), 'Invalid number after selection'
+    assert 3 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_drugclass_one():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='drug', type='file', drug_classes=['class1'])
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'class1', 'class2', 'class3', 'class4'} == data.rgi_parser.all_drugs(), 'Invalid drug classes'
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_drugclass_two():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='drug', type='file', drug_classes=['class1', 'class2'])
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'class1', 'class2', 'class3', 'class4'} == data.rgi_parser.all_drugs(), 'Invalid drug classes'
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_drugclass_three():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='drug', type='file', drug_classes=['class1', 'class2', 'class4'])
+    assert 1 == len(data), 'Invalid number after selection'
+    assert 1 == len(data.main_df), 'Invalid number after selection'
+    assert {'file2'} == data.files(), 'Invalid files'
+    assert 1 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'class1', 'class2', 'class4'} == data.rgi_parser.all_drugs(), 'Invalid drug classes'
+    assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 1 == len(data.lmat_df), 'Invalid number after selection'
+    assert 1 == len(data.mlst_df), 'Invalid number after selection'
