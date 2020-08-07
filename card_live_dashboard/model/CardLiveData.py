@@ -12,7 +12,8 @@ class CardLiveData:
 
     def __init__(self, main_df: pd.DataFrame, rgi_parser: RGIParser, rgi_kmer_df: pd.DataFrame,
                  lmat_df: pd.DataFrame, mlst_df: pd.DataFrame):
-        self._main_df = main_df
+        self._main_df = main_df.reset_index().set_index('filename')
+        self._main_df['timestamp'] = pd.to_datetime(self._main_df['timestamp'])
         self._rgi_parser = rgi_parser
         self._rgi_kmer_df = rgi_kmer_df
         self._lmat_df = lmat_df
@@ -101,6 +102,9 @@ class CardLiveData:
         reduced_frame = reduced_frame.groupby('filename').first()
         counts_frame = reduced_frame[cols].groupby(cols).size().to_frame()
         return counts_frame.rename(columns={0: 'count'})
+
+    def __len__(self) -> int:
+        return self.samples_count()
 
     @property
     def main_df(self) -> pd.DataFrame:
