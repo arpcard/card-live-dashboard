@@ -7,10 +7,10 @@ from card_live_dashboard.model.CardLiveData import CardLiveData
 TIME_FMT = '%Y-%m-%d %H:%M:%S'
 
 MAIN_DF = pd.DataFrame(
-    columns=['filename', 'timestamp'],
-    data=[['file1', '2020-08-05 16:27:32.996157'],
-          ['file2', '2020-08-06 16:27:32.996157'],
-          ['file3', '2020-08-07 16:27:32.996157'],
+    columns=['filename', 'timestamp', 'geo_area_code'],
+    data=[['file1', '2020-08-05 16:27:32.996157', 0],
+          ['file2', '2020-08-06 16:27:32.996157', 0],
+          ['file3', '2020-08-07 16:27:32.996157', 1],
           ],
 )
 
@@ -159,7 +159,8 @@ def test_select_rgi_cutoff_all():
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
     assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'Strict', 'Perfect', None} == set(data.rgi_parser.df_rgi['rgi_main.Cut_Off'].tolist()), 'Invalid cutoff values'
+    assert {'Strict', 'Perfect', None} == set(
+        data.rgi_parser.df_rgi['rgi_main.Cut_Off'].tolist()), 'Invalid cutoff values'
     assert {'class1', 'class2', 'class3', 'class4'} == data.rgi_parser.all_drugs(), 'Invalid drug classes'
     assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 3 == len(data.lmat_df), 'Invalid number after selection'
@@ -269,3 +270,57 @@ def test_select_rgi_besthit_aro_two():
     assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 1 == len(data.lmat_df), 'Invalid number after selection'
     assert 1 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_value_counts_geo():
+    data = DATA
+
+    counts = data.value_counts(['geo_area_code'])
+    assert len(counts) == 2, 'Invalid number of geographic areas'
+    assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
+    assert counts.loc[0, 'count'] == 2, 'Invalid count number'
+    assert counts.loc[1, 'count'] == 1, 'Invalid count number'
+
+
+def test_value_counts_timestamp():
+    data = DATA
+
+    counts = data.value_counts(['timestamp'])
+    assert len(counts) == 3, 'Invalid number of timestamps areas'
+
+
+def test_value_counts_new_data():
+    data = DATA
+
+    new_data = pd.DataFrame(
+        columns=['filename', 'color'],
+        data=[['file1', 'red'],
+              ['file2', 'blue'],
+              ['file3', 'red'],
+              ]
+        ).set_index('filename')
+
+    counts = data.value_counts(cols=['color'], include_df=new_data)
+    assert len(counts) == 2, 'Invalid number of unique categories'
+    assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
+    assert counts.loc['red', 'count'] == 2, 'Invalid count number'
+    assert counts.loc['blue', 'count'] == 1, 'Invalid count number'
+
+
+def test_value_counts_new_data_multiple_files():
+    data = DATA
+
+    new_data = pd.DataFrame(
+        columns=['filename', 'color'],
+        data=[['file1', 'red'],
+              ['file1', 'red'],
+              ['file2', 'blue'],
+              ['file3', 'red'],
+              ]
+        ).set_index('filename')
+
+    counts = data.value_counts(cols=['color'], include_df=new_data)
+    assert len(counts) == 2, 'Invalid number of unique categories'
+    assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
+    assert counts.loc['red', 'count'] == 2, 'Invalid count number'
+    assert counts.loc['blue', 'count'] == 1, 'Invalid count number'
