@@ -8,7 +8,7 @@ import card_live_dashboard.layouts as layouts
 import card_live_dashboard.callbacks as callbacks
 from card_live_dashboard.app import app
 
-data_loader = CardLiveDataLoader(Path(path.dirname(__file__), '..', 'data', 'card_live_small'))
+data_loader = CardLiveDataLoader(Path(path.dirname(__file__), '..', 'data', 'card_live'))
 CardLiveData.create_instance(data_loader)
 
 app.layout = layouts.default_layout()

@@ -13,3 +13,11 @@ To run the development server please run:
 ```bash
 ./run-dev.py
 ```
+
+# Tests
+
+To run the tests, please run:
+
+```bash
+pytest
+```
