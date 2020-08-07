@@ -3,7 +3,7 @@ from typing import Set, List
 from datetime import datetime
 import pandas as pd
 
-from card_live_dashboard.model.CardLiveDataLoader import CardLiveDataLoader
+from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.RGIParser import RGIParser
 
 
