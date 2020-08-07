@@ -26,8 +26,6 @@ class RGIParser:
             return self.select_by_drugclass(type=type, **kwargs)
         elif by == 'aro':
             return self.select_by_besthit_aro(type=type, **kwargs)
-        elif by == 'time':
-            return self.select_by_time(type=type, **kwargs)
         else:
             raise Exception(f'Unknown value [by={by}].')
 
