@@ -80,6 +80,14 @@ class CardLiveData:
         rgi_parser_subset = self.rgi_parser.select_by_files(files)
         return self.select_from_rgi_parser(rgi_parser_subset)
 
+    def files(self) -> Set[str]:
+        """
+        Returns the set of files in this object.
+
+        :return: The set of files in this object.
+        """
+        return set(self.main_df.index.tolist())
+
     def samples_count(self) -> int:
         return len(self._main_df)
 
