@@ -28,7 +28,7 @@ class CardLiveDataLoader:
         self._mlst_df = None
         self._lmat_df = None
 
-        if self._directory == None:
+        if self._directory is None:
             raise Exception('Invalid value [card_live_dir=None]')
 
         self._card_live_data = self.read_data()
@@ -111,26 +111,6 @@ class CardLiveDataLoader:
     @property
     def card_data(self):
         return self._card_live_data
-
-    @property
-    def main_df(self) -> pd.DataFrame:
-        return self._card_live_data.main_df
-
-    @property
-    def rgi_df(self) -> pd.DataFrame:
-        return self._card_live_data.rgi_df
-
-    @property
-    def rgi_kmer_df(self) -> pd.DataFrame:
-        return self._card_live_data.rgi_kmer_df
-
-    @property
-    def mlst_df(self) -> pd.DataFrame:
-        return self._card_live_data.mlst_df
-
-    @property
-    def lmat_df(self) -> pd.DataFrame:
-        return self._card_live_data.lmat_df
 
     @classmethod
     def create_instance(cls, card_live_dir: Path) -> None:
