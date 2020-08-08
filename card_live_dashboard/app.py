@@ -1,4 +1,5 @@
 import dash
+import flask
 from pathlib import Path
 from os import path
 import logging
@@ -18,7 +19,7 @@ def build_app(card_live_data_dir: Path = DEFAULT_DATA_DIR) -> dash.dash.Dash:
     """
     app = dash.Dash(__name__, external_stylesheets=layouts.external_stylesheets)
     logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(levelname)s %(module)s.%(funcName)s,%(lineno)s: %(message)s')
+                        format='[%(asctime)s] [%(levelname)s] %(module)s.%(funcName)s,%(lineno)s: %(message)s')
 
     CardLiveDataManager.create_instance(card_live_data_dir)
 
@@ -26,3 +27,11 @@ def build_app(card_live_data_dir: Path = DEFAULT_DATA_DIR) -> dash.dash.Dash:
     callbacks.build_callbacks(app)
 
     return app
+
+
+def flask_app() -> flask.Flask:
+    """
+    Builds and gets the Flask app object for deployment as a Flask app.
+    :return: The Flask app server object.
+    """
+    return build_app(DEFAULT_DATA_DIR).server
