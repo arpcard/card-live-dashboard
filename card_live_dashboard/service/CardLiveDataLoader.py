@@ -4,9 +4,12 @@ import pandas as pd
 from pathlib import Path
 import json
 from os import path
+import logging
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
+
+logger = logging.getLogger(__name__)
 
 
 class CardLiveDataLoader:
@@ -24,26 +27,31 @@ class CardLiveDataLoader:
         if self._directory is None:
             raise Exception('Invalid value [card_live_dir=None]')
 
-    def update_data(self, existing_data: CardLiveData = None) -> CardLiveData:
+    def read_or_update_data(self, existing_data: CardLiveData = None) -> CardLiveData:
         """
         Given an existing data object, updates the data object with any new files.
         :param existing_data: The existing data object (None if all data should be read).
         :return: The original (unmodified) data object if no updates, otherwise a new data object with additional data.
         """
-        input_files = Path(self._directory).glob('*')
+        input_files = list(Path(self._directory).glob('*'))
 
         if existing_data is None:
             return self.read_data(input_files)
         else:
             existing_files = existing_data.files()
+            input_files_set = {p.name for p in input_files}
+
+            files_new = input_files_set - existing_files
 
             # If no new files have been found
-            if len(set(input_files).intersection(existing_files)) == 0:
+            if len(files_new) == 0:
+                logger.debug('Data has not changed, not updating')
                 return existing_data
             else:
+                logger.info(f'{len(files_new)} additional samples found.')
                 return self.read_data(input_files)
 
-    def read_data(self, input_files: Iterable) -> CardLiveData:
+    def read_data(self, input_files: list) -> CardLiveData:
         if not self._directory.exists():
             raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
 
