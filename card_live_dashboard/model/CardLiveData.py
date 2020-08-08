@@ -3,7 +3,6 @@ from typing import Set, List
 from datetime import datetime
 import pandas as pd
 
-from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.RGIParser import RGIParser
 
 
@@ -137,24 +136,3 @@ class CardLiveData:
     @property
     def mlst_df(self) -> pd.DataFrame:
         return self._mlst_df
-
-    @classmethod
-    def from_data_loader(cls, data_loader: CardLiveDataLoader) -> CardLiveData:
-        return CardLiveData(
-            main_df=data_loader.main_df,
-            rgi_parser=RGIParser(data_loader.rgi_df),
-            rgi_kmer_df=data_loader.rgi_kmer_df,
-            lmat_df=data_loader.lmat_df,
-            mlst_df=data_loader.mlst_df,
-        )
-
-    @classmethod
-    def create_instance(cls, data_loader: CardLiveDataLoader) -> None:
-        cls.INSTANCE = cls.from_data_loader(data_loader)
-
-    @classmethod
-    def get_data_package(cls) -> CardLiveData:
-        if cls.INSTANCE is not None:
-            return cls.INSTANCE
-        else:
-            raise Exception(f'{cls} does not yet have an instance.')

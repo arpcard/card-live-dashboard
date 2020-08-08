@@ -1,11 +1,17 @@
+from __future__ import annotations
 from typing import List
 import pandas as pd
 from pathlib import Path
 import json
 from os import path
 
+from card_live_dashboard.model.CardLiveData import CardLiveData
+from card_live_dashboard.model.RGIParser import RGIParser
+
 
 class CardLiveDataLoader:
+    INSTANCE = None
+
     JSON_DATA_FIELDS = [
         'rgi_main',
         'rgi_kmer',
@@ -24,13 +30,14 @@ class CardLiveDataLoader:
 
         if self._directory == None:
             raise Exception('Invalid value [card_live_dir=None]')
-        elif not self._directory.exists():
-            raise Exception(f'Data directory [card_live_dir={card_live_dir}] does not exist')
-        else:
-            self.read_data(self._directory)
 
-    def read_data(self, directory: Path):
-        input_files = Path(directory).glob('*')
+        self._card_live_data = self.read_data()
+
+    def read_data(self) -> CardLiveData:
+        if not self._directory.exists():
+            raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
+
+        input_files = Path(self._directory).glob('*')
         json_data = []
         for input_file in input_files:
             filename = path.basename(input_file)
@@ -39,11 +46,26 @@ class CardLiveDataLoader:
                 json_obj['filename'] = filename
                 json_data.append(json_obj)
 
-        self._full_df = pd.json_normalize(json_data).set_index('filename')
-        self._full_df = self._replace_empty_list_na(self._full_df, self.JSON_DATA_FIELDS)
-        self._full_df = self._create_analysis_valid_column(self._full_df, self.JSON_DATA_FIELDS)
-        self._full_df['timestamp'] = pd.to_datetime(self._full_df['timestamp'])
-        self._main_df = self._full_df.drop(columns=self.JSON_DATA_FIELDS)
+        full_df = pd.json_normalize(json_data).set_index('filename')
+        full_df = self._replace_empty_list_na(full_df, self.JSON_DATA_FIELDS)
+        full_df = self._create_analysis_valid_column(full_df, self.JSON_DATA_FIELDS)
+        full_df['timestamp'] = pd.to_datetime(full_df['timestamp'])
+
+        main_df = full_df.drop(columns=self.JSON_DATA_FIELDS)
+        rgi_df = self._expand_column(full_df, 'rgi_main', na_char='n/a').drop(
+            columns=self.JSON_DATA_FIELDS)
+        rgi_kmer_df = self._expand_column(full_df, 'rgi_kmer', na_char='n/a').drop(
+            columns=self.JSON_DATA_FIELDS)
+        mlst_df = self._expand_column(full_df, 'mlst', na_char='-').drop(
+            columns=self.JSON_DATA_FIELDS)
+        lmat_df = self._expand_column(full_df, 'lmat', na_char='n/a').drop(
+            columns=self.JSON_DATA_FIELDS)
+
+        return CardLiveData(main_df=main_df,
+                            rgi_parser=RGIParser(rgi_df),
+                            rgi_kmer_df=rgi_kmer_df,
+                            mlst_df=mlst_df,
+                            lmat_df=lmat_df)
 
     def _rows_with_empty_list(self, df: pd.DataFrame, col_name: str):
         empty_rows = {}
@@ -87,36 +109,36 @@ class CardLiveDataLoader:
         return merged_df
 
     @property
+    def card_data(self):
+        return self._card_live_data
+
+    @property
     def main_df(self) -> pd.DataFrame:
-        return self._main_df
+        return self._card_live_data.main_df
 
     @property
     def rgi_df(self) -> pd.DataFrame:
-        if self._rgi_df is None:
-            self._rgi_df = self._expand_column(self._full_df, 'rgi_main', na_char='n/a').drop(
-                columns=self.JSON_DATA_FIELDS)
-
-        return self._rgi_df
+        return self._card_live_data.rgi_df
 
     @property
     def rgi_kmer_df(self) -> pd.DataFrame:
-        if self._rgi_kmer_df is None:
-            self._rgi_kmer_df = self._expand_column(self._full_df, 'rgi_kmer', na_char='n/a').drop(
-                columns=self.JSON_DATA_FIELDS)
-
-        return self._rgi_kmer_df
+        return self._card_live_data.rgi_kmer_df
 
     @property
     def mlst_df(self) -> pd.DataFrame:
-        if self._mlst_df is None:
-            self._mlst_df = self._expand_column(self._full_df, 'mlst', na_char='-').drop(columns=self.JSON_DATA_FIELDS)
-
-        return self._mlst_df
+        return self._card_live_data.mlst_df
 
     @property
     def lmat_df(self) -> pd.DataFrame:
-        if self._lmat_df is None:
-            self._lmat_df = self._expand_column(self._full_df, 'lmat', na_char='n/a').drop(
-                columns=self.JSON_DATA_FIELDS)
+        return self._card_live_data.lmat_df
 
-        return self._lmat_df
+    @classmethod
+    def create_instance(cls, card_live_dir: Path) -> None:
+        cls.INSTANCE = CardLiveDataLoader(card_live_dir)
+
+    @classmethod
+    def get_data_package(cls) -> CardLiveData:
+        if cls.INSTANCE is not None:
+            return cls.INSTANCE.card_data
+        else:
+            raise Exception(f'{cls} does not yet have an instance.')
