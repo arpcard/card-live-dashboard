@@ -15,6 +15,8 @@ def default_layout():
     Builds the default layout of the CARD:Live dashboard.
     :return: The default layout of the CARD:Live dashboard.
     """
+    LOADING = '[LOADING]'
+
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
             html.Div(className='card-live-panel col-sm-3', children=[
@@ -29,11 +31,11 @@ def default_layout():
                     ]),
                     html.Div(className='card-live-badges pb-3', children=[
                         html.Span(className='badge badge-secondary', children=[
-                            html.Span(id='global-sample-count', children=['[loading]']),
+                            html.Span(id='global-sample-count', children=[LOADING]),
                             ' samples']),
                         ' ',
                         html.Span(className='badge badge-secondary',
-                                  children=[f'Updated: ', html.Span(id='global-last-updated', children=['[loading]'])]),
+                                  children=[f'Updated: ', html.Span(id='global-last-updated', children=[LOADING])]),
                     ]),
                     html.Div([
                         html.H2('Selection criteria'),
@@ -44,7 +46,7 @@ def default_layout():
                             html.Div(className='card-live-badges pt-1', children=[
                                 html.Span(className='badge badge-secondary', children=[
                                     'Showing ', html.Span(id='selected-samples-count',
-                                                          children=['[loading]']),
+                                                          children=[LOADING]),
                                     ' samples'
                                 ]),
                             ]),
