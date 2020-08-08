@@ -44,7 +44,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
     @app.callback(
         [Output('global-sample-count', 'children'),
-         Output('global-last-updated', 'children'),
+         Output('global-most-recent', 'children'),
          Output('time-period-items', 'options'),
          Output('selected-samples-count', 'children'),
          Output('drug-class-select', 'options'),
@@ -59,12 +59,14 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('timeline-type-select', 'value'),
          Input('timeline-color-select', 'value'),
          Input('totals-type-select', 'value'),
-         Input('totals-color-select', 'value')]
+         Input('totals-color-select', 'value'),
+         Input('auto-update-interval', 'n_intervals')]
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
                            besthit_aro: List[str], time_dropdown: str,
                            timeline_type_select: str, timeline_color_select: str,
-                           totals_type_select: str, totals_color_select: str):
+                           totals_type_select: str, totals_color_select: str,
+                           n_intervals):
         """
         Main callback/controller for updating all figures based on user selections.
         :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).

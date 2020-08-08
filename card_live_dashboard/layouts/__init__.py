@@ -16,6 +16,7 @@ def default_layout():
     :return: The default layout of the CARD:Live dashboard.
     """
     LOADING = '[LOADING]'
+    AUTO_UPDATE_MILLIS = 10 * 60 * 1000 # milliseconds
 
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
@@ -35,7 +36,7 @@ def default_layout():
                             ' samples']),
                         ' ',
                         html.Span(className='badge badge-secondary',
-                                  children=[f'Updated: ', html.Span(id='global-last-updated', children=[LOADING])]),
+                                  children=[f'Most recent: ', html.Span(id='global-most-recent', children=[LOADING])]),
                     ]),
                     html.Div([
                         html.H2('Selection criteria'),
@@ -107,6 +108,12 @@ def default_layout():
                 ]),
             ]),
             html.Div(className='col', children=[
+                # component to auto update data
+                dcc.Interval(
+                    id='auto-update-interval',
+                    interval=AUTO_UPDATE_MILLIS,  # in milliseconds
+                    n_intervals=0
+                ),
                 html.Div(className='container', children=[
                     html.Div(className='row', children=[
                         html.Div(className='col', id='main-pane',

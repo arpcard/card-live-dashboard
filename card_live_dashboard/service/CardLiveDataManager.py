@@ -29,7 +29,7 @@ class CardLiveDataManager:
                 'max_instances': 1
             }
         )
-        self._scheduler.add_job(self.update_job, 'interval', seconds=15)
+        self._scheduler.add_job(self.update_job, 'interval', minutes=10)
         self._scheduler.start()
 
     def update_job(self):
