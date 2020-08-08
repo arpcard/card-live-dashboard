@@ -45,7 +45,7 @@ class CardLiveDataLoader:
 
             # If no new files have been found
             if len(files_new) == 0:
-                logger.debug('Data has not changed, not updating')
+                logger.debug(f'Data has not changed from {len(input_files_set)} samples, not updating')
                 return existing_data
             else:
                 logger.info(f'{len(files_new)} additional samples found.')

@@ -1,6 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
+from apscheduler.jobstores.memory import MemoryJobStore
 import logging
 
 from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
@@ -16,15 +18,30 @@ class CardLiveDataManager:
         self._data_loader = CardLiveDataLoader(card_live_dir)
         self._card_live_data = self._data_loader.read_or_update_data()
 
-        self._scheduler = BackgroundScheduler()
+        self._scheduler = BackgroundScheduler(
+            jobstores={
+                'default': MemoryJobStore()
+            },
+            executors={
+                'default': ThreadPoolExecutor(1)
+            },
+            job_defaults={
+                'max_instances': 1
+            }
+        )
         self._scheduler.add_job(self.update_job, 'interval', seconds=15)
         self._scheduler.start()
 
     def update_job(self):
         logger.debug('Updating CARD:Live data.')
-        card_live_data = self._data_loader.read_or_update_data(self._card_live_data)
-        logger.debug(f'Old data has {len(self._card_live_data)} samples, new data has {len(card_live_data)} samples')
-        self._card_live_data = card_live_data
+        try:
+            new_data = self._data_loader.read_or_update_data(self._card_live_data)
+            if new_data is not self._card_live_data:
+                logger.debug(f'Old data has {len(self._card_live_data)} samples, new data has {len(new_data)} samples')
+                self._card_live_data = new_data
+        except Exception as e:
+            logger.info('An exeption occured when attempting to load new data. Skipping new data.')
+            logger.exception(e)
         logger.debug('Finished updating CARD:Live data.')
 
     @property
