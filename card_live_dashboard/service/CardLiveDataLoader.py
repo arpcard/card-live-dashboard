@@ -10,7 +10,6 @@ from card_live_dashboard.model.RGIParser import RGIParser
 
 
 class CardLiveDataLoader:
-    INSTANCE = None
 
     JSON_DATA_FIELDS = [
         'rgi_main',
@@ -22,16 +21,8 @@ class CardLiveDataLoader:
     def __init__(self, card_live_dir: Path):
         self._directory = card_live_dir
 
-        self._main_df = None
-        self._rgi_df = None
-        self._rgi_kmer_df = None
-        self._mlst_df = None
-        self._lmat_df = None
-
         if self._directory is None:
             raise Exception('Invalid value [card_live_dir=None]')
-
-        self._card_live_data = self.read_data()
 
     def read_data(self) -> CardLiveData:
         if not self._directory.exists():
@@ -107,18 +98,3 @@ class CardLiveDataLoader:
         merged_df = pd.merge(df, exploded_columns, how='left', on=df.index.name)
 
         return merged_df
-
-    @property
-    def card_data(self):
-        return self._card_live_data
-
-    @classmethod
-    def create_instance(cls, card_live_dir: Path) -> None:
-        cls.INSTANCE = CardLiveDataLoader(card_live_dir)
-
-    @classmethod
-    def get_data_package(cls) -> CardLiveData:
-        if cls.INSTANCE is not None:
-            return cls.INSTANCE.card_data
-        else:
-            raise Exception(f'{cls} does not yet have an instance.')

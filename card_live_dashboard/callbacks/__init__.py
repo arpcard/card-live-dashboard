@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from dash.dependencies import Input, Output, State
 import dash
 
-from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
+from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 import card_live_dashboard.layouts.figures as figures
@@ -75,7 +75,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         :param timeline_color_select: The color selection for the timeline.
         :return: The figures to place in the main figure region of the page.
         """
-        data = CardLiveDataLoader.get_data_package()
+        data = CardLiveDataManager.get_instance().card_data
         global_samples_count = len(data)
         global_last_updated = f'{data.latest_update(): %b %d, %Y}'
 
