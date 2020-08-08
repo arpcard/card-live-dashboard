@@ -10,7 +10,7 @@ class CardLiveDataManager:
 
     def __init__(self, card_live_dir: Path):
         self._data_loader = CardLiveDataLoader(card_live_dir)
-        self._card_live_data = self._data_loader.read_data()
+        self._card_live_data = self._data_loader.update_data()
 
     @property
     def card_data(self) -> CardLiveData:
