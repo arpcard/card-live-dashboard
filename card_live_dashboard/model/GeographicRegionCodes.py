@@ -23,6 +23,9 @@ class GeographicRegionCodes:
 
         if use_default_additional_mappings:
             self.insert_geo_name_na_mapping(lambda x: 'Multiple regions' if int(x) == 0 else None)
+            self.insert_geo_name_na_mapping(lambda x: 'N/A' if int(x) < 0 else None)
+            self.insert_geo_name_na_mapping(
+                lambda x: 'Eastern Asia (excluding Japan and China)' if int(x) == 223 else None)
             self.insert_geo_name_na_mapping(lambda x: f'N/A [code={x}]')
 
     def insert_geo_name_na_mapping(self, function: Callable):
