@@ -1,5 +1,6 @@
 from datetime import datetime
 import pandas as pd
+import pytest
 
 from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.CardLiveData import CardLiveData
@@ -324,3 +325,54 @@ def test_value_counts_new_data_multiple_files():
     assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
     assert counts.loc['red', 'count'] == 2, 'Invalid count number'
     assert counts.loc['blue', 'count'] == 1, 'Invalid count number'
+
+
+def test_switch_antarctica_na():
+    main_df = pd.DataFrame(
+        columns=['filename', 'timestamp', 'geo_area_code'],
+        data=[['file1', '2020-07-31 16:27:32.996157', 1],
+              ['file2', '2020-07-31 16:27:32.996157', 10],
+              ['file3', '2020-08-01 16:27:32.996157', 10],
+              ],
+    )
+
+    other_df = pd.DataFrame(
+        columns=['filename', 'timestamp', 'geo_area_code'],
+        data=[['file1', '2020-07-31 16:27:32.996157', 1],
+              ['file2', '2020-07-31 16:27:32.996157', 10],
+              ['file3', '2020-08-01 16:27:32.996157', 10],
+              ]
+    ).set_index('filename')
+
+    rgi_df = pd.DataFrame(
+        columns=['filename', 'timestamp', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO', 'geo_area_code'],
+        data=[['file1', '2020-07-31 16:27:32.996157', 'Perfect', 'class1; class2', 'gene1', 1],
+              ['file1', '2020-07-31 16:27:32.996157', 'Strict', 'class1; class2; class3', 'gene2', 1],
+              ['file2', '2020-07-31 16:27:32.996157', 'Perfect', 'class1; class2; class4', 'gene1', 10],
+              ['file3', '2020-08-01 16:27:32.996157', None, None, 10],
+              ]
+    ).set_index('filename')
+
+    rgi_parser = RGIParser(rgi_df)
+
+    data = CardLiveData(main_df=main_df,
+                        rgi_parser=rgi_parser,
+                        rgi_kmer_df=other_df,
+                        lmat_df=other_df,
+                        mlst_df=other_df)
+
+    assert 1 == data.main_df.loc['file1', 'geo_area_code']
+    assert -10 == data.main_df.loc['file2', 'geo_area_code']
+    assert 10 == data.main_df.loc['file3', 'geo_area_code']
+
+    assert 1 == data.mlst_df.loc['file1', 'geo_area_code']
+    assert -10 == data.mlst_df.loc['file2', 'geo_area_code']
+    assert 10 == data.mlst_df.loc['file3', 'geo_area_code']
+
+    assert 1 == data.lmat_df.loc['file1', 'geo_area_code']
+    assert -10 == data.lmat_df.loc['file2', 'geo_area_code']
+    assert 10 == data.lmat_df.loc['file3', 'geo_area_code']
+
+    assert 1 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
+    assert -10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
+    assert 10 == data.rgi_kmer_df.loc['file3', 'geo_area_code']

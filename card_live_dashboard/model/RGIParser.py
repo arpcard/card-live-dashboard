@@ -9,7 +9,8 @@ import numpy as np
 class RGIParser:
 
     def __init__(self, df_rgi: pd.DataFrame):
-        self._df_rgi = df_rgi
+        self._df_rgi = df_rgi.copy()
+        self._df_rgi['timestamp'] = pd.to_datetime(self._df_rgi['timestamp'])
         self._drug_mapping = None
 
     def select(self, by: str, type: str = None, **kwargs) -> RGIParser:
