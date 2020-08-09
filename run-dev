@@ -4,10 +4,8 @@ import logging
 import card_live_dashboard
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG,
-                        format='[%(asctime)s] [%(levelname)s] %(module)s.%(funcName)s,%(lineno)s: %(message)s')
     app = card_live_dashboard.build_app()
-    app.run_server(debug = False,
+    app.run_server(debug = True,
                   port = 8050,
                   host = '0.0.0.0')
 

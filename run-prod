@@ -2,4 +2,4 @@
 # Runs CARD:Live dashboard via gunicorn
 # This script used to keep track of standard options to gunicorn to run application.
 
-gunicorn -b 0.0.0.0:8050 'card_live_dashboard:flask_app()' --timeout 120 --log-level DEBUG
+gunicorn --workers 2 -b 0.0.0.0:8050 'card_live_dashboard:flask_app()' --timeout 180 --log-level debug
