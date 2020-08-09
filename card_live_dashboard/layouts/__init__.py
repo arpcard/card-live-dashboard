@@ -5,6 +5,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
 
+import card_live_dashboard
 import card_live_dashboard.layouts.figures as figures
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
@@ -102,7 +103,8 @@ def default_layout():
                     ]),
                     html.P(className='text-center card-live-badges', children=[
                         html.Br(),
-                        html.A(className='badge badge-primary', children=['Code | GitLab'],
+                        html.A(className='badge badge-primary',
+                               children=[f'Version | {card_live_dashboard.__version__}'],
                                href='https://devcard.mcmaster.ca:8888/apetkau/card-live-dashboard'),
                     ]),
                 ]),
