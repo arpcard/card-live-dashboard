@@ -1,0 +1,40 @@
+{
+  "rgi_main": [
+    {
+      "Cut_Off": "Perfect",
+      "Pass_Bitscore": "100",
+      "Best_Hit_ARO": "test",
+      "Drug Class": "macrolide antibiotic; cephalosporin"
+    }
+  ],
+  "rgi_kmer": [
+    {
+      "CARD*kmer Prediction": "Salmonella enterica (chromosome)",
+      "Taxonomic kmers": "Salmonella enterica 10;",
+      "Genomic kmers": "chr + plasmid: 5; plasmid: 0; chr: 100;"
+    }
+  ],
+  "mlst": [
+    {
+      "scheme": "senterica",
+      "sequence_type": "-"
+    }
+  ],
+  "lmat": [
+    {
+      "score": "100",
+      "count": "100",
+      "ncbi_taxon_id": "28901",
+      "rank": "species",
+      "taxonomy_label": "Salmonella enterica"
+    }
+  ],
+  "timestamp": "2020-07-19 16:27:32.996157",
+  "geo_area_code": "10",
+  "geo_area_name": "Antarctica",
+  "mlst_version": "2.19.0",
+  "lmat_version": "1.2.6",
+  "rgi_version": "5.1.0",
+  "card_data_version": "3.0.7",
+  "variants_data_version": "3.0.6"
+}

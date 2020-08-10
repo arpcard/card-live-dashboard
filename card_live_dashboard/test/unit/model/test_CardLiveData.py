@@ -1,6 +1,6 @@
 from datetime import datetime
 import pandas as pd
-import pytest
+import numpy as np
 
 from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.CardLiveData import CardLiveData
@@ -9,26 +9,27 @@ TIME_FMT = '%Y-%m-%d %H:%M:%S'
 
 MAIN_DF = pd.DataFrame(
     columns=['filename', 'timestamp', 'geo_area_code'],
-    data=[['file1', '2020-08-05 16:27:32.996157', 0],
-          ['file2', '2020-08-06 16:27:32.996157', 0],
+    data=[['file1', '2020-08-05 16:27:32.996157', 10],
+          ['file2', '2020-08-06 16:27:32.996157', 10],
           ['file3', '2020-08-07 16:27:32.996157', 1],
           ],
 )
 
 OTHER_DF = pd.DataFrame(
-    columns=['filename', 'timestamp'],
-    data=[['file1', '2020-08-05 16:27:32.996157'],
-          ['file2', '2020-08-06 16:27:32.996157'],
-          ['file3', '2020-08-07 16:27:32.996157'],
+    columns=['filename', 'timestamp', 'geo_area_code'],
+    data=[['file1', '2020-08-05 16:27:32.996157', 10],
+          ['file2', '2020-08-06 16:27:32.996157', 10],
+          ['file3', '2020-08-07 16:27:32.996157', 1],
           ]
 ).set_index('filename')
 
 RGI_DF = pd.DataFrame(
-    columns=['filename', 'timestamp', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
-    data=[['file1', '2020-08-05 16:27:32.996157', 'Perfect', 'class1; class2', 'gene1'],
-          ['file1', '2020-08-05 16:27:32.996157', 'Strict', 'class1; class2; class3', 'gene2'],
-          ['file2', '2020-08-06 16:27:32.996157', 'Perfect', 'class1; class2; class4', 'gene1'],
-          ['file3', '2020-08-07 16:27:32.996157', None, None],
+    columns=['filename', 'timestamp', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO',
+             'geo_area_code'],
+    data=[['file1', '2020-08-05 16:27:32.996157', 'Perfect', 'class1; class2', 'gene1', 10],
+          ['file1', '2020-08-05 16:27:32.996157', 'Strict', 'class1; class2; class3', 'gene2', 10],
+          ['file2', '2020-08-06 16:27:32.996157', 'Perfect', 'class1; class2; class4', 'gene1', 10],
+          ['file3', '2020-08-07 16:27:32.996157', None, None, None, 1],
           ]
 ).set_index('filename')
 
@@ -279,7 +280,7 @@ def test_value_counts_geo():
     counts = data.value_counts(['geo_area_code'])
     assert len(counts) == 2, 'Invalid number of geographic areas'
     assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
-    assert counts.loc[0, 'count'] == 2, 'Invalid count number'
+    assert counts.loc[10, 'count'] == 2, 'Invalid count number'
     assert counts.loc[1, 'count'] == 1, 'Invalid count number'
 
 
@@ -327,53 +328,61 @@ def test_value_counts_new_data_multiple_files():
     assert counts.loc['blue', 'count'] == 1, 'Invalid count number'
 
 
-@pytest.mark.skip
 def test_switch_antarctica_na():
-    main_df = pd.DataFrame(
-        columns=['filename', 'timestamp', 'geo_area_code'],
-        data=[['file1', '2020-07-31 16:27:32.996157', 1],
-              ['file2', '2020-07-31 16:27:32.996157', 10],
-              ['file3', '2020-08-01 16:27:32.996157', 10],
-              ],
-    )
+    data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-08-06'))
 
-    other_df = pd.DataFrame(
-        columns=['filename', 'timestamp', 'geo_area_code'],
-        data=[['file1', '2020-07-31 16:27:32.996157', 1],
-              ['file2', '2020-07-31 16:27:32.996157', 10],
-              ['file3', '2020-08-01 16:27:32.996157', 10],
-              ]
-    ).set_index('filename')
+    assert -10 == data.main_df.loc['file1', 'geo_area_code']
+    assert 10 == data.main_df.loc['file2', 'geo_area_code']
+    assert 1 == data.main_df.loc['file3', 'geo_area_code']
 
-    rgi_df = pd.DataFrame(
-        columns=['filename', 'timestamp', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO', 'geo_area_code'],
-        data=[['file1', '2020-07-31 16:27:32.996157', 'Perfect', 'class1; class2', 'gene1', 1],
-              ['file1', '2020-07-31 16:27:32.996157', 'Strict', 'class1; class2; class3', 'gene2', 1],
-              ['file2', '2020-07-31 16:27:32.996157', 'Perfect', 'class1; class2; class4', 'gene1', 10],
-              ['file3', '2020-08-01 16:27:32.996157', None, None, 10],
-              ]
-    ).set_index('filename')
+    assert -10 == data.mlst_df.loc['file1', 'geo_area_code']
+    assert 10 == data.mlst_df.loc['file2', 'geo_area_code']
+    assert 1 == data.mlst_df.loc['file3', 'geo_area_code']
 
-    rgi_parser = RGIParser(rgi_df)
+    assert -10 == data.lmat_df.loc['file1', 'geo_area_code']
+    assert 10 == data.lmat_df.loc['file2', 'geo_area_code']
+    assert 1 == data.lmat_df.loc['file3', 'geo_area_code']
 
-    data = CardLiveData(main_df=main_df,
-                        rgi_parser=rgi_parser,
-                        rgi_kmer_df=other_df,
-                        lmat_df=other_df,
-                        mlst_df=other_df)
+    assert -10 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
+    assert 10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
+    assert 1 == data.rgi_kmer_df.loc['file3', 'geo_area_code']
 
-    assert 1 == data.main_df.loc['file1', 'geo_area_code']
+
+def test_switch_antarctica_na_all():
+    data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-09-01'))
+
+    assert -10 == data.main_df.loc['file1', 'geo_area_code']
     assert -10 == data.main_df.loc['file2', 'geo_area_code']
-    assert 10 == data.main_df.loc['file3', 'geo_area_code']
+    assert 1 == data.main_df.loc['file3', 'geo_area_code']
 
-    assert 1 == data.mlst_df.loc['file1', 'geo_area_code']
+    assert -10 == data.mlst_df.loc['file1', 'geo_area_code']
     assert -10 == data.mlst_df.loc['file2', 'geo_area_code']
-    assert 10 == data.mlst_df.loc['file3', 'geo_area_code']
+    assert 1 == data.mlst_df.loc['file3', 'geo_area_code']
 
-    assert 1 == data.lmat_df.loc['file1', 'geo_area_code']
+    assert -10 == data.lmat_df.loc['file1', 'geo_area_code']
     assert -10 == data.lmat_df.loc['file2', 'geo_area_code']
-    assert 10 == data.lmat_df.loc['file3', 'geo_area_code']
+    assert 1 == data.lmat_df.loc['file3', 'geo_area_code']
 
-    assert 1 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
+    assert -10 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
     assert -10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
-    assert 10 == data.rgi_kmer_df.loc['file3', 'geo_area_code']
+    assert 1 == data.rgi_kmer_df.loc['file3', 'geo_area_code']
+
+
+def test_switch_antarctica_na_none():
+    data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-07-01'))
+
+    assert 10 == data.main_df.loc['file1', 'geo_area_code']
+    assert 10 == data.main_df.loc['file2', 'geo_area_code']
+    assert 1 == data.main_df.loc['file3', 'geo_area_code']
+
+    assert 10 == data.mlst_df.loc['file1', 'geo_area_code']
+    assert 10 == data.mlst_df.loc['file2', 'geo_area_code']
+    assert 1 == data.mlst_df.loc['file3', 'geo_area_code']
+
+    assert 10 == data.lmat_df.loc['file1', 'geo_area_code']
+    assert 10 == data.lmat_df.loc['file2', 'geo_area_code']
+    assert 1 == data.lmat_df.loc['file3', 'geo_area_code']
+
+    assert 10 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
+    assert 10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
+    assert 1 == data.rgi_kmer_df.loc['file3', 'geo_area_code']

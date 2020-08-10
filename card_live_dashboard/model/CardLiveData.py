@@ -15,48 +15,55 @@ class CardLiveData:
         self._main_df = main_df.reset_index().set_index('filename').astype({'geo_area_code': 'int64'})
         self._main_df['timestamp'] = pd.to_datetime(self._main_df['timestamp'])
         self._rgi_parser = rgi_parser
-        self._rgi_kmer_df = rgi_kmer_df#.astype({'geo_area_code': 'int64'})
+        self._rgi_kmer_df = rgi_kmer_df
         self._rgi_kmer_df['timestamp'] = pd.to_datetime(self._rgi_kmer_df['timestamp'])
-        self._lmat_df = lmat_df#.astype({'geo_area_code': 'int64'})
+        self._lmat_df = lmat_df
         self._lmat_df['timestamp'] = pd.to_datetime(self._lmat_df['timestamp'])
-        self._mlst_df = mlst_df#.astype({'geo_area_code': 'int64'})
+        self._mlst_df = mlst_df
         self._mlst_df['timestamp'] = pd.to_datetime(self._mlst_df['timestamp'])
 
-        # Data patches to fix small issues with data
-        #self._replace_antarctica_with_na()
-
-    def _replace_antarctica_with_na(self):
+    def replace_antarctica_with_na(self, date_threshold: np.datetime64) -> CardLiveData:
         """
         Replaces the Antarctica geo code (10) with an N/A geo code (-10) for certain dates.
         This is because for CARD:Live, initially Antartica was the default option given to users.
         So, much of the data stored in CARD:Live had 'Antartica' set as the geograhpic region when what
         was intended was 'N/A'. This method fixes the issue.
-        :return: None
+
+        :param date_threshold: The date threshold before which replacement should occur.
+        :return: A new CardLiveData object.
         """
-        DATE_THRESHOLD = np.datetime64('2020-08-01')
-        NA_CODE = -10
+        na_code = -10
 
-        if 'geo_area_code' in self._main_df:
-            self._main_df.loc[(self._main_df['geo_area_code'] == 10) &
-                (self._main_df['timestamp'] < DATE_THRESHOLD), 'geo_area_code'] = NA_CODE
+        main_df = self._main_df.copy()
+        if 'geo_area_code' in main_df:
+            main_df.loc[(main_df['geo_area_code'] == 10) &
+                (main_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
 
-        if 'geo_area_code' in self._rgi_parser.df_rgi:
-            df_rgi = self._rgi_parser.df_rgi
-            df_rgi.loc[(df_rgi['geo_area_code'] == 10) &
-                       (df_rgi['timestamp'] < DATE_THRESHOLD), 'geo_area_code'] = NA_CODE
-            self._rgi_parser = RGIParser(df_rgi)
+        rgi_df = self.rgi_df.copy()
+        if 'geo_area_code' in rgi_df:
+            rgi_df.loc[(rgi_df['geo_area_code'] == 10) &
+                       (rgi_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
 
-        if 'geo_area_code' in self._rgi_kmer_df:
-            self._rgi_kmer_df.loc[(self._rgi_kmer_df['geo_area_code'] == 10) &
-                                  (self._rgi_kmer_df['timestamp'] < DATE_THRESHOLD), 'geo_area_code'] = NA_CODE
+        rgi_kmer_df = self._rgi_kmer_df.copy()
+        if 'geo_area_code' in rgi_kmer_df:
+            rgi_kmer_df.loc[(rgi_kmer_df['geo_area_code'] == 10) &
+                                  (rgi_kmer_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
 
-        if 'geo_area_code' in self._lmat_df:
-            self._lmat_df.loc[(self._lmat_df['geo_area_code'] == 10) &
-                              (self._lmat_df['timestamp'] < DATE_THRESHOLD), 'geo_area_code'] = NA_CODE
+        lmat_df = self._lmat_df.copy()
+        if 'geo_area_code' in lmat_df:
+            lmat_df.loc[(lmat_df['geo_area_code'] == 10) &
+                              (lmat_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
 
-        if 'geo_area_code' in self._mlst_df:
-            self._mlst_df.loc[(self._mlst_df['geo_area_code'] == 10) &
-                              (self._mlst_df['timestamp'] < DATE_THRESHOLD), 'geo_area_code'] = NA_CODE
+        mlst_df = self._mlst_df.copy()
+        if 'geo_area_code' in mlst_df:
+            mlst_df.loc[(mlst_df['geo_area_code'] == 10) &
+                              (mlst_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
+
+        return CardLiveData(main_df=main_df,
+                            rgi_parser=RGIParser(rgi_df),
+                            rgi_kmer_df=rgi_kmer_df,
+                            mlst_df=mlst_df,
+                            lmat_df=lmat_df)
 
     def select(self, table: str, by: str, **kwargs) -> CardLiveData:
         """

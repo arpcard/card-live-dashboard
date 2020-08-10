@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import List, Iterable
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import json
 from os import path
@@ -89,11 +90,16 @@ class CardLiveDataLoader:
         lmat_df = self._expand_column(full_df, 'lmat', na_char='n/a').drop(
             columns=self.JSON_DATA_FIELDS)
 
-        return CardLiveData(main_df=main_df,
+        data = CardLiveData(main_df=main_df,
                             rgi_parser=RGIParser(rgi_df),
                             rgi_kmer_df=rgi_kmer_df,
                             mlst_df=mlst_df,
                             lmat_df=lmat_df)
+
+        # Data patches to fix small issues with data
+        #data = data.replace_antarctica_with_na(date_threshold = np.datetime64('2020-07-20'))
+
+        return data
 
     def _rows_with_empty_list(self, df: pd.DataFrame, col_name: str):
         empty_rows = {}
