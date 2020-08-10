@@ -9,11 +9,9 @@ import logging
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
-from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
+import card_live_dashboard.model.data_modifiers as data_modifiers
 
 logger = logging.getLogger(__name__)
-
-antarctica_modifier = AntarcticaNAModifier(np.datetime64('2020-07-20'))
 
 
 class CardLiveDataLoader:
@@ -105,7 +103,8 @@ class CardLiveDataLoader:
                             lmat_df=lmat_df)
 
         # Make changes to underlying data
-        data = antarctica_modifier.modify(data)
+        data = data_modifiers.antarctica_modifier.modify(data)
+        data = data_modifiers.geo_names_modifier.modify(data)
 
         return data
 

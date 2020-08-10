@@ -2,6 +2,7 @@ import pandas as pd
 
 from card_live_dashboard.service.GeographicRegionCodesService import GeographicRegionCodesService
 
+
 class GeographicSummaries:
 
     def __init__(self, region_codes: GeographicRegionCodesService):

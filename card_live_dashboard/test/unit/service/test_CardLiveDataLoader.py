@@ -12,9 +12,11 @@ def test_read_one_file():
 
     assert 1 == len(data.main_df)
     assert ['file1'] == data.main_df.index.tolist()
-    assert [10] == data.main_df['geo_area_code'].tolist()
+    assert [15] == data.main_df['geo_area_code'].tolist()
     assert 'timestamp' in set(data.main_df.columns.tolist())
     assert 'geo_area_code' in set(data.main_df.columns.tolist())
+    assert 'geo_area_name_standard' in set(data.main_df.columns.tolist())
+    assert ['Northern Africa'] == data.main_df['geo_area_name_standard'].tolist()
 
     assert 2 == len(data.rgi_df)
     assert ['Perfect', 'Strict'] == data.rgi_df['rgi_main.Cut_Off'].tolist()
@@ -43,6 +45,7 @@ def test_read_antarctica_switch():
     assert 2 == len(data.main_df)
     assert ['file1', 'file2'] == data.main_df.index.tolist()
     assert [-10, 10] == data.main_df['geo_area_code'].tolist()
+    assert ['N/A', 'Antarctica'] == data.main_df['geo_area_name_standard'].tolist()
     assert ['Perfect', 'Strict'] == data.rgi_df['rgi_main.Cut_Off'].tolist()
     assert ['macrolide antibiotic; cephalosporin', 'macrolide antibiotic'] == data.rgi_df[
         'rgi_main.Drug Class'].tolist()
@@ -72,3 +75,4 @@ def test_read_or_update_data_withupdate():
     new_data = loader.read_or_update_data(data)
     assert data is not new_data
     assert 2 == len(new_data.main_df)
+

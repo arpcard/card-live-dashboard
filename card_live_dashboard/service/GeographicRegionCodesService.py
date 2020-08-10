@@ -79,11 +79,14 @@ class GeographicRegionCodesService:
         return data
 
     def add_region_standard_names(self, data: pd.DataFrame, region_column: str) -> pd.DataFrame:
+        original_type = data[region_column].dtype
         data = data.astype({region_column: str})
         region_standard_names = self._unm49_mapping[[self.TOP_REGION_NAME, self.NAME_COL]].drop_duplicates(
             keep='first').dropna()
-        data_expanded = data.merge(region_standard_names, how='left', left_on=region_column,
-                                   right_on=self.TOP_REGION_NAME)
+
+        data_expanded = data.reset_index().merge(region_standard_names, how='left', left_on=region_column,
+                                                 right_on=self.TOP_REGION_NAME).set_index(
+            data.index.name).astype({region_column: original_type})
 
         data_expanded = self._apply_mapping_functions(data_expanded, region_column)
 
