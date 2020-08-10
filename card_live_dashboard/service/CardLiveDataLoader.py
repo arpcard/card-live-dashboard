@@ -97,7 +97,7 @@ class CardLiveDataLoader:
                             lmat_df=lmat_df)
 
         # Data patches to fix small issues with data
-        #data = data.replace_antarctica_with_na(date_threshold = np.datetime64('2020-07-20'))
+        data = data.replace_antarctica_with_na(date_threshold = np.datetime64('2020-07-20'))
 
         return data
 
