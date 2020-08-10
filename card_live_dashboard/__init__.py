@@ -7,7 +7,7 @@ from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 import card_live_dashboard.layouts as layouts
 import card_live_dashboard.callbacks as callbacks
 
-__version__ = '0.1.0.dev0'
+__version__ = '0.2.0.dev0'
 
 DEFAULT_DATA_DIR = Path(path.dirname(__file__), '..', 'data', 'card_live')
 
