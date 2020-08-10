@@ -7,7 +7,8 @@ from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 import card_live_dashboard.layouts.figures as figures
-import card_live_dashboard.model as model
+from card_live_dashboard.model import world
+from card_live_dashboard.service import region_codes
 
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)
@@ -150,18 +151,15 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
 
 
 def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]]):
-    geographic_counts = data.value_counts(['geo_area_code']).reset_index()
-    geographic_counts = model.region_codes.add_region_standard_names(geographic_counts,
-                                                                     region_column='geo_area_code')
-    fig_map = figures.choropleth_drug(geographic_counts, model.world)
+    geographic_counts = data.value_counts(
+        ['geo_area_code', 'geo_area_name_standard']).reset_index()
+    fig_map = figures.choropleth_drug(geographic_counts, world)
     tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
 
     # Add all data to timeline dataframe for color_by option
     df_timeline = data.main_df
     if len(df_timeline) > 0:
-        df_timeline = df_timeline.merge(tax_parse.create_file_matches(), left_index=True, right_index=True,
-                                        how='left')
-        df_timeline = model.region_codes.add_region_standard_names(df_timeline, 'geo_area_code')
+        df_timeline = df_timeline.merge(tax_parse.create_file_matches(), left_index=True, right_index=True, how='left')
 
     fig_histogram_rate = figures.build_time_histogram(df_timeline, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])

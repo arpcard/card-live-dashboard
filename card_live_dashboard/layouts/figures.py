@@ -3,7 +3,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import geopandas
 
-import card_live_dashboard.model as model
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
 
@@ -33,8 +32,8 @@ EMPTY_FIGURE_DICT = {
 }
 
 TOTALS_COLUMN_SELECT_NAMES = {
-    'default': 'geo_area_code',
-    'geographic': 'geo_area_code',
+    'default': 'geo_area_name_standard',
+    'geographic': 'geo_area_name_standard',
     'organism_lmat': 'lmat.taxonomy_label',
     'organism_rgi_kmer': 'rgi_kmer.taxonomy_label'
 }
@@ -110,9 +109,6 @@ def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: st
     else:
         tax_df = tax_parse.create_file_matches()
         totals_df = data.value_counts(count_by_columns, include_df=tax_df).reset_index()
-
-        if type_value == 'geographic' or color_by_value == 'geographic':
-            totals_df = model.region_codes.add_region_standard_names(totals_df, region_column='geo_area_code')
 
         type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]

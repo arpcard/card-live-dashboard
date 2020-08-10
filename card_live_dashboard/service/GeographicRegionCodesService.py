@@ -85,8 +85,9 @@ class GeographicRegionCodesService:
             keep='first').dropna()
 
         data_expanded = data.reset_index().merge(region_standard_names, how='left', left_on=region_column,
-                                                 right_on=self.TOP_REGION_NAME).set_index(
-            data.index.name).astype({region_column: original_type})
+                                                 right_on=self.TOP_REGION_NAME).astype({region_column: original_type})
+        if not data.index.empty:
+            data_expanded = data_expanded.set_index(data.index.name)
 
         data_expanded = self._apply_mapping_functions(data_expanded, region_column)
 

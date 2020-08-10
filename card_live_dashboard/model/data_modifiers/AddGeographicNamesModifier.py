@@ -21,9 +21,9 @@ class AddGeographicNamesModifier(CardLiveDataModifier):
 
     def modify(self, data: CardLiveData) -> CardLiveData:
         main_df = data.main_df.copy()
-        logger.info(f'Main df before {main_df}')
+        logger.debug(f'Main df before {main_df}')
         main_df = self._region_codes_service.add_region_standard_names(main_df, 'geo_area_code')
-        logger.info(f'Main df after {main_df}')
+        logger.debug(f'Main df after {main_df}')
 
         rgi_df = data.rgi_df.copy()
         rgi_kmer_df = data.rgi_kmer_df.copy()
