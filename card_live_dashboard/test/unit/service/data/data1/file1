@@ -5,6 +5,12 @@
       "Pass_Bitscore": "100",
       "Best_Hit_ARO": "test",
       "Drug Class": "macrolide antibiotic; cephalosporin"
+    },
+    {
+      "Cut_Off": "Strict",
+      "Pass_Bitscore": "100",
+      "Best_Hit_ARO": "test",
+      "Drug Class": "macrolide antibiotic; cephalosporin"
     }
   ],
   "rgi_kmer": [

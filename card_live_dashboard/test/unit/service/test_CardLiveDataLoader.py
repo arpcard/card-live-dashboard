@@ -14,8 +14,11 @@ def test_read_one_file():
     assert 1 == len(data.main_df)
     assert ['file1'] == data.main_df.index.tolist()
     assert [10] == data.main_df['geo_area_code'].tolist()
-    assert ['Perfect'] == data.rgi_df['rgi_main.Cut_Off'].tolist()
-    assert ['macrolide antibiotic; cephalosporin'] == data.rgi_df['rgi_main.Drug Class'].tolist()
+
+    assert 2 == len(data.rgi_df)
+    assert ['Perfect', 'Strict'] == data.rgi_df['rgi_main.Cut_Off'].tolist()
+    assert ['macrolide antibiotic; cephalosporin', 'macrolide antibiotic; cephalosporin'] == data.rgi_df['rgi_main.Drug Class'].tolist()
+
     assert ['Salmonella enterica (chromosome)'] == data.rgi_kmer_df['rgi_kmer.CARD*kmer Prediction'].tolist()
     assert ['senterica'] == data.mlst_df['mlst.scheme'].tolist()
     assert ['Salmonella enterica'] == data.lmat_df['lmat.taxonomy_label'].tolist()
