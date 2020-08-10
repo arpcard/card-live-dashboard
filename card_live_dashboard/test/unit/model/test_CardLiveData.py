@@ -16,20 +16,19 @@ MAIN_DF = pd.DataFrame(
 )
 
 OTHER_DF = pd.DataFrame(
-    columns=['filename', 'timestamp', 'geo_area_code'],
-    data=[['file1', '2020-08-05 16:27:32.996157', 10],
-          ['file2', '2020-08-06 16:27:32.996157', 10],
-          ['file3', '2020-08-07 16:27:32.996157', 1],
+    columns=['filename'],
+    data=[['file1'],
+          ['file2'],
+          ['file3'],
           ]
 ).set_index('filename')
 
 RGI_DF = pd.DataFrame(
-    columns=['filename', 'timestamp', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO',
-             'geo_area_code'],
-    data=[['file1', '2020-08-05 16:27:32.996157', 'Perfect', 'class1; class2', 'gene1', 10],
-          ['file1', '2020-08-05 16:27:32.996157', 'Strict', 'class1; class2; class3', 'gene2', 10],
-          ['file2', '2020-08-06 16:27:32.996157', 'Perfect', 'class1; class2; class4', 'gene1', 10],
-          ['file3', '2020-08-07 16:27:32.996157', None, None, None, 1],
+    columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
+    data=[['file1', 'Perfect', 'class1; class2', 'gene1'],
+          ['file1', 'Strict', 'class1; class2; class3', 'gene2'],
+          ['file2', 'Perfect', 'class1; class2; class4', 'gene1'],
+          ['file3', None, None, None],
           ]
 ).set_index('filename')
 
@@ -335,18 +334,6 @@ def test_switch_antarctica_na():
     assert 10 == data.main_df.loc['file2', 'geo_area_code']
     assert 1 == data.main_df.loc['file3', 'geo_area_code']
 
-    assert -10 == data.mlst_df.loc['file1', 'geo_area_code']
-    assert 10 == data.mlst_df.loc['file2', 'geo_area_code']
-    assert 1 == data.mlst_df.loc['file3', 'geo_area_code']
-
-    assert -10 == data.lmat_df.loc['file1', 'geo_area_code']
-    assert 10 == data.lmat_df.loc['file2', 'geo_area_code']
-    assert 1 == data.lmat_df.loc['file3', 'geo_area_code']
-
-    assert -10 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
-    assert 10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
-    assert 1 == data.rgi_kmer_df.loc['file3', 'geo_area_code']
-
 
 def test_switch_antarctica_na_all():
     data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-09-01'))
@@ -355,18 +342,6 @@ def test_switch_antarctica_na_all():
     assert -10 == data.main_df.loc['file2', 'geo_area_code']
     assert 1 == data.main_df.loc['file3', 'geo_area_code']
 
-    assert -10 == data.mlst_df.loc['file1', 'geo_area_code']
-    assert -10 == data.mlst_df.loc['file2', 'geo_area_code']
-    assert 1 == data.mlst_df.loc['file3', 'geo_area_code']
-
-    assert -10 == data.lmat_df.loc['file1', 'geo_area_code']
-    assert -10 == data.lmat_df.loc['file2', 'geo_area_code']
-    assert 1 == data.lmat_df.loc['file3', 'geo_area_code']
-
-    assert -10 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
-    assert -10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
-    assert 1 == data.rgi_kmer_df.loc['file3', 'geo_area_code']
-
 
 def test_switch_antarctica_na_none():
     data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-07-01'))
@@ -374,15 +349,3 @@ def test_switch_antarctica_na_none():
     assert 10 == data.main_df.loc['file1', 'geo_area_code']
     assert 10 == data.main_df.loc['file2', 'geo_area_code']
     assert 1 == data.main_df.loc['file3', 'geo_area_code']
-
-    assert 10 == data.mlst_df.loc['file1', 'geo_area_code']
-    assert 10 == data.mlst_df.loc['file2', 'geo_area_code']
-    assert 1 == data.mlst_df.loc['file3', 'geo_area_code']
-
-    assert 10 == data.lmat_df.loc['file1', 'geo_area_code']
-    assert 10 == data.lmat_df.loc['file2', 'geo_area_code']
-    assert 1 == data.lmat_df.loc['file3', 'geo_area_code']
-
-    assert 10 == data.rgi_kmer_df.loc['file1', 'geo_area_code']
-    assert 10 == data.rgi_kmer_df.loc['file2', 'geo_area_code']
-    assert 1 == data.rgi_kmer_df.loc['file3', 'geo_area_code']

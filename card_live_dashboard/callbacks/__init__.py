@@ -157,7 +157,7 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
     tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
 
     # Add all data to timeline dataframe for color_by option
-    df_timeline = data.rgi_parser.data_by_file()
+    df_timeline = data.main_df
     if len(df_timeline) > 0:
         df_timeline = df_timeline.merge(tax_parse.create_file_matches(), left_index=True, right_index=True,
                                         how='left')

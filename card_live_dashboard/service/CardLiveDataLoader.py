@@ -22,6 +22,11 @@ class CardLiveDataLoader:
         'lmat',
     ]
 
+    OTHER_TABLE_DROP_FIELDS = JSON_DATA_FIELDS + [
+        'timestamp',
+        'geo_area_code',
+    ]
+
     def __init__(self, card_live_dir: Path):
         self._directory = card_live_dir
 
@@ -82,13 +87,13 @@ class CardLiveDataLoader:
 
         main_df = full_df.drop(columns=self.JSON_DATA_FIELDS)
         rgi_df = self._expand_column(full_df, 'rgi_main', na_char='n/a').drop(
-            columns=self.JSON_DATA_FIELDS)
+            columns=self.OTHER_TABLE_DROP_FIELDS)
         rgi_kmer_df = self._expand_column(full_df, 'rgi_kmer', na_char='n/a').drop(
-            columns=self.JSON_DATA_FIELDS)
+            columns=self.OTHER_TABLE_DROP_FIELDS)
         mlst_df = self._expand_column(full_df, 'mlst', na_char='-').drop(
-            columns=self.JSON_DATA_FIELDS)
+            columns=self.OTHER_TABLE_DROP_FIELDS)
         lmat_df = self._expand_column(full_df, 'lmat', na_char='n/a').drop(
-            columns=self.JSON_DATA_FIELDS)
+            columns=self.OTHER_TABLE_DROP_FIELDS)
 
         data = CardLiveData(main_df=main_df,
                             rgi_parser=RGIParser(rgi_df),

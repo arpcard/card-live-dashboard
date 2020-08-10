@@ -16,11 +16,8 @@ class CardLiveData:
         self._main_df['timestamp'] = pd.to_datetime(self._main_df['timestamp'])
         self._rgi_parser = rgi_parser
         self._rgi_kmer_df = rgi_kmer_df
-        self._rgi_kmer_df['timestamp'] = pd.to_datetime(self._rgi_kmer_df['timestamp'])
         self._lmat_df = lmat_df
-        self._lmat_df['timestamp'] = pd.to_datetime(self._lmat_df['timestamp'])
         self._mlst_df = mlst_df
-        self._mlst_df['timestamp'] = pd.to_datetime(self._mlst_df['timestamp'])
 
     def replace_antarctica_with_na(self, date_threshold: np.datetime64) -> CardLiveData:
         """
@@ -35,29 +32,13 @@ class CardLiveData:
         na_code = -10
 
         main_df = self._main_df.copy()
-        if 'geo_area_code' in main_df:
-            main_df.loc[(main_df['geo_area_code'] == 10) &
-                (main_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
+        main_df.loc[(main_df['geo_area_code'] == 10) &
+            (main_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
 
         rgi_df = self.rgi_df.copy()
-        if 'geo_area_code' in rgi_df:
-            rgi_df.loc[(rgi_df['geo_area_code'] == 10) &
-                       (rgi_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
-
         rgi_kmer_df = self._rgi_kmer_df.copy()
-        if 'geo_area_code' in rgi_kmer_df:
-            rgi_kmer_df.loc[(rgi_kmer_df['geo_area_code'] == 10) &
-                                  (rgi_kmer_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
-
         lmat_df = self._lmat_df.copy()
-        if 'geo_area_code' in lmat_df:
-            lmat_df.loc[(lmat_df['geo_area_code'] == 10) &
-                              (lmat_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
-
         mlst_df = self._mlst_df.copy()
-        if 'geo_area_code' in mlst_df:
-            mlst_df.loc[(mlst_df['geo_area_code'] == 10) &
-                              (mlst_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
 
         return CardLiveData(main_df=main_df,
                             rgi_parser=RGIParser(rgi_df),
