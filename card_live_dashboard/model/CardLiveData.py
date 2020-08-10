@@ -15,15 +15,15 @@ class CardLiveData:
         self._main_df = main_df.reset_index().set_index('filename').astype({'geo_area_code': 'int64'})
         self._main_df['timestamp'] = pd.to_datetime(self._main_df['timestamp'])
         self._rgi_parser = rgi_parser
-        self._rgi_kmer_df = rgi_kmer_df.astype({'geo_area_code': 'int64'})
+        self._rgi_kmer_df = rgi_kmer_df#.astype({'geo_area_code': 'int64'})
         self._rgi_kmer_df['timestamp'] = pd.to_datetime(self._rgi_kmer_df['timestamp'])
-        self._lmat_df = lmat_df.astype({'geo_area_code': 'int64'})
+        self._lmat_df = lmat_df#.astype({'geo_area_code': 'int64'})
         self._lmat_df['timestamp'] = pd.to_datetime(self._lmat_df['timestamp'])
-        self._mlst_df = mlst_df.astype({'geo_area_code': 'int64'})
+        self._mlst_df = mlst_df#.astype({'geo_area_code': 'int64'})
         self._mlst_df['timestamp'] = pd.to_datetime(self._mlst_df['timestamp'])
 
         # Data patches to fix small issues with data
-        self._replace_antarctica_with_na()
+        #self._replace_antarctica_with_na()
 
     def _replace_antarctica_with_na(self):
         """

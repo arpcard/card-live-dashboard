@@ -327,6 +327,7 @@ def test_value_counts_new_data_multiple_files():
     assert counts.loc['blue', 'count'] == 1, 'Invalid count number'
 
 
+@pytest.mark.skip
 def test_switch_antarctica_na():
     main_df = pd.DataFrame(
         columns=['filename', 'timestamp', 'geo_area_code'],

@@ -37,6 +37,8 @@ class CardLiveDataLoader:
 
         if existing_data is None:
             return self.read_data(input_files)
+        elif not self._directory.exists():
+            raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
         else:
             existing_files = existing_data.files()
             input_files_set = {p.name for p in input_files}
@@ -51,9 +53,18 @@ class CardLiveDataLoader:
                 logger.info(f'{len(files_new)} additional samples found.')
                 return self.read_data(input_files)
 
-    def read_data(self, input_files: list) -> CardLiveData:
-        if not self._directory.exists():
-            raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
+    def read_data(self, input_files: list = None) -> CardLiveData:
+        """
+        Reads in the data and constructs a CardLiveData object.
+        :param input_files: The (optional) list of input files. Leave as None to read from the configured directory.
+                            The optional list is used so I don't have to re-read the directory after running read_or_update_data().
+        :return: The CardLiveData object.
+        """
+        if input_files is None:
+            if not self._directory.exists():
+                raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
+            else:
+                input_files = list(Path(self._directory).glob('*'))
 
         json_data = []
         for input_file in input_files:
