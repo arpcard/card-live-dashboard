@@ -4,6 +4,7 @@ import numpy as np
 
 from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.CardLiveData import CardLiveData
+from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
 
 TIME_FMT = '%Y-%m-%d %H:%M:%S'
 
@@ -328,7 +329,8 @@ def test_value_counts_new_data_multiple_files():
 
 
 def test_switch_antarctica_na():
-    data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-08-06'))
+    antarctica_modifier = AntarcticaNAModifier(np.datetime64('2020-08-06'))
+    data = antarctica_modifier.modify(DATA)
 
     assert -10 == data.main_df.loc['file1', 'geo_area_code']
     assert 10 == data.main_df.loc['file2', 'geo_area_code']
@@ -336,7 +338,8 @@ def test_switch_antarctica_na():
 
 
 def test_switch_antarctica_na_all():
-    data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-09-01'))
+    antarctica_modifier = AntarcticaNAModifier(np.datetime64('2020-09-01'))
+    data = antarctica_modifier.modify(DATA)
 
     assert -10 == data.main_df.loc['file1', 'geo_area_code']
     assert -10 == data.main_df.loc['file2', 'geo_area_code']
@@ -344,7 +347,8 @@ def test_switch_antarctica_na_all():
 
 
 def test_switch_antarctica_na_none():
-    data = DATA.replace_antarctica_with_na(date_threshold = np.datetime64('2020-07-01'))
+    antarctica_modifier = AntarcticaNAModifier(np.datetime64('2020-07-01'))
+    data = antarctica_modifier.modify(DATA)
 
     assert 10 == data.main_df.loc['file1', 'geo_area_code']
     assert 10 == data.main_df.loc['file2', 'geo_area_code']

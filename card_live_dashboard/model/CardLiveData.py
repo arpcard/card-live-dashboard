@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Set, List
 from datetime import datetime
 import pandas as pd
-import numpy as np
 
 from card_live_dashboard.model.RGIParser import RGIParser
 
@@ -18,33 +17,6 @@ class CardLiveData:
         self._rgi_kmer_df = rgi_kmer_df
         self._lmat_df = lmat_df
         self._mlst_df = mlst_df
-
-    def replace_antarctica_with_na(self, date_threshold: np.datetime64) -> CardLiveData:
-        """
-        Replaces the Antarctica geo code (10) with an N/A geo code (-10) for certain dates.
-        This is because for CARD:Live, initially Antartica was the default option given to users.
-        So, much of the data stored in CARD:Live had 'Antartica' set as the geograhpic region when what
-        was intended was 'N/A'. This method fixes the issue.
-
-        :param date_threshold: The date threshold before which replacement should occur.
-        :return: A new CardLiveData object.
-        """
-        na_code = -10
-
-        main_df = self._main_df.copy()
-        main_df.loc[(main_df['geo_area_code'] == 10) &
-            (main_df['timestamp'] < date_threshold), 'geo_area_code'] = na_code
-
-        rgi_df = self.rgi_df.copy()
-        rgi_kmer_df = self._rgi_kmer_df.copy()
-        lmat_df = self._lmat_df.copy()
-        mlst_df = self._mlst_df.copy()
-
-        return CardLiveData(main_df=main_df,
-                            rgi_parser=RGIParser(rgi_df),
-                            rgi_kmer_df=rgi_kmer_df,
-                            mlst_df=mlst_df,
-                            lmat_df=lmat_df)
 
     def select(self, table: str, by: str, **kwargs) -> CardLiveData:
         """
