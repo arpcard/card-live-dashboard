@@ -36,3 +36,26 @@ def test_read_antarctica_switch():
     assert ['Salmonella enterica (chromosome)', 'Salmonella enterica (chromosome)'] == data.rgi_kmer_df['rgi_kmer.CARD*kmer Prediction'].tolist()
     assert ['senterica', 'senterica'] == data.mlst_df['mlst.scheme'].tolist()
     assert ['Salmonella enterica', 'Salmonella enterica'] == data.lmat_df['lmat.taxonomy_label'].tolist()
+
+
+def test_read_or_update_data_noupdate():
+    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    data = loader.read_or_update_data()
+
+    assert 1 == len(data.main_df)
+
+    new_data = loader.read_or_update_data(data)
+    assert data is new_data
+
+
+def test_read_or_update_data_withupdate():
+    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    data = loader.read_or_update_data()
+
+    assert 1 == len(data.main_df)
+
+    loader = CardLiveDataLoader(data_dir.joinpath('data2'))
+    new_data = loader.read_or_update_data(data)
+    assert data is not new_data
+    assert 2 == len(new_data.main_df)
+
