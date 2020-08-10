@@ -1,10 +1,10 @@
 import pandas as pd
 
-from card_live_dashboard.model.GeographicRegionCodes import GeographicRegionCodes
+from card_live_dashboard.service.GeographicRegionCodesService import GeographicRegionCodesService
 
 class GeographicSummaries:
 
-    def __init__(self, region_codes: GeographicRegionCodes):
+    def __init__(self, region_codes: GeographicRegionCodesService):
         self._geographic_region_codes = region_codes
 
     def create_geo_analysis_table(self, main_df: pd.DataFrame) -> pd.DataFrame:

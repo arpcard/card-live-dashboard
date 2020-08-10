@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class GeographicRegionCodes:
+class GeographicRegionCodesService:
     TOP_REGION_NAME = 'geo_area_toplevel_m49code'
     SUB_REGION_CODE = 'geo_area_sublevel_m49code'
     COUNTRY_CODE = 'geo_area_iso3_code'
