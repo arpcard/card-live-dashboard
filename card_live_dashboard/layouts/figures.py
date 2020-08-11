@@ -148,7 +148,12 @@ def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: st
     return fig
 
 
-def choropleth_drug(df_geo: pd.DataFrame, world: geopandas.GeoDataFrame):
+def choropleth_drug(data: pd.DataFrame, world: geopandas.GeoDataFrame):
+    df_geo = data.value_counts(['geo_area_code', 'geo_area_name_standard']).reset_index()
+
+    # Remove N/A from counts so it doesn't mess with colors of map
+    df_geo = df_geo[~df_geo['geo_area_name_standard'].str.contains('N/A')]
+
     if df_geo.empty or df_geo['count'].sum() == 0:
         fig = EMPTY_MAP
     else:
