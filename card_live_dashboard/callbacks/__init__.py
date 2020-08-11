@@ -5,10 +5,9 @@ import dash
 
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
+from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model import world
-from card_live_dashboard.service import region_codes
 
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)

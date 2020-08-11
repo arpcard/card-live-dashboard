@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import geopandas
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.model.TaxonomicParser import TaxonomicParser
+from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 
 # Creation of empty figure adapted from https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497
 EMPTY_FIGURE = go.Figure(layout={

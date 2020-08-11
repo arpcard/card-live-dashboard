@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import List, Iterable
 import pandas as pd
-import numpy as np
 from pathlib import Path
 import json
 from os import path

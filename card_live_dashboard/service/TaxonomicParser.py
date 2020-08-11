@@ -4,19 +4,10 @@ import pandas as pd
 class TaxonomicParser:
 
     def __init__(self, df_rgi_kmer: pd.DataFrame, df_lmat: pd.DataFrame):
-        self._df_rgi_kmer = df_rgi_kmer[['rgi_kmer.CARD*kmer Prediction',
-                                         'rgi_kmer.Taxonomic kmers',
-                                         'rgi_kmer.Genomic kmers',
-                                         'rgi_version']]
+        self._df_rgi_kmer = df_rgi_kmer[['rgi_kmer.CARD*kmer Prediction']]
 
-        self._df_lmat = df_lmat[['lmat.score',
-                                 'lmat.count',
-                                 'lmat.ncbi_taxon_id',
-                                 'lmat.rank',
-                                 'lmat.taxonomy_label',
-                                 'lmat_version']].astype(
-            {'lmat.score': 'float64',
-             'lmat.count': 'float64'}
+        self._df_lmat = df_lmat[['lmat.count', 'lmat.taxonomy_label']].astype(
+            {'lmat.count': 'float64'}
         )
 
     def create_contigs_lmat_score(self, df: pd.DataFrame, name: str) -> pd.DataFrame:
@@ -28,8 +19,9 @@ class TaxonomicParser:
 
     def create_filename_lmat_tax(self) -> pd.DataFrame:
         df_lmat_subset = self.create_contigs_lmat_score(self._df_lmat, 'lmat_real_score')
-        df_lmat_subset = df_lmat_subset.sort_values(by=['filename', 'lmat_real_score'], ascending=False).groupby(
-            'filename').nth(0)
+        df_lmat_subset = df_lmat_subset.sort_values(
+            by=['filename', 'lmat_real_score', 'lmat.taxonomy_label'], ascending=False)
+        df_lmat_subset = df_lmat_subset.groupby('filename').nth(0)
 
         return df_lmat_subset[['lmat.taxonomy_label']]
 
@@ -37,10 +29,10 @@ class TaxonomicParser:
         df_tax = self._df_rgi_kmer.groupby('filename')['rgi_kmer.CARD*kmer Prediction'].apply(
             lambda x: x.replace(
                 # Remove text like '(chromosome)'
-                ' *\(.*\)', '', regex=True).value_counts(
-                sort=True, ascending=False)).reset_index()
-        df_tax = df_tax.groupby('filename').nth(0)
-        df_tax = df_tax.rename(columns={'level_1': 'rgi_kmer.taxonomy_label'})['rgi_kmer.taxonomy_label']
+                r' *\(.*\)', '', regex=True).value_counts()).reset_index()
+        df_tax = df_tax.rename(columns={'level_1': 'rgi_kmer.taxonomy_label', 'rgi_kmer.CARD*kmer Prediction': 'rgi_kmer.prediction_count'})
+        df_tax = df_tax.sort_values(by=['rgi_kmer.prediction_count', 'rgi_kmer.taxonomy_label'], ascending=False)
+        df_tax = df_tax.groupby('filename').nth(0)['rgi_kmer.taxonomy_label']
         return df_tax.to_frame()
 
     def matches_column(self, df: pd.DataFrame, left: str, right: str) -> pd.DataFrame:
