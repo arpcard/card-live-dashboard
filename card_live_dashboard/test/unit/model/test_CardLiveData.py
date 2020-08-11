@@ -392,6 +392,12 @@ def test_select_organism_rgi_kmer_two():
     assert 2 == len(data.mlst_df), 'Invalid number after selection'
 
 
+def test_unique_column():
+    assert {'Salmonella enterica', 'Enterobacteriaceae'} == DATA.unique_column('lmat_taxonomy')
+    assert {'Salmonella enterica', 'Enterobacteriaceae'} == DATA.unique_column('rgi_kmer_taxonomy')
+    assert {1, 10} == DATA.unique_column('geo_area_code')
+
+
 def test_switch_antarctica_na():
     antarctica_modifier = AntarcticaNAModifier(np.datetime64('2020-08-06'))
     data = antarctica_modifier.modify(DATA)

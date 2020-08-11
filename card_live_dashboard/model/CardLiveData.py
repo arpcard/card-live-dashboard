@@ -98,6 +98,15 @@ class CardLiveData:
         """
         return set(self.main_df.index.tolist())
 
+    def unique_column(self, col: str) -> Set[str]:
+        """
+        Returns the set of unique values in a column.
+
+        :param col: The column to select.
+        :return: The set of unique values in a column.
+        """
+        return set(self.main_df[col].tolist())
+
     def samples_count(self) -> int:
         return len(self._main_df)
 
