@@ -131,14 +131,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                              'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
                              'lmat_taxonomy': 'Organism (LMAT)'},
                      title=TOTALS_FIGURE_TITLES[type_value],
-                     # hover_data=['geo_area_name_standard'],
                      )
-        # fig.update_traces(
-        #     hovertemplate=(
-        #         '<b style="font-size: 125%;">%{customdata[0]}</b><br>'
-        #         '<b>Count:</b>  %{x}<br>'
-        #     )
-        # )
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'dtick': 1}
                           )
@@ -189,26 +182,17 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         else:
             raise Exception(f'Unknown value [fig_type={fig_type}]')
 
-        if color_by == 'default':
-            color = None
-        elif color_by == 'geographic':
-            color = 'geo_area_name_standard'
-        elif color_by == 'organism_lmat':
-            color = 'lmat_taxonomy'
-        elif color_by == 'organism_rgi_kmer':
-            color = 'rgi_kmer_taxonomy'
-        else:
-            raise Exception(f'Unknown value [color_by={color_by}]')
+        color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by]
 
         # Count and sort labels to re-order decreasing
         category_orders = {}
-        if color is not None:
-            labels = data.main_df.groupby(color).size().sort_values(ascending=False).index.tolist()
-            category_orders = {color: labels}
+        if color_col_name is not None:
+            labels = data.main_df.groupby(color_col_name).size().sort_values(ascending=False).index.tolist()
+            category_orders = {color_col_name: labels}
 
         fig = px.histogram(data.main_df, x='timestamp',
                            nbins=50,
-                           color=color,
+                           color=color_col_name,
                            category_orders=category_orders,
                            labels={'count': 'Count',
                                    'timestamp': 'Date',
