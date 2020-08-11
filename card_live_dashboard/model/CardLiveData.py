@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Set, List
+from typing import Set, List, Union
 from datetime import datetime
 import pandas as pd
 
@@ -30,6 +30,10 @@ class CardLiveData:
         if table == 'main':
             if by == 'time':
                 return self.select_by_time(**kwargs)
+            elif by == 'lmat_taxonomy':
+                return self.select_by_taxonomy(column='lmat_taxonomy', **kwargs)
+            elif by == 'rgi_kmer_taxonomy':
+                return self.select_by_taxonomy(column='rgi_kmer_taxonomy', **kwargs)
             else:
                 raise Exception(f'Unknown value[by={by}]')
         elif table == 'rgi':
@@ -49,6 +53,13 @@ class CardLiveData:
         files = set(self.main_df[
                         (self.main_df['timestamp'] >= start) & (self.main_df['timestamp'] <= end)].index.tolist())
         return self.select_by_files(files)
+
+    def select_by_taxonomy(self, column: str, taxonomy: Union[List, str]) -> CardLiveData:
+        if taxonomy is None or taxonomy == [] or taxonomy == '':
+            return self
+        else:
+            files = set(self.main_df[self.main_df[column] == taxonomy].index.tolist())
+            return self.select_by_files(files)
 
     def select_from_rgi_parser(self, rgi_parser: RGIParser):
         """

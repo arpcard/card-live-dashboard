@@ -9,10 +9,10 @@ from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import Antarc
 TIME_FMT = '%Y-%m-%d %H:%M:%S'
 
 MAIN_DF = pd.DataFrame(
-    columns=['filename', 'timestamp', 'geo_area_code'],
-    data=[['file1', '2020-08-05 16:27:32.996157', 10],
-          ['file2', '2020-08-06 16:27:32.996157', 10],
-          ['file3', '2020-08-07 16:27:32.996157', 1],
+    columns=['filename', 'timestamp', 'geo_area_code', 'lmat_taxonomy', 'rgi_kmer_taxonomy'],
+    data=[['file1', '2020-08-05 16:27:32.996157', 10, 'Salmonella enterica', 'Enterobacteriaceae'],
+          ['file2', '2020-08-06 16:27:32.996157', 10, 'Enterobacteriaceae', 'Salmonella enterica'],
+          ['file3', '2020-08-07 16:27:32.996157', 1, 'Salmonella enterica', 'Enterobacteriaceae'],
           ],
 )
 
@@ -326,6 +326,70 @@ def test_value_counts_new_data_multiple_files():
     assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
     assert counts.loc['red', 'count'] == 2, 'Invalid count number'
     assert counts.loc['blue', 'count'] == 1, 'Invalid count number'
+
+
+def test_select_organism_lmat_all():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='main', by='lmat_taxonomy', taxonomy=None)
+    assert 3 == len(data), 'Invalid number after selection'
+    assert 3 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
+    assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert ['Salmonella enterica', 'Enterobacteriaceae', 'Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
+    assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 3 == len(data.lmat_df), 'Invalid number after selection'
+    assert 3 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_organism_rgi_kmer_one():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='main', by='rgi_kmer_taxonomy', taxonomy='Salmonella enterica')
+    assert 1 == len(data), 'Invalid number after selection'
+    assert 1 == len(data.main_df), 'Invalid number after selection'
+    assert {'file2'} == data.files(), 'Invalid files'
+    assert 1 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'gene1'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert ['Salmonella enterica'] == data.main_df['rgi_kmer_taxonomy'].tolist()
+    assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 1 == len(data.lmat_df), 'Invalid number after selection'
+    assert 1 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_organism_lmat_two():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='main', by='lmat_taxonomy', taxonomy='Salmonella enterica')
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file3'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert ['Salmonella enterica', 'Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_organism_rgi_kmer_two():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='main', by='rgi_kmer_taxonomy', taxonomy='Enterobacteriaceae')
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file3'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert ['Enterobacteriaceae', 'Enterobacteriaceae'] == data.main_df['rgi_kmer_taxonomy'].tolist()
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
 
 
 def test_switch_antarctica_na():
