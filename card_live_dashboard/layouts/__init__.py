@@ -90,6 +90,24 @@ def default_layout():
                         ]),
                     ]),
                     html.Div([
+                        dbc.Button(id='organism-parameters-toggle', color='link',
+                                   className='cardlive-collapse pl-0', children=[html.H3('Organism')]),
+                        dbc.Collapse(id='organism-parameters', is_open=True, children=[
+                            html.Div(children=['Select an organism (LMAT): ',
+                                               dcc.Dropdown(id='organism-lmat-select',
+                                                            className='sidepanel-selection',
+                                                            placeholder='LMAT organism',
+                                                            clearable=True)
+                                               ]),
+                            html.Div(children=['Select an organism (RGI Kmer): ',
+                                               dcc.Dropdown(id='organism-rgi-kmer-select',
+                                                            className='sidepanel-selection',
+                                                            placeholder='RGI Kmer organism',
+                                                            clearable=True)
+                                               ]),
+                        ]),
+                    ]),
+                    html.Div([
                         dbc.Button(id='time-parameters-toggle', color='link',
                                    className='cardlive-collapse pl-0', children=[html.H3('Time')]),
                         dbc.Collapse(id='time-parameters', is_open=True, children=[

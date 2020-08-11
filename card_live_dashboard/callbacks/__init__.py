@@ -43,9 +43,21 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         return is_open
 
     @app.callback(
+        Output('organism-parameters', 'is_open'),
+        [Input('organism-parameters-toggle', 'n_clicks')],
+        [State('organism-parameters', 'is_open')],
+    )
+    def toggle_organism_parameters_collapse(n, is_open):
+        if n:
+            return not is_open
+        return is_open
+
+    @app.callback(
         [Output('global-sample-count', 'children'),
          Output('global-most-recent', 'children'),
          Output('time-period-items', 'options'),
+         Output('organism-lmat-select', 'options'),
+         Output('organism-rgi-kmer-select', 'options'),
          Output('selected-samples-count', 'children'),
          Output('drug-class-select', 'options'),
          Output('besthit-aro-select', 'options'),
@@ -55,6 +67,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('besthit-aro-select', 'value'),
+         Input('organism-lmat-select', 'value'),
+         Input('organism-rgi-kmer-select', 'value'),
          Input('time-period-items', 'value'),
          Input('timeline-type-select', 'value'),
          Input('timeline-color-select', 'value'),
@@ -63,7 +77,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('auto-update-interval', 'n_intervals')]
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
-                           besthit_aro: List[str], time_dropdown: str,
+                           besthit_aro: List[str], organism_lmat: str,
+                           organism_rgi_kmer: str, time_dropdown: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
                            n_intervals):
@@ -81,7 +96,12 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         global_samples_count = len(data)
         global_last_updated = f'{data.latest_update(): %b %d, %Y}'
 
-        time_subsets = apply_filters(data, rgi_cutoff_select, drug_classes, besthit_aro)
+        time_subsets = apply_filters(data=data,
+                                     rgi_cutoff_select=rgi_cutoff_select,
+                                     drug_classes=drug_classes,
+                                     besthit_aro=besthit_aro,
+                                     organism_lmat=organism_lmat,
+                                     organism_rgi_kmer=organism_rgi_kmer)
 
         fig_settings = {
             'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
@@ -101,12 +121,16 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
         samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
+        organism_lmat_options = build_options([organism_lmat], time_subsets[time_dropdown].unique_column('lmat_taxonomy'))
+        organism_rgi_kmer_options = build_options([organism_rgi_kmer], time_subsets[time_dropdown].unique_column('rgi_kmer_taxonomy'))
         drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].rgi_parser.all_drugs())
         besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].rgi_parser.all_besthit_aro())
 
         return (global_samples_count,
                 global_last_updated,
                 time_dropdown_text,
+                organism_lmat_options,
+                organism_rgi_kmer_options,
                 samples_count_string,
                 drug_class_options,
                 besthit_aro_options,
@@ -116,12 +140,15 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
-                  drug_classes: List[str], besthit_aro: List[str]) -> Dict[str, CardLiveData]:
+                  drug_classes: List[str], besthit_aro: List[str], organism_lmat: str,
+                  organism_rgi_kmer: str) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
         .select(table='rgi', by='drug', type='file', drug_classes=drug_classes) \
-        .select(table='rgi', by='aro', type='file', besthit_aro=besthit_aro)
+        .select(table='rgi', by='aro', type='file', besthit_aro=besthit_aro) \
+        .select(table='main', by='lmat_taxonomy', taxonomy=organism_lmat) \
+        .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
 
     time_subsets = {
         'all': data,
@@ -136,6 +163,8 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
 def build_options(selected_options: List[str], all_available_options: Set[str]):
     if selected_options is None or len(selected_options) == 0:
+        selected_options_set = set()
+    elif len(selected_options) == 1 and selected_options[0] == None:
         selected_options_set = set()
     else:
         selected_options_set = set(selected_options)
