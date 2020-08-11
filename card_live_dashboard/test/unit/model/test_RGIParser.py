@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from card_live_dashboard.model.RGIParser import RGIParser
 
@@ -29,6 +30,24 @@ RGI_DF_NA = pd.DataFrame(
 RGI_PARSER_NA = RGIParser(RGI_DF_NA)
 
 
+RGI_DF_ONLY_EMPTY_STRING = pd.DataFrame(
+    columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
+    data=[['file1', None, '', pd.NA],
+          ['file2', None, '', pd.NA]
+          ]
+).set_index('filename')
+RGI_PARSER_ONLY_EMPTY_STRING = RGIParser(RGI_DF_ONLY_EMPTY_STRING)
+
+
+RGI_DF_ONLY_NA= pd.DataFrame(
+    columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
+    data=[['file1', None, pd.NA, pd.NA],
+          ['file2', None, np.nan, pd.NA]
+          ]
+).set_index('filename')
+RGI_PARSER_ONLY_NA = RGIParser(RGI_DF_ONLY_NA)
+
+
 def test_all_drugs():
     assert {'class1', 'class2', 'class3', 'class4'} == RGI_PARSER.all_drugs()
 
@@ -39,6 +58,14 @@ def test_all_drugs_only_none():
 
 def test_all_drugs_only_na():
     assert set() == RGI_PARSER_NA.all_drugs()
+
+
+def test_all_drugs_only_empty_string():
+    assert set() == RGI_PARSER_ONLY_EMPTY_STRING.all_drugs()
+
+
+def test_all_drugs_only_na_values():
+    assert set() == RGI_PARSER_ONLY_NA.all_drugs()
 
 
 def test_all_drugs_empty():

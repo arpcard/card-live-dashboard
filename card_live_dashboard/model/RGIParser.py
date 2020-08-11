@@ -208,20 +208,20 @@ class RGIParser:
 
         :return: A list of all possible drug classes.
         """
-        if self.empty():
-            all_drugs = set()
-        else:
-            df_rgi_drug = self._df_rgi[['rgi_main.Drug Class']].replace('', pd.NA)
-            logger.info(f'df_rgi_drug:\n{df_rgi_drug}')
+        all_drugs = set()
+        if not self.empty():
+            df_rgi_drug = self._df_rgi[['rgi_main.Drug Class']].replace(r'^\s*$', pd.NA, regex=True).dropna()
+            logger.debug(f'df_rgi_drug:\n{df_rgi_drug}')
 
-            df_rgi_drug = df_rgi_drug.loc[
-                ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(
-                lambda x: set(y.strip() for y in x)).to_frame()
+            if not df_rgi_drug.empty:
+                df_rgi_drug = df_rgi_drug.loc[
+                    ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(
+                    lambda x: set(y.strip() for y in x)).to_frame()
 
-            all_drugs_list = df_rgi_drug['rgi_main.Drug Class'].dropna().tolist()
+                all_drugs_list = df_rgi_drug['rgi_main.Drug Class'].dropna().tolist()
 
-            # Store as 'set' first to remove duplicates
-            all_drugs = set(y for x in all_drugs_list for y in x)
+                # Store as 'set' first to remove duplicates
+                all_drugs = set(y for x in all_drugs_list for y in x)
 
         return all_drugs
 
