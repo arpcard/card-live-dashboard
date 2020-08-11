@@ -9,8 +9,8 @@
   ],
   "rgi_kmer": [
     {
-      "CARD*kmer Prediction": "Salmonella enterica (chromosome)",
-      "Taxonomic kmers": "Salmonella enterica 10;",
+      "CARD*kmer Prediction": "Enterobacteriaceae (chromosome)",
+      "Taxonomic kmers": "Enterobacteriaceae 10;",
       "Genomic kmers": "chr + plasmid: 5; plasmid: 0; chr: 100;"
     }
   ],

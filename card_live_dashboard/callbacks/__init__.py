@@ -151,17 +151,9 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
 
 def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]]):
     fig_map = figures.choropleth_drug(data, world)
-    tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
-
-    # Add all data to timeline dataframe for color_by option
-    df_timeline = data.main_df
-    if len(df_timeline) > 0:
-        df_timeline = df_timeline.merge(tax_parse.create_file_matches(), left_index=True, right_index=True, how='left')
-
-    fig_histogram_rate = figures.build_time_histogram(df_timeline, fig_type=fig_settings['timeline']['type'],
+    fig_histogram_rate = figures.build_time_histogram(data, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])
-
-    fig_totals = figures.totals_figure(data, tax_parse, type_value=fig_settings['totals']['type'],
+    fig_totals = figures.totals_figure(data, type_value=fig_settings['totals']['type'],
                                        color_by_value=fig_settings['totals']['color'])
 
     return {

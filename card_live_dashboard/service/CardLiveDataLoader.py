@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Iterable
+from typing import List
 import pandas as pd
 from pathlib import Path
 import json
@@ -104,6 +104,7 @@ class CardLiveDataLoader:
         # Make changes to underlying data
         data = data_modifiers.antarctica_modifier.modify(data)
         data = data_modifiers.geo_names_modifier.modify(data)
+        data = data_modifiers.taxonomy_modifier.modify(data)
 
         return data
 

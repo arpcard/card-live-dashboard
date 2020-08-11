@@ -17,6 +17,9 @@ def test_read_one_file():
     assert 'geo_area_code' in set(data.main_df.columns.tolist())
     assert 'geo_area_name_standard' in set(data.main_df.columns.tolist())
     assert ['Northern Africa'] == data.main_df['geo_area_name_standard'].tolist()
+    assert ['Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
+    assert ['Enterobacteriaceae'] == data.main_df['rgi_kmer_taxonomy'].tolist()
+    assert 'matches' not in set(data.main_df.columns.tolist())
 
     assert 2 == len(data.rgi_df)
     assert ['Perfect', 'Strict'] == data.rgi_df['rgi_main.Cut_Off'].tolist()
@@ -25,7 +28,7 @@ def test_read_one_file():
     assert 'timestamp' not in set(data.rgi_df.columns.tolist())
     assert 'geo_area_code' not in set(data.rgi_df.columns.tolist())
 
-    assert ['Salmonella enterica (chromosome)'] == data.rgi_kmer_df['rgi_kmer.CARD*kmer Prediction'].tolist()
+    assert ['Enterobacteriaceae (chromosome)'] == data.rgi_kmer_df['rgi_kmer.CARD*kmer Prediction'].tolist()
     assert 'timestamp' not in set(data.rgi_kmer_df.columns.tolist())
     assert 'geo_area_code' not in set(data.rgi_kmer_df.columns.tolist())
 
@@ -49,7 +52,7 @@ def test_read_antarctica_switch():
     assert ['Perfect', 'Strict'] == data.rgi_df['rgi_main.Cut_Off'].tolist()
     assert ['macrolide antibiotic; cephalosporin', 'macrolide antibiotic'] == data.rgi_df[
         'rgi_main.Drug Class'].tolist()
-    assert ['Salmonella enterica (chromosome)', 'Salmonella enterica (chromosome)'] == data.rgi_kmer_df[
+    assert ['Enterobacteriaceae (chromosome)', 'Salmonella enterica (chromosome)'] == data.rgi_kmer_df[
         'rgi_kmer.CARD*kmer Prediction'].tolist()
     assert ['senterica', 'senterica'] == data.mlst_df['mlst.scheme'].tolist()
     assert ['Salmonella enterica', 'Salmonella enterica'] == data.lmat_df['lmat.taxonomy_label'].tolist()

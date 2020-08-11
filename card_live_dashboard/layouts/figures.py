@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 import geopandas
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 
 # Creation of empty figure adapted from https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497
 EMPTY_FIGURE = go.Figure(layout={
@@ -34,15 +33,15 @@ EMPTY_FIGURE_DICT = {
 TOTALS_COLUMN_SELECT_NAMES = {
     'default': 'geo_area_name_standard',
     'geographic': 'geo_area_name_standard',
-    'organism_lmat': 'lmat.taxonomy_label',
-    'organism_rgi_kmer': 'rgi_kmer.taxonomy_label'
+    'organism_lmat': 'lmat_taxonomy',
+    'organism_rgi_kmer': 'rgi_kmer_taxonomy'
 }
 
 TOTALS_COLUMN_DATAFRAME_NAMES = {
     'default': None,
     'geographic': 'geo_area_name_standard',
-    'organism_lmat': 'lmat.taxonomy_label',
-    'organism_rgi_kmer': 'rgi_kmer.taxonomy_label'
+    'organism_lmat': 'lmat_taxonomy',
+    'organism_rgi_kmer': 'rgi_kmer_taxonomy'
 }
 
 TOTALS_FIGURE_TITLES = {
@@ -96,7 +95,7 @@ def taxonomic_comparison(df: pd.DataFrame):
     return fig
 
 
-def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: str, color_by_value: str) -> go.Figure:
+def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
     color_col = TOTALS_COLUMN_SELECT_NAMES[color_by_value]
     if type_col == color_col or color_by_value == 'default':
@@ -107,8 +106,7 @@ def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: st
     if data.samples_count() == 0:
         fig = EMPTY_FIGURE
     else:
-        tax_df = tax_parse.create_file_matches()
-        totals_df = data.value_counts(count_by_columns, include_df=tax_df).reset_index()
+        totals_df = data.value_counts(count_by_columns).reset_index()
 
         type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
@@ -130,8 +128,8 @@ def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: st
                      category_orders=category_orders,
                      labels={'count': 'Samples count',
                              'geo_area_name_standard': 'Geographic region',
-                             'rgi_kmer.taxonomy_label': 'Organism (RGI Kmer)',
-                             'lmat.taxonomy_label': 'Organism (LMAT)'},
+                             'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
+                             'lmat_taxonomy': 'Organism (LMAT)'},
                      title=TOTALS_FIGURE_TITLES[type_value],
                      # hover_data=['geo_area_name_standard'],
                      )
@@ -148,7 +146,7 @@ def totals_figure(data: CardLiveData, tax_parse: TaxonomicParser, type_value: st
     return fig
 
 
-def choropleth_drug(data: pd.DataFrame, world: geopandas.GeoDataFrame):
+def choropleth_drug(data: CardLiveData, world: geopandas.GeoDataFrame):
     df_geo = data.value_counts(['geo_area_code', 'geo_area_name_standard']).reset_index()
 
     # Remove N/A from counts so it doesn't mess with colors of map
@@ -180,8 +178,8 @@ def choropleth_drug(data: pd.DataFrame, world: geopandas.GeoDataFrame):
     return fig
 
 
-def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
-    if df_time.empty:
+def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
+    if data.empty:
         fig = EMPTY_FIGURE
     else:
         if fig_type == 'cumulative':
@@ -196,27 +194,27 @@ def build_time_histogram(df_time: pd.DataFrame, fig_type: str, color_by: str):
         elif color_by == 'geographic':
             color = 'geo_area_name_standard'
         elif color_by == 'organism_lmat':
-            color = 'lmat.taxonomy_label'
+            color = 'lmat_taxonomy'
         elif color_by == 'organism_rgi_kmer':
-            color = 'rgi_kmer.taxonomy_label'
+            color = 'rgi_kmer_taxonomy'
         else:
             raise Exception(f'Unknown value [color_by={color_by}]')
 
         # Count and sort labels to re-order decreasing
         category_orders = {}
         if color is not None:
-            labels = df_time.groupby(color).size().sort_values(ascending=False).index.tolist()
+            labels = data.main_df.groupby(color).size().sort_values(ascending=False).index.tolist()
             category_orders = {color: labels}
 
-        fig = px.histogram(df_time, x='timestamp',
+        fig = px.histogram(data.main_df, x='timestamp',
                            nbins=50,
                            color=color,
                            category_orders=category_orders,
                            labels={'count': 'Count',
                                    'timestamp': 'Date',
                                    'geo_area_name_standard': 'Geographic region',
-                                   'rgi_kmer.taxonomy_label': 'Organism (RGI Kmer)',
-                                   'lmat.taxonomy_label': 'Organism (LMAT)'},
+                                   'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
+                                   'lmat_taxonomy': 'Organism (LMAT)'},
                            title='Samples by date',
                            )
         fig.update_traces(cumulative_enabled=cumulative)

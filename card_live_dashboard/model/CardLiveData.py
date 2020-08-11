@@ -114,6 +114,10 @@ class CardLiveData:
         return self.samples_count()
 
     @property
+    def empty(self) -> bool:
+        return len(self) == 0
+
+    @property
     def main_df(self) -> pd.DataFrame:
         return self._main_df
 
