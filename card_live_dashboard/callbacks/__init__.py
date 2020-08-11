@@ -151,9 +151,7 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
 
 
 def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]]):
-    geographic_counts = data.value_counts(
-        ['geo_area_code', 'geo_area_name_standard']).reset_index()
-    fig_map = figures.choropleth_drug(geographic_counts, world)
+    fig_map = figures.choropleth_drug(data, world)
     tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
 
     # Add all data to timeline dataframe for color_by option
