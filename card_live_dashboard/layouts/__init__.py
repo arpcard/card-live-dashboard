@@ -119,12 +119,13 @@ def default_layout():
                                                ]),
                         ]),
                     ]),
-                    html.P(className='text-center card-live-badges', children=[
+                    html.P(className='text-center card-live-badges pb-5', children=[
                         html.Br(),
                         html.A(className='badge badge-primary',
                                children=[f'Version | {card_live_dashboard.__version__}'],
                                href='https://devcard.mcmaster.ca:8888/apetkau/card-live-dashboard'),
                     ]),
+                    html.Div(className='py-5')
                 ]),
             ]),
             html.Div(className='col', children=[
