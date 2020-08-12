@@ -1,9 +1,14 @@
+from typing import List, Dict
+import logging
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import geopandas
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
+
+logger = logging.getLogger(__name__)
 
 # Creation of empty figure adapted from https://community.plotly.com/t/replacing-an-empty-graph-with-a-message/31497
 EMPTY_FIGURE = go.Figure(layout={
@@ -111,16 +116,11 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
         type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
 
-        # Sort labels by count to reorder display of bars in chart
-        category_orders = {}
-        sorted_type_labels = totals_df.groupby(type_col_name).sum().sort_values(
-             by=['count'], ascending=False).index.tolist()
-        category_orders[type_col_name] = sorted_type_labels
-
+        category_orders = order_categories(totals_df, type_col_name, by_sum=True, sum_col='count')
         if color_by_value != 'default':
-            sorted_color_labels = totals_df.groupby(color_col_name).sum().sort_values(
-                 by=['count'], ascending=False).index.tolist()
-            category_orders[color_col_name] = sorted_color_labels
+            category_orders.update(
+                order_categories(totals_df, color_col_name, by_sum=True, sum_col='count')
+            )
 
         fig = px.bar(totals_df, y=type_col_name, x='count',
                      color=color_col_name,
@@ -183,12 +183,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
             raise Exception(f'Unknown value [fig_type={fig_type}]')
 
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by]
-
-        # Count and sort labels to re-order decreasing
-        category_orders = {}
-        if color_col_name is not None:
-            labels = data.main_df.groupby(color_col_name).size().sort_values(ascending=False).index.tolist()
-            category_orders = {color_col_name: labels}
+        category_orders = order_categories(data.main_df, color_col_name)
 
         fig = px.histogram(data.main_df, x='timestamp',
                            nbins=50,
@@ -206,3 +201,22 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                           yaxis={'title': 'Samples count'}
                           )
     return fig
+
+
+def order_categories(df: pd.DataFrame, col: str, by_sum: bool = False, sum_col: str = None) -> Dict[str,List[str]]:
+    """
+    Reorders categories in the dataframe by the total counts in the passed column.
+    :param df: The data frame.
+    :param col: The column to order by. Pass None to return no order (empty dictionary).
+    :return: A dictionary mapping the column to a list of indexes defining the order of categories in the data frame.
+             Returns an empty dictionary if col is None.
+             Returned as a dictionary to be directly passed to a plotly plot as the orders of categories.
+    """
+    if col is None:
+        return {}
+    else:
+        if by_sum:
+            ordered_list = df.groupby(col).sum().sort_values(by=[sum_col], ascending=False).index.tolist()
+        else:
+            ordered_list = df.groupby(col).size().sort_values(ascending=False).index.tolist()
+        return {col: ordered_list}
