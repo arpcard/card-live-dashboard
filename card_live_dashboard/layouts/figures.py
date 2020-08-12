@@ -151,7 +151,7 @@ def drug_classes(data: CardLiveData) -> go.Figure:
         selected_files_count = len(set(totals_df.index.tolist()))
         counts_df['non_resistant_count'] = selected_files_count - counts_df
         counts_df = counts_df.reset_index()
-        counts_df = counts_df.sort_values(by='resistant_count', ascending=True)
+        counts_df = counts_df.sort_values(by=['resistant_count', 'rgi_main.Drug Class'], ascending=[True, False])
 
         counts_df = counts_df.rename(columns={'resistant_count': 'Resistant',
                                               'non_resistant_count': 'Non-resistant'})
