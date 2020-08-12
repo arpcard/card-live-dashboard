@@ -33,6 +33,7 @@ EMPTY_FIGURE_DICT = {
     'map': EMPTY_MAP,
     'timeline': EMPTY_FIGURE,
     'totals': EMPTY_FIGURE,
+    'drug-classes': EMPTY_FIGURE,
 }
 
 TOTALS_COLUMN_SELECT_NAMES = {
@@ -108,7 +109,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
     else:
         count_by_columns = [type_col, color_col]
 
-    if data.samples_count() == 0:
+    if data.empty:
         fig = EMPTY_FIGURE
     else:
         totals_df = data.value_counts(count_by_columns).reset_index()
@@ -134,6 +135,38 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      )
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'dtick': 1}
+                          )
+
+    return fig
+
+
+def drug_classes(data: CardLiveData) -> go.Figure:
+    if data.empty:
+        fig = EMPTY_FIGURE
+    else:
+        totals_df = data.rgi_parser.explode_column(
+            'rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].reset_index().drop_duplicates().set_index('filename')
+        counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'resistant_count'})
+        counts_df.index.rename('rgi_main.Drug Class', inplace=True)
+        selected_files_count = len(set(totals_df.index.tolist()))
+        counts_df['non_resistant_count'] = selected_files_count - counts_df
+        counts_df = counts_df.reset_index()
+        counts_df = counts_df.sort_values(by='resistant_count', ascending=True)
+
+        counts_df = counts_df.rename(columns={'resistant_count': 'Resistant',
+                                              'non_resistant_count': 'Non-resistant'})
+
+        fig = px.bar(counts_df, y='rgi_main.Drug Class', x=['Resistant', 'Non-resistant'],
+                     height=600,
+                     labels={'resistant_count': 'Resistant samples',
+                             'non_resistant_count': 'Non-resistant samples',
+                             'rgi_main.Drug Class': 'Drug class',
+                             'variable': 'Type'},
+                     title='Drug class resistances',
+                     )
+        fig.update_layout(font={'size': 14},
+                          yaxis={'title': '', 'dtick': 1},
+                          xaxis={'title': 'Samples count'}
                           )
 
     return fig

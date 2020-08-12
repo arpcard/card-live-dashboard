@@ -63,7 +63,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('besthit-aro-select', 'options'),
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
-         Output('figure-totals-id', 'figure')],
+         Output('figure-totals-id', 'figure'),
+         Output('figure-drug-classes-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('besthit-aro-select', 'value'),
@@ -136,7 +137,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 besthit_aro_options,
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
-                main_pane_figures['totals'])
+                main_pane_figures['totals'],
+                main_pane_figures['drug-classes'])
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
@@ -185,8 +187,11 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
     fig_totals = figures.totals_figure(data, type_value=fig_settings['totals']['type'],
                                        color_by_value=fig_settings['totals']['color'])
 
+    fig_drug_classes = figures.drug_classes(data)
+
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
+        'drug-classes': fig_drug_classes,
     }
