@@ -87,3 +87,71 @@ def test_all_besthit_aro_only_none():
 
 def test_all_besthit_aro_only_na():
     assert set() == RGI_PARSER_NA.all_besthit_aro()
+
+
+def test_expand_drug_class():
+    expanded_df = RGI_PARSER.explode_column('rgi_main.Drug Class')
+    assert 9 == len(expanded_df)
+    assert ['file1', 'file1', 'file1', 'file1', 'file1',
+            'file2', 'file2', 'file2', 'file3'] == expanded_df.index.tolist()
+
+    value_counts = expanded_df['rgi_main.Drug Class'].groupby('filename').value_counts()
+    assert 2 == value_counts['file1']['class1; class2']
+    assert 3 == value_counts['file1']['class1; class2; class3']
+    assert 3 == value_counts['file2']['class1; class2; class4']
+    assert 'file3' not in value_counts
+
+    assert ['class1', 'class2', 'class1', 'class2', 'class3',
+            'class1', 'class2', 'class4'] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
+    assert pd.isna(expanded_df.loc['file3', 'rgi_main.Drug Class_exploded'])
+
+
+def test_expand_drug_class_none():
+    expanded_df = RGI_PARSER_NONE.explode_column('rgi_main.Drug Class')
+    assert 2 == len(expanded_df)
+    assert ['file1', 'file2'] == expanded_df.index.tolist()
+
+    assert '' == expanded_df.loc['file1', 'rgi_main.Drug Class']
+
+    assert [] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
+    assert pd.isna(expanded_df.loc['file1', 'rgi_main.Drug Class_exploded'])
+    assert pd.isna(expanded_df.loc['file2', 'rgi_main.Drug Class_exploded'])
+
+
+def test_expand_drug_class_na():
+    expanded_df = RGI_PARSER_NA.explode_column('rgi_main.Drug Class')
+    assert 2 == len(expanded_df)
+    assert ['file1', 'file2'] == expanded_df.index.tolist()
+
+    assert '' == expanded_df.loc['file1', 'rgi_main.Drug Class']
+    assert pd.isna(expanded_df.loc['file2', 'rgi_main.Drug Class'])
+
+    assert [] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
+    assert pd.isna(expanded_df.loc['file1', 'rgi_main.Drug Class_exploded'])
+    assert pd.isna(expanded_df.loc['file2', 'rgi_main.Drug Class_exploded'])
+
+
+def test_expand_drug_class_only_empty_string():
+    expanded_df = RGI_PARSER_ONLY_EMPTY_STRING.explode_column('rgi_main.Drug Class')
+    assert 2 == len(expanded_df)
+    assert ['file1', 'file2'] == expanded_df.index.tolist()
+
+    assert '' == expanded_df.loc['file1', 'rgi_main.Drug Class']
+    assert '' == expanded_df.loc['file2', 'rgi_main.Drug Class']
+
+    assert [] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
+    assert pd.isna(expanded_df.loc['file1', 'rgi_main.Drug Class_exploded'])
+    assert pd.isna(expanded_df.loc['file2', 'rgi_main.Drug Class_exploded'])
+
+
+def test_expand_drug_class_only_na():
+    expanded_df = RGI_PARSER_ONLY_NA.explode_column('rgi_main.Drug Class')
+    assert 2 == len(expanded_df)
+    assert ['file1', 'file2'] == expanded_df.index.tolist()
+
+    assert pd.isna(expanded_df.loc['file1', 'rgi_main.Drug Class'])
+    assert pd.isna(expanded_df.loc['file2', 'rgi_main.Drug Class'])
+
+    assert [] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
+    assert pd.isna(expanded_df.loc['file1', 'rgi_main.Drug Class_exploded'])
+    assert pd.isna(expanded_df.loc['file2', 'rgi_main.Drug Class_exploded'])

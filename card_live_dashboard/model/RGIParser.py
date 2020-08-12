@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import List, Set
 from typing import Callable
+import re
 import logging
 
 import pandas as pd
@@ -201,6 +202,23 @@ class RGIParser:
         :return: The set of files in this object.
         """
         return set(self._df_rgi.index.tolist())
+
+    def explode_column(self, col: str, sep: str = ';') -> pd.DataFrame:
+        """
+        Explodes a column (e.g., 'rgi_main.Drug Class') in the underlying dataframe based on the passed separator.
+        :param col: The column to expand.
+        :param sep: The separator character.
+        :return: The expanded data frame.
+        """
+        df_rgi_no_index = self._df_rgi.reset_index()
+        exploded_df = df_rgi_no_index[col].replace(r'^\s*$', pd.NA, regex=True).dropna()
+        exploded_df = exploded_df.replace(re.compile(f'\\s*{col}\\s*'), col, regex=True).dropna()
+        exploded_df = exploded_df.str.split(sep).apply(
+                    lambda x: [y.strip() for y in x]).explode().rename(col + '_exploded').to_frame()
+        exploded_df = df_rgi_no_index.merge(
+            exploded_df, how='left', left_index=True, right_index=True).set_index('filename')
+
+        return exploded_df
 
     def all_drugs(self) -> Set[str]:
         """
