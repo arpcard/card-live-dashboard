@@ -93,7 +93,7 @@ class RGIParser:
         df_drugclass = self._get_drugclass_matches(drug_classes)
 
         if type == 'file':
-            filename_matches = set(df_drugclass[df_drugclass['matches']].index.tolist())
+            filename_matches = df_drugclass[df_drugclass['matches']].index.tolist()
             return RGIParser(self._df_rgi.loc[filename_matches])
         elif type == 'row':
             raise Exception('Unimplemented type [type=row]')
