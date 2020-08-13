@@ -230,11 +230,15 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by]
         category_orders = order_categories(data.main_df, color_col_name)
 
+        print(data.main_df.columns)
+
         fig = px.histogram(data.main_df, x='timestamp',
                            nbins=50,
                            color=color_col_name,
+                           #histnorm='percent',
+                           # barnorm='percent',
                            category_orders=category_orders,
-                           labels={'count': 'Count',
+                           labels={'count': 'Percent',
                                    'timestamp': 'Date',
                                    'geo_area_name_standard': 'Geographic region',
                                    'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
@@ -243,7 +247,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                            )
         fig.update_traces(cumulative_enabled=cumulative)
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': 'Samples count'}
+                          yaxis={'title': 'Percent of samples', 'ticksuffix': '%'}
                           )
     return fig
 
