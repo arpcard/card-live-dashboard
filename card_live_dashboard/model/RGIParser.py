@@ -29,8 +29,8 @@ class RGIParser:
             return self.select_by_cutoff(type=type, **kwargs)
         elif by == 'drug':
             return self.select_by_drugclass(type=type, **kwargs)
-        elif by == 'aro':
-            return self.select_by_besthit_aro(type=type, **kwargs)
+        elif by == 'amr_gene':
+            return self.select_by_amr_gene(type=type, **kwargs)
         else:
             raise Exception(f'Unknown value [by={by}].')
 
@@ -98,33 +98,33 @@ class RGIParser:
         else:
             raise Exception(f'Unknown value [type={type}]')
 
-    def select_by_besthit_aro(self, type: str, besthit_aro: List[str] = None) -> RGIParser:
+    def select_by_amr_gene(self, type: str, amr_genes: List[str] = None) -> RGIParser:
         """
-        Given a list of Best Hit ARO selections, selects data containing only files with some match.
+        Given a list of AMR gene selections, selects data containing only files with some match.
 
-        :param besthit_aro: A list of Best Hit ARO selections.
+        :param amr_genes: A list of amr_gene selections.
         :param type: The type of results to select.
             'row' means that the function is used to select rows in the data frame.
             'file' means that all data for files matching the criteria are selected.
         :return: An RGIParser object on the subset of matched data.
         """
-        if besthit_aro is None or len(besthit_aro) == 0:
+        if amr_genes is None or len(amr_genes) == 0:
             return self
         elif type == 'file':
             # Convert 'rgi_main.Best_Hit_ARO' column to a 'Set' of entries. For example
-            # | index | rgi_main.Best_Hit_ARO |
-            # |-------|-----------------------|
-            # | file1 | {'aro1', 'aro2'}      |
-            # | file2 | {'aro4', 'aro5'}      |
-            collapsed_aro_sets = self._df_rgi.groupby('filename').apply(
+            # | index | rgi_main.Best_Hit_ARO   |
+            # |-------|-------------------------|
+            # | file1 | {'gene1', 'gene2'}      |
+            # | file2 | {'gene4', 'gene5'}      |
+            collapsed_gene_sets = self._df_rgi.groupby('filename').apply(
                 lambda x: set(y for y in x['rgi_main.Best_Hit_ARO'])).to_frame().rename(
                 columns={0: 'rgi_main.Best_Hit_ARO'})
 
-            # Set 'matches' column to True if the 'besthit_aro' list is a subset of 'rgi_main.Best_Hit_ARO'
-            collapsed_aro_sets['matches'] = collapsed_aro_sets['rgi_main.Best_Hit_ARO'].apply(
-                lambda x: set(besthit_aro).issubset(x))
+            # Set 'matches' column to True if the 'amr_genes' list is a subset of 'rgi_main.Best_Hit_ARO'
+            collapsed_gene_sets['matches'] = collapsed_gene_sets['rgi_main.Best_Hit_ARO'].apply(
+                lambda x: set(amr_genes).issubset(x))
 
-            matches_files = collapsed_aro_sets[collapsed_aro_sets['matches']]
+            matches_files = collapsed_gene_sets[collapsed_gene_sets['matches']]
             files = set(matches_files.index.tolist())
             return RGIParser(self._df_rgi.loc[files].copy())
         elif type == 'row':
@@ -225,11 +225,11 @@ class RGIParser:
 
         return all_drugs
 
-    def all_besthit_aro(self) -> Set[str]:
+    def all_amr_genes(self) -> Set[str]:
         """
-        Gets a set of all possible Best Hit ARO values.
+        Gets a set of all possible AMR genes (Best Hit ARO values).
 
-        :return: A set of all Best Hit ARO values.
+        :return: A set of all AMR genes (Best Hit ARO values).
         """
         return set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist())
 

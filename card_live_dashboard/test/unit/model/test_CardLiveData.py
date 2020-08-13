@@ -229,46 +229,46 @@ def test_select_rgi_drugclass_three():
     assert 1 == len(data.mlst_df), 'Invalid number after selection'
 
 
-def test_select_rgi_besthit_aro_all():
+def test_select_rgi_amr_genes_all():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='aro', type='file', besthit_aro=[])
+    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=[])
     assert 3 == len(data), 'Invalid number after selection'
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
     assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes categories'
     assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 3 == len(data.lmat_df), 'Invalid number after selection'
     assert 3 == len(data.mlst_df), 'Invalid number after selection'
 
 
-def test_select_rgi_besthit_aro_one():
+def test_select_rgi_amr_genes_one():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='aro', type='file', besthit_aro=['gene1'])
+    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=['gene1'])
     assert 2 == len(data), 'Invalid number after selection'
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
     assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes categories'
     assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 2 == len(data.lmat_df), 'Invalid number after selection'
     assert 2 == len(data.mlst_df), 'Invalid number after selection'
 
 
-def test_select_rgi_besthit_aro_two():
+def test_select_rgi_amr_gene_two():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='aro', type='file', besthit_aro=['gene1', 'gene2'])
+    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=['gene1', 'gene2'])
     assert 1 == len(data), 'Invalid number after selection'
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file1'} == data.files(), 'Invalid files'
     assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes categories'
     assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 1 == len(data.lmat_df), 'Invalid number after selection'
     assert 1 == len(data.mlst_df), 'Invalid number after selection'
@@ -337,7 +337,7 @@ def test_select_organism_lmat_all():
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
     assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes'
     assert ['Salmonella enterica', 'Enterobacteriaceae', 'Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
     assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 3 == len(data.lmat_df), 'Invalid number after selection'
@@ -353,7 +353,7 @@ def test_select_organism_rgi_kmer_one():
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file2'} == data.files(), 'Invalid files'
     assert 1 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes'
     assert ['Salmonella enterica'] == data.main_df['rgi_kmer_taxonomy'].tolist()
     assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 1 == len(data.lmat_df), 'Invalid number after selection'
@@ -369,7 +369,7 @@ def test_select_organism_lmat_two():
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file3'} == data.files(), 'Invalid files'
     assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes'
     assert ['Salmonella enterica', 'Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
     assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 2 == len(data.lmat_df), 'Invalid number after selection'
@@ -385,7 +385,7 @@ def test_select_organism_rgi_kmer_two():
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file3'} == data.files(), 'Invalid files'
     assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'gene1', 'gene2'} == data.rgi_parser.all_besthit_aro(), 'Invalid ARO categories'
+    assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes'
     assert ['Enterobacteriaceae', 'Enterobacteriaceae'] == data.main_df['rgi_kmer_taxonomy'].tolist()
     assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 2 == len(data.lmat_df), 'Invalid number after selection'
