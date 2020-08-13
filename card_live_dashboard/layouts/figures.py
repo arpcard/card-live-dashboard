@@ -57,6 +57,12 @@ TOTALS_FIGURE_TITLES = {
 }
 
 
+RESISTANCES_TITLES = {
+    'drug_class': 'Drug class resistances',
+    'besthit_aro': 'Best hit ARO resistances',
+}
+
+
 def taxonomic_comparison(df: pd.DataFrame):
     if df.empty:
         fig = EMPTY_FIGURE
@@ -144,39 +150,36 @@ def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figur
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        if type_value == 'drug-classes':
-            totals_df = data.rgi_parser.explode_column(
-                'rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].reset_index().drop_duplicates().set_index('filename')
-            counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'resistant_count'})
-            counts_df.index.rename('rgi_main.Drug Class', inplace=True)
-            selected_files_count = len(set(totals_df.index.tolist()))
-            counts_df['non_resistant_count'] = selected_files_count - counts_df
-            counts_df = counts_df.reset_index()
-            counts_df = counts_df.sort_values(by=['resistant_count', 'rgi_main.Drug Class'], ascending=[True, False])
-
-            counts_df = counts_df.rename(columns={'resistant_count': 'Resistant',
-                                                  'non_resistant_count': 'Non-resistant'})
-        elif type_value == 'besthit-aro':
-            totals_df = data.rgi_df['rgi_main.Best_Hit_ARO'].value_counts()
-            print(totals_df)
-
-            fig = EMPTY_FIGURE
+        if type_value == 'drug_class':
+            totals_df = data.rgi_parser.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded']
+        elif type_value == 'besthit_aro':
+            totals_df = data.rgi_df['rgi_main.Best_Hit_ARO']
         else:
             raise Exception(f'Unknown value [type_value={type_value}]')
 
-        fig = px.bar(counts_df, y='rgi_main.Drug Class', x=['Resistant', 'Non-resistant'],
+        # Data preparation
+        totals_df.name = 'categories'
+        totals_df = totals_df.reset_index().drop_duplicates().set_index('filename')
+        counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'match_count'})
+        selected_files_count = len(set(totals_df.index.tolist()))
+        counts_df['non_match_count'] = selected_files_count - counts_df
+        counts_df = counts_df.reset_index()
+        counts_df = counts_df.sort_values(by=['match_count', 'categories'], ascending=[True, False])
+        counts_df = counts_df.rename(columns={'match_count': 'Match',
+                                              'non_match_count': 'Non-match'})
+
+        title = RESISTANCES_TITLES[type_value]
+
+        fig = px.bar(counts_df, y='categories', x=['Match', 'Non-match'],
                      height=600,
-                     labels={'resistant_count': 'Resistant samples',
-                             'non_resistant_count': 'Non-resistant samples',
-                             'rgi_main.Drug Class': 'Drug class',
+                     labels={'categories': 'Categories',
                              'variable': 'Type'},
-                     title='Drug class resistances',
+                     title=title,
                      )
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'dtick': 1},
                           xaxis={'title': 'Samples count'}
                           )
-
     return fig
 
 

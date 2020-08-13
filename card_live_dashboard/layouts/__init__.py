@@ -207,7 +207,15 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
             single_figure_layout(title='Resistances',
                                  id='figure-resistances-id',
                                  fig=figures_dict['resistances'],
+                                 dropdowns=figure_menus_layout(
+                                     id_type='resistances-type-select',
+                                     options_type=[
+                                         {'label': 'Drug class', 'value': 'drug_class'},
+                                         {'label': 'Best Hit ARO', 'value': 'besthit_aro'},
+                                     ],
+                                     value_type='drug_class',
                                  ),
+                             ),
         ])
     ]
 
@@ -229,22 +237,23 @@ def single_figure_layout(title: str, id: str, fig: go.Figure, dropdowns: html.Di
 
 
 def figure_menus_layout(id_type: str, options_type: List[Dict[str,str]], value_type: str,
-                        id_color: str, options_color: List[Dict[str,str]], value_color: str) -> html.Div:
-    return html.Div(className='d-flex align-items-center', children=[
-        html.Div(['Type:']),
-        html.Div(className='ml-2', children=[dcc.Dropdown(
-            id=id_type,
-            options=options_type,
-            searchable=False,
-            clearable=False,
-            value=value_type,
-        )]),
-        html.Div(className='ml-3', children=['Color by:']),
-        html.Div(className='ml-2', children=[dcc.Dropdown(
+                        id_color: str = None, options_color: List[Dict[str,str]] = None, value_color: str = None) -> html.Div:
+    elements = [html.Div(['Type:']), html.Div(className='ml-2', children=[dcc.Dropdown(
+        id=id_type,
+        options=options_type,
+        searchable=False,
+        clearable=False,
+        value=value_type,
+    )])]
+
+    if id_color is not None:
+        elements.append(html.Div(className='ml-3', children=['Color by:']))
+        elements.append(html.Div(className='ml-2', children=[dcc.Dropdown(
             id=id_color,
             options=options_color,
             searchable=False,
             clearable=False,
             value=value_color,
-        )]),
-    ])
+        )]))
+
+    return html.Div(className='d-flex align-items-center', children=elements)
