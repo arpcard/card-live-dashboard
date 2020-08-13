@@ -4,6 +4,7 @@
 * Added an organism select dropdown for both LMAT and RGI Kmer results.
 * Fixed bug in select by drug class causing multiple selections to miss some samples if drug classes were found on different contigs.
 * Added plot for viewing drug class counts.
+* Added plot for Best Hit ARO (AMR gene).
 
 # 0.1.0
 
