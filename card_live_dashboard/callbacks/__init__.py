@@ -5,7 +5,6 @@ import dash
 
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model import world
 
@@ -64,7 +63,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
-         Output('figure-drug-classes-id', 'figure')],
+         Output('figure-resistances-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('besthit-aro-select', 'value'),
@@ -138,7 +137,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
-                main_pane_figures['drug-classes'])
+                main_pane_figures['resistances'])
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
@@ -187,11 +186,11 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
     fig_totals = figures.totals_figure(data, type_value=fig_settings['totals']['type'],
                                        color_by_value=fig_settings['totals']['color'])
 
-    fig_drug_classes = figures.drug_classes(data)
+    fig_drug_classes = figures.resistance_breakdown_figure(data, type_value='drug-classes')
 
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
-        'drug-classes': fig_drug_classes,
+        'resistances': fig_drug_classes,
     }

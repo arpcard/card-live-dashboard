@@ -33,7 +33,7 @@ EMPTY_FIGURE_DICT = {
     'map': EMPTY_MAP,
     'timeline': EMPTY_FIGURE,
     'totals': EMPTY_FIGURE,
-    'drug-classes': EMPTY_FIGURE,
+    'resistances': EMPTY_FIGURE,
 }
 
 TOTALS_COLUMN_SELECT_NAMES = {
@@ -140,21 +140,29 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
     return fig
 
 
-def drug_classes(data: CardLiveData) -> go.Figure:
+def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        totals_df = data.rgi_parser.explode_column(
-            'rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].reset_index().drop_duplicates().set_index('filename')
-        counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'resistant_count'})
-        counts_df.index.rename('rgi_main.Drug Class', inplace=True)
-        selected_files_count = len(set(totals_df.index.tolist()))
-        counts_df['non_resistant_count'] = selected_files_count - counts_df
-        counts_df = counts_df.reset_index()
-        counts_df = counts_df.sort_values(by=['resistant_count', 'rgi_main.Drug Class'], ascending=[True, False])
+        if type_value == 'drug-classes':
+            totals_df = data.rgi_parser.explode_column(
+                'rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].reset_index().drop_duplicates().set_index('filename')
+            counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'resistant_count'})
+            counts_df.index.rename('rgi_main.Drug Class', inplace=True)
+            selected_files_count = len(set(totals_df.index.tolist()))
+            counts_df['non_resistant_count'] = selected_files_count - counts_df
+            counts_df = counts_df.reset_index()
+            counts_df = counts_df.sort_values(by=['resistant_count', 'rgi_main.Drug Class'], ascending=[True, False])
 
-        counts_df = counts_df.rename(columns={'resistant_count': 'Resistant',
-                                              'non_resistant_count': 'Non-resistant'})
+            counts_df = counts_df.rename(columns={'resistant_count': 'Resistant',
+                                                  'non_resistant_count': 'Non-resistant'})
+        elif type_value == 'besthit-aro':
+            totals_df = data.rgi_df['rgi_main.Best_Hit_ARO'].value_counts()
+            print(totals_df)
+
+            fig = EMPTY_FIGURE
+        else:
+            raise Exception(f'Unknown value [type_value={type_value}]')
 
         fig = px.bar(counts_df, y='rgi_main.Drug Class', x=['Resistant', 'Non-resistant'],
                      height=600,

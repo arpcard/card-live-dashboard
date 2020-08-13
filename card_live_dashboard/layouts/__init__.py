@@ -204,9 +204,9 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      value_color='default'
                                  ),
                              ),
-            single_figure_layout(title='Drug classes',
-                                 id='figure-drug-classes-id',
-                                 fig=figures_dict['drug-classes'],
+            single_figure_layout(title='Resistances',
+                                 id='figure-resistances-id',
+                                 fig=figures_dict['resistances'],
                                  ),
         ])
     ]
