@@ -162,23 +162,24 @@ def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figur
         totals_df = totals_df.reset_index().drop_duplicates().set_index('filename')
         counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'match_count'})
         selected_files_count = len(set(totals_df.index.tolist()))
-        counts_df['non_match_count'] = selected_files_count - counts_df
+        counts_df['match_proportion'] = counts_df / selected_files_count
         counts_df = counts_df.reset_index()
         counts_df = counts_df.sort_values(by=['match_count', 'categories'], ascending=[True, False])
-        counts_df = counts_df.rename(columns={'match_count': 'Match',
-                                              'non_match_count': 'Non-match'})
+        counts_df = counts_df.rename(columns={'match_proportion': 'Match percent'})
 
         title = RESISTANCES_TITLES[type_value]
 
-        fig = px.bar(counts_df, y='categories', x=['Match', 'Non-match'],
+        fig = px.bar(counts_df, y='categories', x='Match percent',
                      height=600,
                      labels={'categories': 'Categories',
-                             'variable': 'Type'},
+                             'variable': 'Type',
+                             'match_count': 'Samples count'},
+                     hover_data=['match_count'],
                      title=title,
                      )
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'dtick': 1},
-                          xaxis={'title': 'Samples count'}
+                          xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                           )
     return fig
 
