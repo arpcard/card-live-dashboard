@@ -8,6 +8,7 @@ RGI_DF = pd.DataFrame(
     data=[['file1', 'Perfect', 'class1; class2', 'gene1'],
           ['file1', 'Strict', 'class1; class2; class3', 'gene2'],
           ['file2', 'Perfect', 'class1; class2; class4', 'gene1'],
+          ['file2', 'Perfect', 'class5', 'gene1'],
           ['file2', 'Perfect', '', 'gene1'],
           ['file3', None, None, None],
           ]
@@ -50,7 +51,7 @@ RGI_PARSER_ONLY_NA = RGIParser(RGI_DF_ONLY_NA)
 
 
 def test_all_drugs():
-    assert {'class1', 'class2', 'class3', 'class4'} == RGI_PARSER.all_drugs()
+    assert {'class1', 'class2', 'class3', 'class4', 'class5'} == RGI_PARSER.all_drugs()
 
 
 def test_all_drugs_only_none():
@@ -92,18 +93,19 @@ def test_all_besthit_aro_only_na():
 
 def test_expand_drug_class():
     expanded_df = RGI_PARSER.explode_column('rgi_main.Drug Class')
-    assert 10 == len(expanded_df)
+    assert 11 == len(expanded_df)
     assert ['file1', 'file1', 'file1', 'file1', 'file1',
-            'file2', 'file2', 'file2', 'file2', 'file3'] == expanded_df.index.tolist()
+            'file2', 'file2', 'file2', 'file2', 'file2', 'file3'] == expanded_df.index.tolist()
 
     value_counts = expanded_df['rgi_main.Drug Class'].groupby('filename').value_counts()
     assert 2 == value_counts['file1']['class1; class2']
     assert 3 == value_counts['file1']['class1; class2; class3']
     assert 3 == value_counts['file2']['class1; class2; class4']
+    assert 1 == value_counts['file2']['class5']
     assert 'file3' not in value_counts
 
     assert ['class1', 'class2', 'class1', 'class2', 'class3',
-            'class1', 'class2', 'class4'] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
+            'class1', 'class2', 'class4', 'class5'] == expanded_df['rgi_main.Drug Class_exploded'].dropna().tolist()
     assert pd.isna(expanded_df.loc['file3', 'rgi_main.Drug Class_exploded'])
 
 
@@ -161,20 +163,20 @@ def test_expand_drug_class_only_na():
 def test_select_by_drugclass_single1():
     new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1'])
 
-    assert 4 == len(new_parser.df_rgi)
-    assert ['file1', 'file1', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
+    assert 5 == len(new_parser.df_rgi)
+    assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
     print(new_parser.df_rgi['rgi_main.Drug Class'].tolist())
     assert ['class1; class2', 'class1; class2; class3',
-            'class1; class2; class4', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
+            'class1; class2; class4', 'class5', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
 
 
 def test_select_by_drugclass_single2():
     new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class2'])
 
-    assert 4 == len(new_parser.df_rgi)
-    assert ['file1', 'file1', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
+    assert 5 == len(new_parser.df_rgi)
+    assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
     assert ['class1; class2', 'class1; class2; class3',
-            'class1; class2; class4', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
+            'class1; class2; class4', 'class5', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
 
 
 def test_select_by_drugclass_single3():
@@ -188,18 +190,18 @@ def test_select_by_drugclass_single3():
 def test_select_by_drugclass_single4():
     new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class4'])
 
-    assert 2 == len(new_parser.df_rgi)
-    assert ['file2', 'file2'] == new_parser.df_rgi.index.tolist()
-    assert ['class1; class2; class4', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
+    assert 3 == len(new_parser.df_rgi)
+    assert ['file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
+    assert ['class1; class2; class4', 'class5', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
 
 
 def test_select_by_drugclass_multiple_1_2():
     new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1', 'class2'])
 
-    assert 4 == len(new_parser.df_rgi)
-    assert ['file1', 'file1', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
+    assert 5 == len(new_parser.df_rgi)
+    assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
     assert ['class1; class2', 'class1; class2; class3',
-            'class1; class2; class4', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
+            'class1; class2; class4', 'class5', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
 
 
 def test_select_by_drugclass_multiple_1_3():
@@ -208,3 +210,19 @@ def test_select_by_drugclass_multiple_1_3():
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
     assert ['class1; class2', 'class1; class2; class3'] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
+
+
+def test_select_by_drugclass_multiple_1_2_3():
+    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1', 'class2', 'class3'])
+
+    assert 2 == len(new_parser.df_rgi)
+    assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
+    assert ['class1; class2', 'class1; class2; class3'] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()
+
+
+def test_select_by_drugclass_multiple_4_5():
+    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class4', 'class5'])
+
+    assert 3 == len(new_parser.df_rgi)
+    assert ['file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
+    assert ['class1; class2; class4', 'class5', ''] == new_parser.df_rgi['rgi_main.Drug Class'].tolist()

@@ -90,11 +90,9 @@ class RGIParser:
             'file' means that all data for files matching the criteria are selected.
         :return: An RGIParser object on the subset of matched data.
         """
-        df_drugclass = self._get_drugclass_matches(drug_classes)
-
         if type == 'file':
-            filename_matches = df_drugclass[df_drugclass['matches']].index.tolist()
-            return RGIParser(self._df_rgi.loc[filename_matches])
+            matched_files = self._get_drugclass_matches(drug_classes)
+            return RGIParser(self._df_rgi.loc[matched_files])
         elif type == 'row':
             raise Exception('Unimplemented type [type=row]')
         else:
@@ -134,30 +132,23 @@ class RGIParser:
         else:
             raise Exception(f'Unknown value [type={type}]')
 
-    def _get_drugclass_matches(self, drug_classes: List[str] = None) -> pd.DataFrame:
+    def _get_drugclass_matches(self, drug_classes: List[str] = None) -> Set[str]:
         """
-        Given a list of drug classes, returns a DataFrame indexed by 'filename' with a column 'matches'
-        indicating if the particular file contains all of the passed drug classes.
+        Given a list of drug classes, returns a set of files that contain all the drug classes.
 
         :param drug_classes: A list of drug class names to match. An empty list matches everything.
-        :return: A DataFrame which indicates of a particular file matched all of the passed drugs.
+        :return: A list of matching files.
         """
-        df_rgi_drug = self._df_rgi.reset_index()[['filename', 'rgi_main.Drug Class']].replace('', np.nan)
-        df_rgi_drug['rgi_main.Drug Class'] = df_rgi_drug.loc[
-            ~df_rgi_drug['rgi_main.Drug Class'].isna(), 'rgi_main.Drug Class'].str.split(';').apply(
-            lambda x: set(y.strip() for y in x))
-
         if drug_classes is None or len(drug_classes) == 0:
-            df_rgi_drug['matches'] = True
+            return self.files()
         else:
-            df_rgi_drug['matches'] = df_rgi_drug['rgi_main.Drug Class'].dropna().apply(
-                lambda rgi_drugs: all(drug in rgi_drugs for drug in drug_classes))
+            drug_classes_set = set(drug_classes)
 
-        df_rgi_drug['matches'] = df_rgi_drug['matches'].fillna(False)
-        df_rgi_drug = df_rgi_drug[['filename', 'matches']].set_index('filename')
-        df_rgi_drug = df_rgi_drug.groupby(['filename']).agg('any')
+            df_rgi_drug = self.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].dropna()
+            df_rgi_drug = df_rgi_drug.groupby('filename').apply(lambda x: set(y for y in x)).to_frame()
+            df_rgi_drug['match'] = df_rgi_drug['rgi_main.Drug Class_exploded'].apply(lambda x: drug_classes_set.issubset(x))
 
-        return df_rgi_drug
+            return df_rgi_drug[df_rgi_drug['match']].index.tolist()
 
     def value_counts(self, col: str) -> pd.DataFrame:
         """
