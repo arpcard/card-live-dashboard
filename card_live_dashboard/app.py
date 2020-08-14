@@ -1,3 +1,4 @@
+from typing import Union
 import dash
 import flask
 from pathlib import Path
@@ -26,9 +27,13 @@ def build_app(card_live_data_dir: Path = DEFAULT_DATA_DIR) -> dash.dash.Dash:
     return app
 
 
-def flask_app() -> flask.Flask:
+def flask_app(data_dir: Union[str,Path] = DEFAULT_DATA_DIR) -> flask.Flask:
     """
     Builds and gets the Flask app object for deployment as a Flask app.
+    :param data_dir: The directory containing the data.
     :return: The Flask app server object.
     """
-    return build_app(DEFAULT_DATA_DIR).server
+    if isinstance(data_dir, str):
+        data_dir = Path(data_dir)
+
+    return build_app(data_dir).server
