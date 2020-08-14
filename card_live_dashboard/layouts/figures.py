@@ -196,9 +196,12 @@ def choropleth_drug(data: CardLiveData, world: geopandas.GeoDataFrame):
         fig = px.choropleth(df_geo, geojson=world, locations='geo_area_code',
                             featureidkey='properties.un_m49_numeric',
                             color='count', color_continuous_scale='YlGnBu',
-                            labels={'count': 'Samples count'},
                             hover_data=['geo_area_name_standard'],
+
+                            # Off-center to avoid a color fill issue with Antarctica
+                            # where the oceans get filled instead of the continent
                             center={'lat': 0, 'lon': 0.01},
+
                             title='Samples by geographic region',
                             )
         fig.update_traces(
@@ -210,7 +213,18 @@ def choropleth_drug(data: CardLiveData, world: geopandas.GeoDataFrame):
 
     fig.update_layout(
         margin={"r": 0, "t": 35, "l": 0, "b": 0},
-        height=400,
+        coloraxis_colorbar=dict(
+            title='Count',
+            yanchor='middle',
+            y=0.5,
+            len=1,
+            lenmode='fraction',
+            outlinecolor='black',
+            outlinewidth=1,
+            bgcolor='white',
+            thickness=25,
+            thicknessmode='pixels',
+        ),
     )
 
     return fig
@@ -235,7 +249,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         fig = px.histogram(data.main_df, x='timestamp',
                            nbins=50,
                            color=color_col_name,
-                           #histnorm='percent',
+                           histnorm='percent',
                            # barnorm='percent',
                            category_orders=category_orders,
                            labels={'count': 'Percent',
