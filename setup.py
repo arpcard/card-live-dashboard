@@ -35,11 +35,12 @@ setup(name='card-live-dashboard',
           'dash-bootstrap-components',
           'plotly',
           'shapely',
+          'gunicorn',
+          'pytest',
       ],
       packages=find_packages(),
       include_package_data=True,
       scripts=['bin/cardlive-dash-dev',
                'bin/cardlive-dash-prod',
                'bin/cardlive-dash-profiler'],
-      # setup_requires = ['green']
 )
