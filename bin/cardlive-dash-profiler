@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 from werkzeug.middleware.profiler import ProfilerMiddleware
 
-import card_live_dashboard
+import card_live_dashboard.app
 
 # Instructions for running Flask (used by Dash) with a profiler from
 # <https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-debugging-testing-and-profiling>
 if __name__ == '__main__':
-    app = card_live_dashboard.build_app()
+    app = card_live_dashboard.app.build_app()
 
     flask_app = app.server
     flask_app.wsgi_app = ProfilerMiddleware(
