@@ -59,7 +59,7 @@ TOTALS_FIGURE_TITLES = {
 
 RESISTANCES_TITLES = {
     'drug_class': 'Drug class resistances',
-    'besthit_aro': 'Best hit ARO resistances',
+    'amr_gene': 'AMR gene',
 }
 
 
@@ -152,7 +152,7 @@ def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figur
     else:
         if type_value == 'drug_class':
             totals_df = data.rgi_parser.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded']
-        elif type_value == 'besthit_aro':
+        elif type_value == 'amr_gene':
             totals_df = data.rgi_df['rgi_main.Best_Hit_ARO']
         else:
             raise Exception(f'Unknown value [type_value={type_value}]')

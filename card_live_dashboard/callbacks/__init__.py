@@ -59,14 +59,14 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('organism-rgi-kmer-select', 'options'),
          Output('selected-samples-count', 'children'),
          Output('drug-class-select', 'options'),
-         Output('besthit-aro-select', 'options'),
+         Output('amr-gene-select', 'options'),
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
          Output('figure-resistances-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
-         Input('besthit-aro-select', 'value'),
+         Input('amr-gene-select', 'value'),
          Input('organism-lmat-select', 'value'),
          Input('organism-rgi-kmer-select', 'value'),
          Input('time-period-items', 'value'),
@@ -78,7 +78,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('auto-update-interval', 'n_intervals')]
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
-                           besthit_aro: List[str], organism_lmat: str,
+                           amr_genes: List[str], organism_lmat: str,
                            organism_rgi_kmer: str, time_dropdown: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
@@ -87,7 +87,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         Main callback/controller for updating all figures based on user selections.
         :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
         :param drug_classes: A list of the drug_classes to display.
-        :param besthit_aro: The list of best hit ARO values to select by.
+        :param amr_genes: The list of AMR genes (best hit ARO values) to select by.
         :param time_dropdown: The time selection.
         :param timeline_type_select: The selection for the timeline type.
         :param timeline_color_select: The color selection for the timeline.
@@ -100,7 +100,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         time_subsets = apply_filters(data=data,
                                      rgi_cutoff_select=rgi_cutoff_select,
                                      drug_classes=drug_classes,
-                                     besthit_aro=besthit_aro,
+                                     amr_genes=amr_genes,
                                      organism_lmat=organism_lmat,
                                      organism_rgi_kmer=organism_rgi_kmer)
 
@@ -126,7 +126,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         organism_lmat_options = build_options([organism_lmat], time_subsets[time_dropdown].unique_column('lmat_taxonomy'))
         organism_rgi_kmer_options = build_options([organism_rgi_kmer], time_subsets[time_dropdown].unique_column('rgi_kmer_taxonomy'))
         drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].rgi_parser.all_drugs())
-        besthit_aro_options = build_options(besthit_aro, time_subsets[time_dropdown].rgi_parser.all_besthit_aro())
+        amr_gene_options = build_options(amr_genes, time_subsets[time_dropdown].rgi_parser.all_amr_genes())
 
         return (global_samples_count,
                 global_last_updated,
@@ -135,7 +135,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 organism_rgi_kmer_options,
                 samples_count_string,
                 drug_class_options,
-                besthit_aro_options,
+                amr_gene_options,
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
@@ -143,13 +143,13 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
-                  drug_classes: List[str], besthit_aro: List[str], organism_lmat: str,
+                  drug_classes: List[str], amr_genes: List[str], organism_lmat: str,
                   organism_rgi_kmer: str) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
         .select(table='rgi', by='drug', type='file', drug_classes=drug_classes) \
-        .select(table='rgi', by='aro', type='file', besthit_aro=besthit_aro) \
+        .select(table='rgi', by='amr_gene', type='file', amr_genes=amr_genes) \
         .select(table='main', by='lmat_taxonomy', taxonomy=organism_lmat) \
         .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
 

@@ -79,16 +79,16 @@ def test_all_drugs_empty():
     assert set() == rgi_parser_empty.all_drugs()
 
 
-def test_all_besthit_aro():
-    assert {'gene1', 'gene2'} == RGI_PARSER.all_besthit_aro()
+def test_all_amr_genes():
+    assert {'gene1', 'gene2'} == RGI_PARSER.all_amr_genes()
 
 
-def test_all_besthit_aro_only_none():
-    assert set() == RGI_PARSER_NONE.all_besthit_aro()
+def test_all_amr_genes_only_none():
+    assert set() == RGI_PARSER_NONE.all_amr_genes()
 
 
-def test_all_besthit_aro_only_na():
-    assert set() == RGI_PARSER_NA.all_besthit_aro()
+def test_all_amr_genes_only_na():
+    assert set() == RGI_PARSER_NA.all_amr_genes()
 
 
 def test_expand_drug_class():
