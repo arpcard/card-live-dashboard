@@ -241,16 +241,30 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         else:
             raise Exception(f'Unknown value [fig_type={fig_type}]')
 
+        if color_by == 'default':
+            marginal = 'rug'
+        else:
+            # I get rid of marginal here since I found the plot became messy
+            # when coloring by many categories
+            marginal = None
+
+        # I add in a fraction of the total number of samples here
+        # This is so I can make the histogram report a percentage
+        # of values instead of a count (by taking the sum of
+        # (time_fraction) in a given time period).
+        hist_data = data.main_df.copy()
+        hist_data['time_fraction'] = 1/len(hist_data)
+
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by]
         category_orders = order_categories(data.main_df, color_col_name)
 
-        print(data.main_df.columns)
+        print(hist_data[['timestamp', 'time_fraction']])
 
-        fig = px.histogram(data.main_df, x='timestamp',
+        fig = px.histogram(hist_data, x='timestamp', y='time_fraction',
                            nbins=50,
+                           marginal=marginal,
+                           cumulative=cumulative,
                            color=color_col_name,
-                           histnorm='percent',
-                           # barnorm='percent',
                            category_orders=category_orders,
                            labels={'count': 'Percent',
                                    'timestamp': 'Date',
@@ -258,10 +272,10 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                                    'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
                                    'lmat_taxonomy': 'Organism (LMAT)'},
                            title='Samples by date',
+                           histfunc='sum',
                            )
-        fig.update_traces(cumulative_enabled=cumulative)
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': 'Percent of samples', 'ticksuffix': '%'}
+                          yaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                           )
     return fig
 
