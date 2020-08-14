@@ -5,6 +5,7 @@
 * Fixed bug in select by drug class causing multiple selections to miss some samples if drug classes were found on different contigs.
 * Renamed *Besthit ARO* to *AMR gene*.
 * Added plot for viewing drug class counts and AMR genes.
+* Added `setup.py` install script.
 
 # 0.1.0
 
