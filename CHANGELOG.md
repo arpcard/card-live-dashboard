@@ -6,6 +6,7 @@
 * Renamed *Besthit ARO* to *AMR gene*.
 * Added plot for viewing drug class counts and AMR genes.
 * Added `setup.py` install script.
+* Changed axis of timeline to percent instead of count.
 
 # 0.1.0
 
