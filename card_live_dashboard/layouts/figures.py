@@ -204,6 +204,7 @@ def choropleth_drug(data: CardLiveData, world: geopandas.GeoDataFrame):
 
                             title='Samples by geographic region',
                             )
+
         fig.update_traces(
             hovertemplate=(
                 '<b style="font-size: 125%;">%{customdata[0]}</b><br>'
@@ -241,6 +242,8 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         else:
             raise Exception(f'Unknown value [fig_type={fig_type}]')
 
+        color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by]
+
         if color_by == 'default':
             marginal = 'rug'
         else:
@@ -255,10 +258,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         hist_data = data.main_df.copy()
         hist_data['time_fraction'] = 1/len(hist_data)
 
-        color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by]
-        category_orders = order_categories(data.main_df, color_col_name)
-
-        print(hist_data[['timestamp', 'time_fraction']])
+        category_orders = order_categories(hist_data, color_col_name)
 
         fig = px.histogram(hist_data, x='timestamp', y='time_fraction',
                            nbins=50,
@@ -266,7 +266,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                            cumulative=cumulative,
                            color=color_col_name,
                            category_orders=category_orders,
-                           labels={'count': 'Percent',
+                           labels={'time_fraction': 'Percent of samples',
                                    'timestamp': 'Date',
                                    'geo_area_name_standard': 'Geographic region',
                                    'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
@@ -277,6 +277,11 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         fig.update_layout(font={'size': 14},
                           yaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                           )
+
+        # This replaces the text in the hover 'sum of Percent of samples' to 'Percent of samples'
+        for d in fig.data:
+            d.hovertemplate = d.hovertemplate.replace('sum of ', '')
+
     return fig
 
 
