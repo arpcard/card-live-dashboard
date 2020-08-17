@@ -7,6 +7,7 @@ from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
 import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model import world
+from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)
@@ -63,7 +64,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
-         Output('figure-resistances-id', 'figure')],
+         Output('figure-resistances-id', 'figure'),
+         Output('figure-taxonomy-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('amr-gene-select', 'value'),
@@ -139,7 +141,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
-                main_pane_figures['resistances'])
+                main_pane_figures['resistances'],
+                main_pane_figures['taxonomy'])
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
@@ -190,9 +193,13 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
 
     fig_drug_classes = figures.resistance_breakdown_figure(data, type_value=fig_settings['resistances']['type'])
 
+    tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
+    taxonomy = figures.taxonomic_comparison(tax_parse.create_rgi_lmat_both())
+
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
         'resistances': fig_drug_classes,
+        'taxonomy': taxonomy,
     }

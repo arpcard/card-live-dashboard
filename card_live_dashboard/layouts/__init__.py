@@ -216,6 +216,9 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      value_type='drug_class',
                                  ),
                              ),
+            single_figure_layout(title='Taxonomy',
+                                 id='figure-taxonomy-id',
+                                 fig=figures_dict['taxonomy']),
         ])
     ]
 

@@ -34,6 +34,7 @@ EMPTY_FIGURE_DICT = {
     'timeline': EMPTY_FIGURE,
     'totals': EMPTY_FIGURE,
     'resistances': EMPTY_FIGURE,
+    'taxonomy': EMPTY_FIGURE,
 }
 
 TOTALS_COLUMN_SELECT_NAMES = {
@@ -67,7 +68,7 @@ def taxonomic_comparison(df: pd.DataFrame):
     if df.empty:
         fig = EMPTY_FIGURE
     else:
-        CATEGORY_LIMIT = 10
+        CATEGORY_LIMIT = 30
         df = df.groupby('taxon').sum().sort_values(
             by=['Total', 'taxon'], ascending=True)
 
