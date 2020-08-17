@@ -15,55 +15,58 @@ class TaxonomicParser:
             {'lmat.count': 'float64'}
         )
 
-        self._df_lmat = self.add_adjusted_taxonomy_label(self._df_lmat, 'lmat')
+        self._df_lmat = self.adjust_taxonomic_labels(self._df_lmat, 'lmat', min_rank='species')
 
         print(self._df_lmat[['lmat.ncbi_taxon_id', 'lmat.taxonomy_label', 'lmat.taxonomy_label_adjusted']])
+        print(self._df_lmat['lmat.taxonomy_label_adjusted'].value_counts())
 
-    def add_adjusted_taxonomy_label(self, df: pd.DataFrame, col_type: str) -> pd.DataFrame:
-        if col_type == 'lmat':
+    def adjust_taxonomic_labels(self, df: pd.DataFrame, results_type: str, min_rank: str) -> pd.DataFrame:
+        """
+        Adjust the taxonomic identifiers and labels so that they don't fall below the specified minimum rank.
+        :param df: The dataframe.
+        :param results_type: The type of results to adjust (lmat or rgi kmer).
+        :param min_rank: The minimum rank.
+        :return: A new data frame with the additional columns.
+        """
+        if results_type == 'lmat':
             ncbi_id_col = 'lmat.ncbi_taxon_id'
-            taxonomy_label_col = 'lmat.taxonomy_label_adjusted'
-            original_taxonomy_label_col = 'lmat.taxonomy_label'
+            taxonomy_id_adj = 'lmat.ncbi_taxon_id_adjusted'
+            taxonomy_label = 'lmat.taxonomy_label'
+            taxonomy_label_adj = 'lmat.taxonomy_label_adjusted'
         else:
-            raise Exception(f'Unknown type [type={col_type}]')
+            raise Exception(f'Unknown type [type={results_type}]')
 
         df_new = df.reset_index()
 
-        df_new[taxonomy_label_col] = df_new[original_taxonomy_label_col]
-        df_new[taxonomy_label_col] = df_new.loc[
+        df_new[taxonomy_id_adj] = df_new[ncbi_id_col]
+        df_new[taxonomy_id_adj] = df_new.loc[
             ~df_new[ncbi_id_col].isna(), ncbi_id_col].apply(
-            self._ncbi_taxa_limited, rank_limit='family')
-        df_new.loc[df_new[taxonomy_label_col].isna(), taxonomy_label_col] = df_new[original_taxonomy_label_col]
+            self._limit_taxon_to, min_rank=min_rank)
+        df_new[taxonomy_label_adj] = df_new[taxonomy_label]
+        df_new[taxonomy_label_adj] = df_new.loc[~df_new[taxonomy_id_adj].isna(), taxonomy_id_adj].apply(
+            lambda x: self._ncbi_taxa.get_taxid_translator([x]).get(x, pd.NA))
 
         return df_new.set_index('filename')
 
-    def _ncbi_taxa_limited(self, taxon_id: str, rank_limit: str) -> pd.Series:
-        taxon_name = pd.NA
-        rank_limit_name = None
+    def _limit_taxon_to(self, taxon_id: int, min_rank: str) -> int:
+        """
+        Given a taxonomic id and a rank limit the taxonomic id so that it is at the specified rank or higher.
+        :param taxon_id: The taxonomic id.
+        :param min_rank: The minimum limit for the rank (e.g., 'species', or 'family').
+        :return: The taxonomic id that is at or above the passed min_rank, or the original id if the passed rank was
+                 not found in the lineage.
+        """
         taxon_id = int(taxon_id)
-
         try:
             lineages = self._ncbi_taxa.get_lineage(taxon_id)
-            print(f'taxon_id={taxon_id}, rank_limit={rank_limit}, lineages={lineages}')
             ranks = self._ncbi_taxa.get_rank(lineages)
-            for lineage_rank in zip(lineages, ranks):
-                if lineage_rank[1] == rank_limit:
-                    rank_limit_name = self._ncbi_taxa.get_taxid_translator([lineage_rank[0]])
-                    break
+            for lineage in lineages:
+                if ranks[lineage] == min_rank:
+                    return lineage
         except ValueError as e:
-            logger.debug(f'Error when looking up taxon_id={taxon_id} in NCBI database.')
+            logger.debug(f'Error when looking up lineage for taxon_id={taxon_id} in NCBI database.', e)
 
-        if rank_limit_name is not None:
-            taxon_name = rank_limit_name
-        else:
-            taxon_names = self._ncbi_taxa.get_taxid_translator([taxon_id])
-
-            if taxon_id not in taxon_names:
-                logger.debug(f'Missing taxonomic translation for [taxon_id={taxon_id}]')
-            else:
-                taxon_name = taxon_names[taxon_id]
-
-        return taxon_name
+        return taxon_id
 
     def _create_contigs_lmat_score(self, df: pd.DataFrame, name: str) -> pd.DataFrame:
         df_sum = df['lmat.count'].groupby('filename').sum().rename('lmat_count_sum').to_frame()
