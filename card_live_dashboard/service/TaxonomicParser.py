@@ -1,6 +1,7 @@
 import pandas as pd
 from ete3 import NCBITaxa
 import logging
+import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -15,10 +16,13 @@ class TaxonomicParser:
             {'lmat.count': 'float64'}
         )
 
-        self._df_lmat = self.adjust_taxonomic_labels(self._df_lmat, 'lmat', min_rank='species')
-
-        print(self._df_lmat[['lmat.ncbi_taxon_id', 'lmat.taxonomy_label', 'lmat.taxonomy_label_adjusted']])
-        print(self._df_lmat['lmat.taxonomy_label_adjusted'].value_counts())
+        # The ete3 toolkit gives me a lot of warnings of the form 'taxid 1120974 was translated into 1203611'
+        # These indicate that certain taxonomic categories have been renamed or merged.
+        # I am removing these warnings from being printed (since things should just work and there's nothing I can do
+        # about the reported tax ids in the data).
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message=r'taxid \d+ was translated into \d+')
+            self._df_lmat = self.adjust_taxonomic_labels(self._df_lmat, 'lmat', min_rank='species')
 
     def adjust_taxonomic_labels(self, df: pd.DataFrame, results_type: str, min_rank: str) -> pd.DataFrame:
         """
@@ -37,7 +41,6 @@ class TaxonomicParser:
             raise Exception(f'Unknown type [type={results_type}]')
 
         df_new = df.reset_index()
-
         df_new[taxonomy_id_adj] = df_new[ncbi_id_col]
         df_new[taxonomy_id_adj] = df_new.loc[
             ~df_new[ncbi_id_col].isna(), ncbi_id_col].apply(
@@ -88,7 +91,8 @@ class TaxonomicParser:
             lambda x: x.replace(
                 # Remove text like '(chromosome)'
                 r' *\(.*\)', '', regex=True).value_counts()).reset_index()
-        df_tax = df_tax.rename(columns={'level_1': 'rgi_kmer.taxonomy_label', 'rgi_kmer.CARD*kmer Prediction': 'rgi_kmer.prediction_count'})
+        df_tax = df_tax.rename(columns={'level_1': 'rgi_kmer.taxonomy_label',
+                                        'rgi_kmer.CARD*kmer Prediction': 'rgi_kmer.prediction_count'})
         df_tax = df_tax.sort_values(by=['rgi_kmer.prediction_count', 'rgi_kmer.taxonomy_label'], ascending=False)
         df_tax = df_tax.groupby('filename').nth(0)['rgi_kmer.taxonomy_label']
         return df_tax.to_frame()
