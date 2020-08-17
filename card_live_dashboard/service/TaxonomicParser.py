@@ -81,10 +81,11 @@ class TaxonomicParser:
     def create_filename_lmat_tax(self) -> pd.DataFrame:
         df_lmat_subset = self._create_contigs_lmat_score(self._df_lmat, 'lmat_real_score')
         df_lmat_subset = df_lmat_subset.sort_values(
-            by=['filename', 'lmat_real_score', 'lmat.taxonomy_label'], ascending=False)
+            by=['filename', 'lmat_real_score', 'lmat.taxonomy_label_adjusted'], ascending=False)
         df_lmat_subset = df_lmat_subset.groupby('filename').nth(0)
 
-        return df_lmat_subset[['lmat.taxonomy_label']]
+        return df_lmat_subset[['lmat.taxonomy_label_adjusted']].rename(
+            columns={'lmat.taxonomy_label_adjusted': 'lmat.taxonomy_label'})
 
     def create_filename_rgi_kmer_tax(self) -> pd.DataFrame:
         df_tax = self._df_rgi_kmer.groupby('filename')['rgi_kmer.CARD*kmer Prediction'].apply(
