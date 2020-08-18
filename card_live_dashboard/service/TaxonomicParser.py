@@ -22,23 +22,19 @@ class TaxonomicParser:
         # about the reported tax ids in the data).
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', message=r'taxid \d+ was translated into \d+')
-            self._df_lmat = self.adjust_taxonomic_labels(self._df_lmat, 'lmat', min_rank='species')
+            self._df_lmat = self.adjust_lmat_taxonomic_labels(self._df_lmat, min_rank='species')
 
-    def adjust_taxonomic_labels(self, df: pd.DataFrame, results_type: str, min_rank: str) -> pd.DataFrame:
+    def adjust_lmat_taxonomic_labels(self, df: pd.DataFrame, min_rank: str) -> pd.DataFrame:
         """
         Adjust the taxonomic identifiers and labels so that they don't fall below the specified minimum rank.
         :param df: The dataframe.
-        :param results_type: The type of results to adjust (lmat or rgi kmer).
         :param min_rank: The minimum rank.
         :return: A new data frame with the additional columns.
         """
-        if results_type == 'lmat':
-            ncbi_id_col = 'lmat.ncbi_taxon_id'
-            taxonomy_id_adj = 'lmat.ncbi_taxon_id_adjusted'
-            taxonomy_label = 'lmat.taxonomy_label'
-            taxonomy_label_adj = 'lmat.taxonomy_label_adjusted'
-        else:
-            raise Exception(f'Unknown type [type={results_type}]')
+        ncbi_id_col = 'lmat.ncbi_taxon_id'
+        taxonomy_id_adj = 'lmat.ncbi_taxon_id_adjusted'
+        taxonomy_label = 'lmat.taxonomy_label'
+        taxonomy_label_adj = 'lmat.taxonomy_label_adjusted'
 
         df_new = df.reset_index()
         df_new[taxonomy_id_adj] = df_new[ncbi_id_col]
