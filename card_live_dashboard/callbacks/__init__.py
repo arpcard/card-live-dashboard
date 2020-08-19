@@ -166,7 +166,7 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
-        .select(table='rgi', by='drug', type='file', drug_classes=drug_classes) \
+        .select(table='rgi', by='drug', type='file', elements=drug_classes) \
         .select(table='rgi', by='amr_gene_family', type='file', elements=amr_gene_families) \
         .select(table='rgi', by='resistance_mechanism', type='file', elements=resistance_mechanisms) \
         .select(table='rgi', by='amr_gene', type='file', elements=amr_genes) \

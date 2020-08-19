@@ -161,7 +161,8 @@ def test_expand_drug_class_only_na():
 
 
 def test_select_by_drugclass_single1():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class1'])
 
     assert 5 == len(new_parser.df_rgi)
     assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -171,7 +172,8 @@ def test_select_by_drugclass_single1():
 
 
 def test_select_by_drugclass_single2():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class2'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class2'])
 
     assert 5 == len(new_parser.df_rgi)
     assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -180,7 +182,8 @@ def test_select_by_drugclass_single2():
 
 
 def test_select_by_drugclass_single3():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class3'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class3'])
 
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
@@ -188,7 +191,8 @@ def test_select_by_drugclass_single3():
 
 
 def test_select_by_drugclass_single4():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class4'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class4'])
 
     assert 3 == len(new_parser.df_rgi)
     assert ['file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -196,7 +200,8 @@ def test_select_by_drugclass_single4():
 
 
 def test_select_by_drugclass_multiple_1_2():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1', 'class2'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class1', 'class2'])
 
     assert 5 == len(new_parser.df_rgi)
     assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -205,7 +210,8 @@ def test_select_by_drugclass_multiple_1_2():
 
 
 def test_select_by_drugclass_multiple_1_3():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1', 'class3'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class1', 'class3'])
 
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
@@ -213,7 +219,8 @@ def test_select_by_drugclass_multiple_1_3():
 
 
 def test_select_by_drugclass_multiple_1_2_3():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class1', 'class2', 'class3'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                elements=['class1', 'class2', 'class3'])
 
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
@@ -221,7 +228,8 @@ def test_select_by_drugclass_multiple_1_2_3():
 
 
 def test_select_by_drugclass_multiple_4_5():
-    new_parser = RGI_PARSER.select_by_drugclass(type='file', drug_classes=['class4', 'class5'])
+    new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
+                                                               elements=['class4', 'class5'])
 
     assert 3 == len(new_parser.df_rgi)
     assert ['file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()

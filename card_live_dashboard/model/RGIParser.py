@@ -28,13 +28,13 @@ class RGIParser:
         if by == 'cutoff':
             return self.select_by_cutoff(type=type, **kwargs)
         elif by == 'drug':
-            return self.select_by_drugclass(type=type, **kwargs)
+            return self.select_by_elements_in_column_split(type=type, column='rgi_main.Drug Class', **kwargs)
         elif by == 'amr_gene':
             return self.select_by_elements_in_column(type=type, column='rgi_main.Best_Hit_ARO', **kwargs)
         elif by == 'resistance_mechanism':
-            return self.select_by_elements_in_column(type=type, column='rgi_main.Resistance Mechanism', **kwargs)
+            return self.select_by_elements_in_column_split(type=type, column='rgi_main.Resistance Mechanism', **kwargs)
         elif by == 'amr_gene_family':
-            return self.select_by_elements_in_column(type=type, column='rgi_main.AMR Gene Family', **kwargs)
+            return self.select_by_elements_in_column_split(type=type, column='rgi_main.AMR Gene Family', **kwargs)
         else:
             raise Exception(f'Unknown value [by={by}].')
 
@@ -94,8 +94,24 @@ class RGIParser:
             'file' means that all data for files matching the criteria are selected.
         :return: An RGIParser object on the subset of matched data.
         """
+        return self.select_by_elements_in_column_split(type=type, column='rgi_main.Drug Class', elements=drug_classes)
+
+    def select_by_elements_in_column_split(self, type: str, column: str, sep: str = ';',
+                                           elements: List[str] = None) -> RGIParser:
+        """
+        Given a list of elements and a column, returns an RGIParser object on the subset of data
+        containing all of the passed elements after splitting the column by the given split string.
+
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
+        :param column: The column to select on.
+        :param sep: The separator string.
+        :param elements: A list of drug class names to match. An empty list matches everything.
+        :return: An RGIParser object on the subset of matched data.
+        """
         if type == 'file':
-            matched_files = self._get_drugclass_matches(drug_classes)
+            matched_files = self._get_column_matches_split(column=column, sep=sep, elements=elements)
             return RGIParser(self._df_rgi.loc[matched_files])
         elif type == 'row':
             raise Exception('Unimplemented type [type=row]')
@@ -137,23 +153,26 @@ class RGIParser:
         else:
             raise Exception(f'Unknown value [type={type}]')
 
-    def _get_drugclass_matches(self, drug_classes: List[str] = None) -> Set[str]:
+    def _get_column_matches_split(self, column: str, sep: str = ';', elements: List[str] = None) -> Set[str]:
         """
-        Given a list of drug classes, returns a set of files that contain all the drug classes.
+        Given a list of elements and a column, returns a set of files that contain all the elements after splitting
+         by the passed separator.
 
-        :param drug_classes: A list of drug class names to match. An empty list matches everything.
+        :param column: The column to search through.
+        :param sep: The separator string to split items in the column.
+        :param elements: The list of elements to match.
         :return: A list of matching files.
         """
-        if drug_classes is None or len(drug_classes) == 0:
+        if elements is None or len(elements) == 0:
             return self.files()
         else:
-            drug_classes_set = set(drug_classes)
+            elements_set = set(elements)
 
-            df_rgi_drug = self.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].dropna()
-            df_rgi_drug = df_rgi_drug.groupby('filename').apply(lambda x: set(y for y in x)).to_frame()
-            df_rgi_drug['match'] = df_rgi_drug['rgi_main.Drug Class_exploded'].apply(lambda x: drug_classes_set.issubset(x))
+            df_rgi_new = self.explode_column(column, sep=sep)[f'{column}_exploded'].dropna()
+            df_rgi_new = df_rgi_new.groupby('filename').apply(lambda x: set(y for y in x)).to_frame()
+            df_rgi_new['match'] = df_rgi_new[f'{column}_exploded'].apply(lambda x: elements_set.issubset(x))
 
-            return df_rgi_drug[df_rgi_drug['match']].index.tolist()
+            return df_rgi_new[df_rgi_new['match']].index.tolist()
 
     def value_counts(self, col: str) -> pd.DataFrame:
         """
@@ -222,13 +241,7 @@ class RGIParser:
 
         :return: A list of all possible drug classes.
         """
-        all_drugs = set()
-        if not self.empty():
-            exploded_df = self.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded'].dropna()
-            if not exploded_df.empty:
-                all_drugs = set(exploded_df.tolist())
-
-        return all_drugs
+        return self._all_by_column_split('rgi_main.Drug Class')
 
     def all_amr_genes(self) -> Set[str]:
         """
@@ -244,7 +257,7 @@ class RGIParser:
 
         :return: A set of all resistance mechanisms.
         """
-        return self._all_by_column('rgi_main.Resistance Mechanism')
+        return self._all_by_column_split('rgi_main.Resistance Mechanism')
 
 
     def all_amr_gene_family(self) -> Set[str]:
@@ -253,7 +266,7 @@ class RGIParser:
 
         :return: A set of all resistance mechanisms.
         """
-        return self._all_by_column('rgi_main.AMR Gene Family')
+        return self._all_by_column_split('rgi_main.AMR Gene Family')
 
 
     def _all_by_column(self, col: str) -> Set[str]:
@@ -264,6 +277,22 @@ class RGIParser:
         :return: A set of all possible entries in the column.
         """
         return set(self._df_rgi[col].dropna().tolist())
+
+    def _all_by_column_split(self, column: str, sep: str = ';') -> Set[str]:
+        """
+        Gets a set of all possible elements after splitting by the passed string.
+
+        :param column: The column to search through.
+        :param sep: The separator string.
+        :return: A set of all possible elements.
+        """
+        all_elements = set()
+        if not self.empty():
+            exploded_df = self.explode_column(column, sep=sep)[f'{column}_exploded'].dropna()
+            if not exploded_df.empty:
+                all_elements = set(exploded_df.tolist())
+
+        return all_elements
 
     @property
     def df_rgi(self):
