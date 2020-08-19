@@ -174,6 +174,25 @@ class RGIParser:
 
             return df_rgi_new[df_rgi_new['match']].index.tolist()
 
+    def get_column_values(self, data_type: str) -> pd.Series:
+        """
+        Gets the values of a column given a particular data type.
+        :param data_type: The data type to select.
+        :return: The values of the column.
+        """
+        if data_type == 'drug_class':
+            totals_df = self.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded']
+        elif data_type == 'amr_gene_family':
+            totals_df = self.explode_column('rgi_main.AMR Gene Family')['rgi_main.AMR Gene Family_exploded']
+        elif data_type == 'resistance_mechanism':
+            totals_df = self.explode_column('rgi_main.Resistance Mechanism')['rgi_main.Resistance Mechanism_exploded']
+        elif data_type == 'amr_gene':
+            totals_df = self._df_rgi['rgi_main.Best_Hit_ARO']
+        else:
+            raise Exception(f'Unknown value [type_value={data_type}]')
+
+        return totals_df
+
     def value_counts(self, col: str) -> pd.DataFrame:
         """
         Given a column, counts the number of files in the underlying dataframe for each category of that column.

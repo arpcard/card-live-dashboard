@@ -227,7 +227,9 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      id_type='rgi-type-select',
                                      options_type=[
                                          {'label': 'Drug class', 'value': 'drug_class'},
-                                         {'label': 'AMR Gene', 'value': 'amr_gene'},
+                                         {'label': 'AMR gene', 'value': 'amr_gene'},
+                                         {'label': 'AMR gene family', 'value': 'amr_gene_family'},
+                                         {'label': 'Resistance mechanism', 'value': 'resistance_mechanism'},
                                      ],
                                      value_type='drug_class',
                                  ),
