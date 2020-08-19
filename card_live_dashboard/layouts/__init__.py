@@ -220,11 +220,11 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      value_color='default'
                                  ),
                              ),
-            single_figure_layout(title='Resistances',
-                                 id='figure-resistances-id',
-                                 fig=figures_dict['resistances'],
+            single_figure_layout(title='RGI results',
+                                 id='figure-rgi-id',
+                                 fig=figures_dict['rgi'],
                                  dropdowns=figure_menus_layout(
-                                     id_type='resistances-type-select',
+                                     id_type='rgi-type-select',
                                      options_type=[
                                          {'label': 'Drug class', 'value': 'drug_class'},
                                          {'label': 'AMR Gene', 'value': 'amr_gene'},

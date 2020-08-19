@@ -65,7 +65,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
-         Output('figure-resistances-id', 'figure')],
+         Output('figure-rgi-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('amr-gene-family-select', 'value'),
@@ -78,7 +78,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('timeline-color-select', 'value'),
          Input('totals-type-select', 'value'),
          Input('totals-color-select', 'value'),
-         Input('resistances-type-select', 'value'),
+         Input('rgi-type-select', 'value'),
          Input('auto-update-interval', 'n_intervals')]
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
@@ -87,7 +87,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                            organism_rgi_kmer: str, time_dropdown: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
-                           resistances_type_select: str, n_intervals):
+                           rgi_type_select: str, n_intervals):
         """
         Main callback/controller for updating all figures based on user selections.
         :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -114,7 +114,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         fig_settings = {
             'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
             'totals': {'type': totals_type_select, 'color': totals_color_select},
-            'resistances': {'type': resistances_type_select}
+            'rgi': {'type': rgi_type_select}
         }
 
         main_pane_figures = build_main_pane(time_subsets[time_dropdown], fig_settings)
@@ -156,7 +156,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
-                main_pane_figures['resistances'])
+                main_pane_figures['rgi'])
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
@@ -208,11 +208,11 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
     fig_totals = figures.totals_figure(data, type_value=fig_settings['totals']['type'],
                                        color_by_value=fig_settings['totals']['color'])
 
-    fig_drug_classes = figures.resistance_breakdown_figure(data, type_value=fig_settings['resistances']['type'])
+    fig_rgi = figures.rgi_breakdown_figure(data, type_value=fig_settings['rgi']['type'])
 
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
-        'resistances': fig_drug_classes,
+        'rgi': fig_rgi,
     }
