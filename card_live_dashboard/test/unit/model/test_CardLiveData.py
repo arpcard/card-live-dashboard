@@ -233,7 +233,7 @@ def test_select_rgi_amr_genes_all():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=[])
+    data = data.select(table='rgi', by='amr_gene', type='file', elements=[])
     assert 3 == len(data), 'Invalid number after selection'
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
@@ -248,7 +248,7 @@ def test_select_rgi_amr_genes_one():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=['gene1'])
+    data = data.select(table='rgi', by='amr_gene', type='file', elements=['gene1'])
     assert 2 == len(data), 'Invalid number after selection'
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
@@ -263,7 +263,7 @@ def test_select_rgi_amr_gene_two():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=['gene1', 'gene2'])
+    data = data.select(table='rgi', by='amr_gene', type='file', elements=['gene1', 'gene2'])
     assert 1 == len(data), 'Invalid number after selection'
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file1'} == data.files(), 'Invalid files'
@@ -278,7 +278,7 @@ def test_select_rgi_resistance_mechanism_all():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='resistance_mechanism', type='file', resistance_mechanism=[])
+    data = data.select(table='rgi', by='resistance_mechanism', type='file', elements=[])
     assert 3 == len(data), 'Invalid number after selection'
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
@@ -294,7 +294,7 @@ def test_select_rgi_resistance_mechanism_one():
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
     data = data.select(table='rgi', by='resistance_mechanism', type='file',
-                       resistance_mechanism=['antibiotic inactivation'])
+                       elements=['antibiotic inactivation'])
     assert 1 == len(data), 'Invalid number after selection'
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file1'} == data.files(), 'Invalid files'
@@ -309,7 +309,7 @@ def test_select_rgi_resistance_mechanism_one2():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='resistance_mechanism', type='file', resistance_mechanism=['antibiotic efflux'])
+    data = data.select(table='rgi', by='resistance_mechanism', type='file', elements=['antibiotic efflux'])
     assert 2 == len(data), 'Invalid number after selection'
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
@@ -325,7 +325,7 @@ def test_select_rgi_resistance_mechanism_two():
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
     data = data.select(table='rgi', by='resistance_mechanism', type='file',
-                       resistance_mechanism=['antibiotic inactivation', 'antibiotic efflux'])
+                       elements=['antibiotic inactivation', 'antibiotic efflux'])
     assert 1 == len(data), 'Invalid number after selection'
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file1'} == data.files(), 'Invalid files'

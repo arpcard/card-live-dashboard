@@ -149,7 +149,7 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
         .select(table='rgi', by='drug', type='file', drug_classes=drug_classes) \
-        .select(table='rgi', by='amr_gene', type='file', amr_genes=amr_genes) \
+        .select(table='rgi', by='amr_gene', type='file', elements=amr_genes) \
         .select(table='main', by='lmat_taxonomy', taxonomy=organism_lmat) \
         .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
 
