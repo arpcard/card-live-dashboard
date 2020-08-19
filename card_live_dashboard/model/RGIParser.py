@@ -33,6 +33,8 @@ class RGIParser:
             return self.select_by_elements_in_column(type=type, column='rgi_main.Best_Hit_ARO', **kwargs)
         elif by == 'resistance_mechanism':
             return self.select_by_elements_in_column(type=type, column='rgi_main.Resistance Mechanism', **kwargs)
+        elif by == 'amr_gene_family':
+            return self.select_by_elements_in_column(type=type, column='rgi_main.AMR Gene Family', **kwargs)
         else:
             raise Exception(f'Unknown value [by={by}].')
 
@@ -234,7 +236,7 @@ class RGIParser:
 
         :return: A set of all AMR genes (Best Hit ARO values).
         """
-        return set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist())
+        return self._all_by_column('rgi_main.Best_Hit_ARO')
 
     def all_resistance_mechanisms(self) -> Set[str]:
         """
@@ -242,7 +244,26 @@ class RGIParser:
 
         :return: A set of all resistance mechanisms.
         """
-        return set(self._df_rgi['rgi_main.Resistance Mechanism'].dropna().tolist())
+        return self._all_by_column('rgi_main.Resistance Mechanism')
+
+
+    def all_amr_gene_family(self) -> Set[str]:
+        """
+        Gets a set of all possible resistance mechanisms.
+
+        :return: A set of all resistance mechanisms.
+        """
+        return self._all_by_column('rgi_main.AMR Gene Family')
+
+
+    def _all_by_column(self, col: str) -> Set[str]:
+        """
+        Gets a set of all possible entries by column.
+
+        :param col: The column.
+        :return: A set of all possible entries in the column.
+        """
+        return set(self._df_rgi[col].dropna().tolist())
 
     @property
     def df_rgi(self):
