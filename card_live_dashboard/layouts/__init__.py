@@ -79,6 +79,22 @@ def default_layout():
                                                    placeholder='Select a drug class',
                                                ),
                                                ]),
+                            html.Div(children=['Filter display by AMR gene family: ',
+                                               dcc.Dropdown(
+                                                   id='amr-gene-family-select',
+                                                   className='sidepanel-selection',
+                                                   multi=True,
+                                                   placeholder='Select the AMR gene family',
+                                               ),
+                                               ]),
+                            html.Div(children=['Filter display by resistance mechanism: ',
+                                               dcc.Dropdown(
+                                                   id='resistance-mechanism-select',
+                                                   className='sidepanel-selection',
+                                                   multi=True,
+                                                   placeholder='Select the resistance mechanism',
+                                               ),
+                                               ]),
                             html.Div(children=['Filter display by AMR gene: ',
                                                dcc.Dropdown(
                                                    id='amr-gene-select',
