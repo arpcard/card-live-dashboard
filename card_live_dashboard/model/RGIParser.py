@@ -31,6 +31,8 @@ class RGIParser:
             return self.select_by_drugclass(type=type, **kwargs)
         elif by == 'amr_gene':
             return self.select_by_amr_gene(type=type, **kwargs)
+        elif by == 'resistance_mechanism':
+            return self.select_by_resistance_mechanism(type=type, **kwargs)
         else:
             raise Exception(f'Unknown value [by={by}].')
 
@@ -123,6 +125,40 @@ class RGIParser:
             # Set 'matches' column to True if the 'amr_genes' list is a subset of 'rgi_main.Best_Hit_ARO'
             collapsed_gene_sets['matches'] = collapsed_gene_sets['rgi_main.Best_Hit_ARO'].apply(
                 lambda x: set(amr_genes).issubset(x))
+
+            matches_files = collapsed_gene_sets[collapsed_gene_sets['matches']]
+            files = set(matches_files.index.tolist())
+            return RGIParser(self._df_rgi.loc[files].copy())
+        elif type == 'row':
+            raise Exception('Unsupported for type=row')
+        else:
+            raise Exception(f'Unknown value [type={type}]')
+
+    def select_by_resistance_mechanism(self, type: str, resistance_mechanism: List[str] = None) -> RGIParser:
+        """
+        Given a list of resistance mechanisms, selects data containing only files with some match.
+
+        :param resistance_mechanisms: A list of resistance mechanisms.
+        :param type: The type of results to select.
+            'row' means that the function is used to select rows in the data frame.
+            'file' means that all data for files matching the criteria are selected.
+        :return: An RGIParser object on the subset of matched data.
+        """
+        if resistance_mechanism is None or len(resistance_mechanism) == 0:
+            return self
+        elif type == 'file':
+            # Convert 'rgi_main.resistance_mechanisms' column to a 'Set' of entries. For example
+            # | index | rgi_main.Resistance Mechanism   |
+            # |-------|-------------------------|
+            # | file1 | {'x1', 'x2'}      |
+            # | file2 | {'x3', 'x4'}      |
+            collapsed_gene_sets = self._df_rgi.groupby('filename').apply(
+                lambda x: set(y for y in x['rgi_main.Resistance Mechanism'])).to_frame().rename(
+                columns={0: 'rgi_main.Resistance Mechanism'})
+
+            # Set 'matches' column to True if the 'amr_genes' list is a subset of 'rgi_main.Best_Hit_ARO'
+            collapsed_gene_sets['matches'] = collapsed_gene_sets['rgi_main.Resistance Mechanism'].apply(
+                lambda x: set(resistance_mechanism).issubset(x))
 
             matches_files = collapsed_gene_sets[collapsed_gene_sets['matches']]
             files = set(matches_files.index.tolist())
@@ -232,6 +268,14 @@ class RGIParser:
         :return: A set of all AMR genes (Best Hit ARO values).
         """
         return set(self._df_rgi['rgi_main.Best_Hit_ARO'].dropna().tolist())
+
+    def all_resistance_mechanisms(self) -> Set[str]:
+        """
+        Gets a set of all possible resistance mechanisms.
+
+        :return: A set of all resistance mechanisms.
+        """
+        return set(self._df_rgi['rgi_main.Resistance Mechanism'].dropna().tolist())
 
     @property
     def df_rgi(self):
