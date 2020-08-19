@@ -193,8 +193,8 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
 
     fig_drug_classes = figures.resistance_breakdown_figure(data, type_value=fig_settings['resistances']['type'])
 
-    tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
-    taxonomy = figures.taxonomic_comparison(tax_parse.create_rgi_lmat_both())
+    # tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
+    taxonomy = figures.EMPTY_MAP #figures.taxonomic_comparison(tax_parse.create_rgi_lmat_both())
 
     return {
         'map': fig_map,

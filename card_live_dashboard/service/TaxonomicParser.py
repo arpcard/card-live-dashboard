@@ -43,11 +43,11 @@ class TaxonomicParser:
             self._limit_taxon_to, min_rank=min_rank)
         df_new[taxonomy_label_adj] = df_new[taxonomy_label]
         df_new[taxonomy_label_adj] = df_new.loc[~df_new[taxonomy_id_adj].isna(), taxonomy_id_adj].apply(
-            lambda x: self._ncbi_taxa.get_taxid_translator([x]).get(x, pd.NA))
+            lambda x: self._ncbi_taxa.get_taxid_translator([int(x)]).get(int(x), pd.NA))
 
         return df_new.set_index('filename')
 
-    def _limit_taxon_to(self, taxon_id: int, min_rank: str) -> int:
+    def _limit_taxon_to(self, taxon_id: int, min_rank: str) -> str:
         """
         Given a taxonomic id and a rank limit the taxonomic id so that it is at the specified rank or higher.
         :param taxon_id: The taxonomic id.
@@ -61,11 +61,11 @@ class TaxonomicParser:
             ranks = self._ncbi_taxa.get_rank(lineages)
             for lineage in lineages:
                 if ranks[lineage] == min_rank:
-                    return lineage
+                    return str(lineage)
         except ValueError as e:
             logger.debug(f'Error when looking up lineage for taxon_id={taxon_id} in NCBI database.', e)
 
-        return taxon_id
+        return str(taxon_id)
 
     def _create_contigs_lmat_score(self, df: pd.DataFrame, name: str) -> pd.DataFrame:
         df_sum = df['lmat.count'].groupby('filename').sum().rename('lmat_count_sum').to_frame()
