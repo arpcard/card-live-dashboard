@@ -11,6 +11,8 @@ from card_live_dashboard.model import world
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)
 MONTH = timedelta(days=31)
+THREE_MONTHS = timedelta(days=365/4) # 3 months is defined as a quarter year
+SIX_MONTHS = timedelta(days=365/2) # 6 months is defined as half a year
 YEAR = timedelta(days=365)
 
 
@@ -122,7 +124,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         # Set time dropdown text to include count of samples in particular time period
         # Should produce a list of dictionaries like [{'label': 'All (500)', 'value': 'all'}, ...]
         time_dropdown_text = [{'label': f'All ({time_subsets["all"].samples_count()})', 'value': 'all'}]
-        for value in ['day', 'week', 'month', 'year']:
+        for value in ['day', 'week', 'month', '3 months', '6 months', 'year']:
             time_dropdown_text.append({
                 'label': f'Last {value} ({time_subsets[value].samples_count()})',
                 'value': value,
@@ -178,6 +180,8 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
         'day': data.select(table='main', by='time', start=time_now - DAY, end=time_now),
         'week': data.select(table='main', by='time', start=time_now - WEEK, end=time_now),
         'month': data.select(table='main', by='time', start=time_now - MONTH, end=time_now),
+        '3 months': data.select(table='main', by='time', start=time_now - THREE_MONTHS, end=time_now),
+        '6 months': data.select(table='main', by='time', start=time_now - SIX_MONTHS, end=time_now),
         'year': data.select(table='main', by='time', start=time_now - YEAR, end=time_now),
     }
 
