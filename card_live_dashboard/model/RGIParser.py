@@ -25,7 +25,9 @@ class RGIParser:
         :param kwargs: Additional arguments for the underlying selection method.
         :return: A new RGIParser object which matches the passed criteria.
         """
-        if by == 'cutoff':
+        if len(self._df_rgi) == 0:
+            return self
+        elif by == 'cutoff':
             return self.select_by_cutoff(type=type, **kwargs)
         elif by == 'drug':
             return self.select_by_elements_in_column_split(type=type, column='rgi_main.Drug Class', **kwargs)
