@@ -27,7 +27,9 @@ class CardLiveData:
         :param kwargs: Additional arguments for the underlying selection method.
         :return: A new CardLiveData object which matches the passed criteria.
         """
-        if table == 'main':
+        if len(self) == 0:
+            return self
+        elif table == 'main':
             if by == 'time':
                 return self.select_by_time(**kwargs)
             elif by == 'lmat_taxonomy':

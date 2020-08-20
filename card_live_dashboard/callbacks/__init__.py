@@ -60,14 +60,18 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('organism-rgi-kmer-select', 'options'),
          Output('selected-samples-count', 'children'),
          Output('drug-class-select', 'options'),
+         Output('amr-gene-family-select', 'options'),
+         Output('resistance-mechanism-select', 'options'),
          Output('amr-gene-select', 'options'),
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
-         Output('figure-resistances-id', 'figure'),
+         Output('figure-rgi-id', 'figure'),
          Output('figure-taxonomy-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
+         Input('amr-gene-family-select', 'value'),
+         Input('resistance-mechanism-select', 'value'),
          Input('amr-gene-select', 'value'),
          Input('organism-lmat-select', 'value'),
          Input('organism-rgi-kmer-select', 'value'),
@@ -76,15 +80,16 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('timeline-color-select', 'value'),
          Input('totals-type-select', 'value'),
          Input('totals-color-select', 'value'),
-         Input('resistances-type-select', 'value'),
+         Input('rgi-type-select', 'value'),
          Input('auto-update-interval', 'n_intervals')]
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
+                           amr_gene_families: List[str], resistance_mechanisms: List[str],
                            amr_genes: List[str], organism_lmat: str,
                            organism_rgi_kmer: str, time_dropdown: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
-                           resistances_type_select: str, n_intervals):
+                           rgi_type_select: str, n_intervals):
         """
         Main callback/controller for updating all figures based on user selections.
         :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -102,6 +107,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         time_subsets = apply_filters(data=data,
                                      rgi_cutoff_select=rgi_cutoff_select,
                                      drug_classes=drug_classes,
+                                     amr_gene_families=amr_gene_families,
+                                     resistance_mechanisms=resistance_mechanisms,
                                      amr_genes=amr_genes,
                                      organism_lmat=organism_lmat,
                                      organism_rgi_kmer=organism_rgi_kmer)
@@ -109,7 +116,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         fig_settings = {
             'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
             'totals': {'type': totals_type_select, 'color': totals_color_select},
-            'resistances': {'type': resistances_type_select}
+            'rgi': {'type': rgi_type_select}
         }
 
         main_pane_figures = build_main_pane(time_subsets[time_dropdown], fig_settings)
@@ -125,10 +132,18 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
         samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
-        organism_lmat_options = build_options([organism_lmat], time_subsets[time_dropdown].unique_column('lmat_taxonomy'))
-        organism_rgi_kmer_options = build_options([organism_rgi_kmer], time_subsets[time_dropdown].unique_column('rgi_kmer_taxonomy'))
-        drug_class_options = build_options(drug_classes, time_subsets[time_dropdown].rgi_parser.all_drugs())
-        amr_gene_options = build_options(amr_genes, time_subsets[time_dropdown].rgi_parser.all_amr_genes())
+        organism_lmat_options = build_options([organism_lmat],
+                                              time_subsets[time_dropdown].unique_column('lmat_taxonomy'))
+        organism_rgi_kmer_options = build_options([organism_rgi_kmer],
+                                                  time_subsets[time_dropdown].unique_column('rgi_kmer_taxonomy'))
+        drug_class_options = build_options(drug_classes,
+                                           time_subsets[time_dropdown].rgi_parser.all_drugs())
+        amr_gene_families_options = build_options(amr_gene_families,
+                                                  time_subsets[time_dropdown].rgi_parser.all_amr_gene_family())
+        resistance_mechanisms_options = build_options(resistance_mechanisms,
+                                                  time_subsets[time_dropdown].rgi_parser.all_resistance_mechanisms())
+        amr_gene_options = build_options(amr_genes,
+                                         time_subsets[time_dropdown].rgi_parser.all_amr_genes())
 
         return (global_samples_count,
                 global_last_updated,
@@ -137,22 +152,27 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 organism_rgi_kmer_options,
                 samples_count_string,
                 drug_class_options,
+                amr_gene_families_options,
+                resistance_mechanisms_options,
                 amr_gene_options,
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
-                main_pane_figures['resistances'],
+                main_pane_figures['rgi'],
                 main_pane_figures['taxonomy'])
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
-                  drug_classes: List[str], amr_genes: List[str], organism_lmat: str,
+                  drug_classes: List[str], amr_gene_families: List[str],
+                  resistance_mechanisms: List[str], amr_genes: List[str], organism_lmat: str,
                   organism_rgi_kmer: str) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
-        .select(table='rgi', by='drug', type='file', drug_classes=drug_classes) \
-        .select(table='rgi', by='amr_gene', type='file', amr_genes=amr_genes) \
+        .select(table='rgi', by='drug', type='file', elements=drug_classes) \
+        .select(table='rgi', by='amr_gene_family', type='file', elements=amr_gene_families) \
+        .select(table='rgi', by='resistance_mechanism', type='file', elements=resistance_mechanisms) \
+        .select(table='rgi', by='amr_gene', type='file', elements=amr_genes) \
         .select(table='main', by='lmat_taxonomy', taxonomy=organism_lmat) \
         .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
 
@@ -191,7 +211,7 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
     fig_totals = figures.totals_figure(data, type_value=fig_settings['totals']['type'],
                                        color_by_value=fig_settings['totals']['color'])
 
-    fig_drug_classes = figures.resistance_breakdown_figure(data, type_value=fig_settings['resistances']['type'])
+    fig_rgi = figures.rgi_breakdown_figure(data, type_value=fig_settings['rgi']['type'])
 
     # tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
     taxonomy = figures.EMPTY_MAP #figures.taxonomic_comparison(tax_parse.create_rgi_lmat_both())
@@ -200,6 +220,6 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
-        'resistances': fig_drug_classes,
+        'rgi': fig_rgi,
         'taxonomy': taxonomy,
     }

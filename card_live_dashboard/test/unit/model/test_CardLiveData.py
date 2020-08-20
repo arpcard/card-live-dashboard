@@ -25,11 +25,12 @@ OTHER_DF = pd.DataFrame(
 ).set_index('filename')
 
 RGI_DF = pd.DataFrame(
-    columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
-    data=[['file1', 'Perfect', 'class1; class2', 'gene1'],
-          ['file1', 'Strict', 'class1; class2; class3', 'gene2'],
-          ['file2', 'Perfect', 'class1; class2; class4', 'gene1'],
-          ['file3', None, None, None],
+    columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO',
+             'rgi_main.Resistance Mechanism', 'rgi_main.AMR Gene Family'],
+    data=[['file1', 'Perfect', 'class1; class2', 'gene1', 'antibiotic efflux; antibiotic target alteration', 'family1'],
+          ['file1', 'Strict', 'class1; class2; class3', 'gene2', 'antibiotic inactivation', 'family2'],
+          ['file2', 'Perfect', 'class1; class2; class4', 'gene1', 'antibiotic efflux; antibiotic target alteration', 'family1'],
+          ['file3', None, None, None, None, None],
           ]
 ).set_index('filename')
 
@@ -173,7 +174,7 @@ def test_select_rgi_drugclass_all():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='drug', type='file', drug_classes=[])
+    data = data.select(table='rgi', by='drug', type='file', elements=[])
     assert 3 == len(data), 'Invalid number after selection'
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
@@ -188,7 +189,7 @@ def test_select_rgi_drugclass_one():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='drug', type='file', drug_classes=['class1'])
+    data = data.select(table='rgi', by='drug', type='file', elements=['class1'])
     assert 2 == len(data), 'Invalid number after selection'
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
@@ -203,7 +204,7 @@ def test_select_rgi_drugclass_two():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='drug', type='file', drug_classes=['class1', 'class2'])
+    data = data.select(table='rgi', by='drug', type='file', elements=['class1', 'class2'])
     assert 2 == len(data), 'Invalid number after selection'
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
@@ -218,7 +219,7 @@ def test_select_rgi_drugclass_three():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='drug', type='file', drug_classes=['class1', 'class2', 'class4'])
+    data = data.select(table='rgi', by='drug', type='file', elements=['class1', 'class2', 'class4'])
     assert 1 == len(data), 'Invalid number after selection'
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file2'} == data.files(), 'Invalid files'
@@ -233,7 +234,7 @@ def test_select_rgi_amr_genes_all():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=[])
+    data = data.select(table='rgi', by='amr_gene', type='file', elements=[])
     assert 3 == len(data), 'Invalid number after selection'
     assert 3 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
@@ -248,7 +249,7 @@ def test_select_rgi_amr_genes_one():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=['gene1'])
+    data = data.select(table='rgi', by='amr_gene', type='file', elements=['gene1'])
     assert 2 == len(data), 'Invalid number after selection'
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
@@ -263,12 +264,151 @@ def test_select_rgi_amr_gene_two():
     data = DATA
 
     assert 3 == len(data), 'Data not initialized to correct number of entries'
-    data = data.select(table='rgi', by='amr_gene', type='file', amr_genes=['gene1', 'gene2'])
+    data = data.select(table='rgi', by='amr_gene', type='file', elements=['gene1', 'gene2'])
     assert 1 == len(data), 'Invalid number after selection'
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file1'} == data.files(), 'Invalid files'
     assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
     assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes categories'
+    assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 1 == len(data.lmat_df), 'Invalid number after selection'
+    assert 1 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_resistance_mechanism_all():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='resistance_mechanism', type='file', elements=[])
+    assert 3 == len(data), 'Invalid number after selection'
+    assert 3 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
+    assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'antibiotic efflux', 'antibiotic target alteration',
+            'antibiotic inactivation'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 3 == len(data.lmat_df), 'Invalid number after selection'
+    assert 3 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_resistance_mechanism_one():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='resistance_mechanism', type='file',
+                       elements=['antibiotic inactivation'])
+    assert 1 == len(data), 'Invalid number after selection'
+    assert 1 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1'} == data.files(), 'Invalid files'
+    assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'antibiotic inactivation', 'antibiotic efflux',
+            'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 1 == len(data.lmat_df), 'Invalid number after selection'
+    assert 1 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_resistance_mechanism_one2():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='resistance_mechanism', type='file', elements=['antibiotic efflux'])
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'antibiotic inactivation', 'antibiotic efflux', 'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_resistance_mechanism_one3():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='resistance_mechanism', type='file', elements=['antibiotic target alteration'])
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'antibiotic inactivation', 'antibiotic efflux', 'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_rgi_resistance_mechanism_two():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='resistance_mechanism', type='file',
+                       elements=['antibiotic inactivation', 'antibiotic efflux'])
+    assert 1 == len(data), 'Invalid number after selection'
+    assert 1 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1'} == data.files(), 'Invalid files'
+    assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'antibiotic inactivation', 'antibiotic efflux', 'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 1 == len(data.lmat_df), 'Invalid number after selection'
+    assert 1 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_amr_gene_family_all():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='amr_gene_family', type='file', elements=[])
+    assert 3 == len(data), 'Invalid number after selection'
+    assert 3 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
+    assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'family1', 'family2'} == data.rgi_parser.all_amr_gene_family(), 'Invalid resistance mechanisms'
+    assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 3 == len(data.lmat_df), 'Invalid number after selection'
+    assert 3 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_amr_gene_family_one():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='amr_gene_family', type='file', elements=['family2'])
+    assert 1 == len(data), 'Invalid number after selection'
+    assert 1 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1'} == data.files(), 'Invalid files'
+    assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'family1', 'family2'} == data.rgi_parser.all_amr_gene_family(), 'Invalid resistance mechanisms'
+    assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 1 == len(data.lmat_df), 'Invalid number after selection'
+    assert 1 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_amr_gene_family_one2():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='amr_gene_family', type='file', elements=['family1'])
+    assert 2 == len(data), 'Invalid number after selection'
+    assert 2 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1', 'file2'} == data.files(), 'Invalid files'
+    assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'family1', 'family2'} == data.rgi_parser.all_amr_gene_family(), 'Invalid resistance mechanisms'
+    assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
+    assert 2 == len(data.lmat_df), 'Invalid number after selection'
+    assert 2 == len(data.mlst_df), 'Invalid number after selection'
+
+
+def test_select_amr_gene_family_two():
+    data = DATA
+
+    assert 3 == len(data), 'Data not initialized to correct number of entries'
+    data = data.select(table='rgi', by='amr_gene_family', type='file', elements=['family1', 'family2'])
+    assert 1 == len(data), 'Invalid number after selection'
+    assert 1 == len(data.main_df), 'Invalid number after selection'
+    assert {'file1'} == data.files(), 'Invalid files'
+    assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
+    assert {'family1', 'family2'} == data.rgi_parser.all_amr_gene_family(), 'Invalid resistance mechanisms'
     assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 1 == len(data.lmat_df), 'Invalid number after selection'
     assert 1 == len(data.mlst_df), 'Invalid number after selection'

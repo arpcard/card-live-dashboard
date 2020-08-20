@@ -33,7 +33,7 @@ EMPTY_FIGURE_DICT = {
     'map': EMPTY_MAP,
     'timeline': EMPTY_FIGURE,
     'totals': EMPTY_FIGURE,
-    'resistances': EMPTY_FIGURE,
+    'rgi': EMPTY_FIGURE,
     'taxonomy': EMPTY_FIGURE,
 }
 
@@ -58,9 +58,11 @@ TOTALS_FIGURE_TITLES = {
 }
 
 
-RESISTANCES_TITLES = {
+RGI_TITLES = {
     'drug_class': 'Drug class resistances',
     'amr_gene': 'AMR gene',
+    'amr_gene_family': 'AMR gene family',
+    'resistance_mechanism': 'Resistance mechanism',
 }
 
 
@@ -141,22 +143,17 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': '', 'dtick': 1}
+                          yaxis={'title': ''}
                           )
 
     return fig
 
 
-def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
+def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        if type_value == 'drug_class':
-            totals_df = data.rgi_parser.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded']
-        elif type_value == 'amr_gene':
-            totals_df = data.rgi_df['rgi_main.Best_Hit_ARO']
-        else:
-            raise Exception(f'Unknown value [type_value={type_value}]')
+        totals_df = data.rgi_parser.get_column_values(data_type=type_value)
 
         # Data preparation
         totals_df.name = 'categories'
@@ -168,7 +165,7 @@ def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figur
         counts_df = counts_df.sort_values(by=['match_count', 'categories'], ascending=[True, False])
         counts_df = counts_df.rename(columns={'match_proportion': 'Match percent'})
 
-        title = RESISTANCES_TITLES[type_value]
+        title = RGI_TITLES[type_value]
 
         fig = px.bar(counts_df, y='categories', x='Match percent',
                      height=600,
@@ -179,7 +176,7 @@ def resistance_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figur
                      title=title,
                      )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': '', 'dtick': 1},
+                          yaxis={'title': ''},
                           xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                           )
     return fig
