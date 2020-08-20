@@ -34,7 +34,6 @@ EMPTY_FIGURE_DICT = {
     'timeline': EMPTY_FIGURE,
     'totals': EMPTY_FIGURE,
     'rgi': EMPTY_FIGURE,
-    'taxonomy': EMPTY_FIGURE,
 }
 
 TOTALS_COLUMN_SELECT_NAMES = {

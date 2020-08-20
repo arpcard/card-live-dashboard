@@ -66,8 +66,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
-         Output('figure-rgi-id', 'figure'),
-         Output('figure-taxonomy-id', 'figure')],
+         Output('figure-rgi-id', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('amr-gene-family-select', 'value'),
@@ -158,8 +157,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
-                main_pane_figures['rgi'],
-                main_pane_figures['taxonomy'])
+                main_pane_figures['rgi'])
 
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
@@ -213,13 +211,9 @@ def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]])
 
     fig_rgi = figures.rgi_breakdown_figure(data, type_value=fig_settings['rgi']['type'])
 
-    tax_parse = TaxonomicParser(data.rgi_kmer_df, data.lmat_df)
-    taxonomy = figures.taxonomic_comparison(tax_parse.create_rgi_lmat_both())
-
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
         'rgi': fig_rgi,
-        'taxonomy': taxonomy,
     }
