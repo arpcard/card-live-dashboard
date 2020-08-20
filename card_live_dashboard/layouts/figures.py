@@ -142,7 +142,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': '', 'dtick': 1}
+                          yaxis={'title': ''}
                           )
 
     return fig
@@ -175,7 +175,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
                      title=title,
                      )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': '', 'dtick': 1},
+                          yaxis={'title': ''},
                           xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                           )
     return fig
