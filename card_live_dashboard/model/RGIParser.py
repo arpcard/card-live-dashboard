@@ -182,6 +182,8 @@ class RGIParser:
         :param data_type: The data type to select.
         :return: The values of the column.
         """
+        additional_columns = ['geo_area_name']
+
         if data_type == 'drug_class':
             totals_df = self.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded']
         elif data_type == 'amr_gene_family':

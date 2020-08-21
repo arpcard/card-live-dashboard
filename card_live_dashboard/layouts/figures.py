@@ -152,6 +152,8 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
     if data.empty:
         fig = EMPTY_FIGURE
     else:
+        totals_df = data.rgi_parser.explode_column('rgi_main.Drug Class')
+        print(totals_df.columns)
         totals_df = data.rgi_parser.get_column_values(data_type=type_value)
 
         # Data preparation
