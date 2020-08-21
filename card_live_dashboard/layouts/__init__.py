@@ -179,7 +179,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  id='figure-geographic-map-id',
                                  fig=figures_dict['map']
                                  ),
-            single_figure_layout(title='Timeline',
+            single_figure_layout(title='Samples timeline',
                                  id='figure-timeline-id',
                                  fig=figures_dict['timeline'],
                                  dropdowns=figure_menus_layout(

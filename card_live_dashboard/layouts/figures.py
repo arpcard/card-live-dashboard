@@ -233,7 +233,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         fig = EMPTY_FIGURE
     else:
         if fig_type == 'cumulative_counts' or fig_type == 'counts':
-            display_col = 'timestamp'
+            display_col = None
             yaxis_title = 'Samples count'
             tickformat = ''
             histfunc = 'count'
@@ -248,7 +248,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                 raise Exception(f'Unknown value [fig_type={fig_type}]')
         elif fig_type == 'cumulative_percent' or fig_type == 'percent':
             display_col = 'time_fraction'
-            yaxis_title = 'Samples percent'
+            yaxis_title = 'Percent of samples'
             tickformat = '.0%'
             histfunc = 'sum'
 
@@ -300,6 +300,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
         # This replaces the text in the hover 'sum of Percent of samples' to 'Percent of samples'
         for d in fig.data:
             d.hovertemplate = d.hovertemplate.replace('sum of ', '')
+            d.hovertemplate = d.hovertemplate.replace('count', 'Samples count')
 
     return fig
 
