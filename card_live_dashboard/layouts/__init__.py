@@ -185,10 +185,12 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  dropdowns=figure_menus_layout(
                                      id_type='timeline-type-select',
                                      options_type=[
-                                        {'label': 'Cumulative', 'value': 'cumulative'},
-                                        {'label': 'Rate', 'value': 'rate'},
+                                        {'label': 'Cumulative counts', 'value': 'cumulative_counts'},
+                                        {'label': 'Cumulative percent', 'value': 'cumulative_percent'},
+                                        {'label': 'Counts', 'value': 'counts'},
+                                        {'label': 'Percent', 'value': 'percent'},
                                      ],
-                                     value_type='cumulative',
+                                     value_type='cumulative_counts',
                                      id_color='timeline-color-select',
                                      options_color=[
                                         {'label': 'Default', 'value': 'default'},
