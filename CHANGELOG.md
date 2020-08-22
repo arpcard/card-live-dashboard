@@ -8,6 +8,7 @@
 * Added `setup.py` install script.
 * Added both percent and count plots for timeline.
 * Added *AMR Gene Family* and *Resistance Mechanism* as selection criteria and as figures.
+* Added the ability to select a custom date range.
 
 # 0.1.0
 

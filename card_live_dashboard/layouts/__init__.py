@@ -1,5 +1,7 @@
 from typing import Dict, List
 
+from datetime import datetime
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -131,8 +133,21 @@ def default_layout():
                                                dcc.Dropdown(id='time-period-items',
                                                             className='sidepanel-selection',
                                                             value='all',
-                                                            clearable=False)
-                                               ]),
+                                                            clearable=False),
+                                               dbc.Collapse(id='custom-time-period', is_open=False, children=[
+                                                   'Please select a custom date range:',
+                                                   dcc.DatePickerRange(
+                                                       id='date-picker-range',
+                                                       className='sidepanel-selection',
+                                                       display_format='MMM DD, YYYY',
+                                                       min_date_allowed=datetime(2020, 1, 1),
+                                                       max_date_allowed=datetime.now(),
+                                                       initial_visible_month=datetime.now(),
+                                                       end_date=datetime.now(),
+                                                       with_portal=True,
+                                                   ),
+                                               ])
+                                           ]),
                         ]),
                     ]),
                     html.P(className='text-center card-live-badges pb-5', children=[
