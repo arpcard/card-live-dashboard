@@ -66,6 +66,9 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         [Output('global-sample-count', 'children'),
          Output('global-most-recent', 'children'),
          Output('time-period-items', 'options'),
+         Output('date-picker-range', 'initial_visible_month'),
+         Output('date-picker-range', 'min_date_allowed'),
+         Output('date-picker-range', 'max_date_allowed'),
          Output('organism-lmat-select', 'options'),
          Output('organism-rgi-kmer-select', 'options'),
          Output('selected-samples-count', 'children'),
@@ -112,19 +115,26 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         :param timeline_color_select: The color selection for the timeline.
         :return: The figures to place in the main figure region of the page.
         """
-        custom_date = None
-        if time_dropdown == 'custom':
-            if start_date is not None and end_date is not None:
-                start_date = datetime.strptime(re.split(r'[T ]', start_date)[0], '%Y-%m-%d')
-                end_date = datetime.strptime(re.split(r'[T ]', end_date)[0], '%Y-%m-%d')
-                custom_date = {
-                    'start': start_date,
-                    'end': end_date,
-                }
-
         data = CardLiveDataManager.get_instance().card_data
         global_samples_count = len(data)
         global_last_updated = f'{data.latest_update(): %b %d, %Y}'
+
+        initial_visible_month = datetime.now()
+        min_date_allowed = data.first_update()
+        max_date_allowed = datetime.now()
+
+        custom_date = {
+            'start': min_date_allowed,
+            'end': max_date_allowed
+        }
+
+        if start_date is not None:
+            start_date = datetime.strptime(re.split(r'[T ]', start_date)[0], '%Y-%m-%d')
+            custom_date['start'] = start_date
+        if end_date is not None:
+            end_date = datetime.strptime(re.split(r'[T ]', end_date)[0], '%Y-%m-%d')
+            initial_visible_month = end_date
+            custom_date['end'] = end_date
 
         time_subsets = apply_filters(data=data,
                                      rgi_cutoff_select=rgi_cutoff_select,
@@ -172,6 +182,9 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         return (global_samples_count,
                 global_last_updated,
                 time_dropdown_text,
+                initial_visible_month,
+                min_date_allowed,
+                max_date_allowed,
                 organism_lmat_options,
                 organism_rgi_kmer_options,
                 samples_count_string,

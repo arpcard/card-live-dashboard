@@ -145,6 +145,7 @@ def default_layout():
                                                        initial_visible_month=datetime.now(),
                                                        end_date=datetime.now(),
                                                        with_portal=True,
+                                                       clearable=True,
                                                    ),
                                                ])
                                            ]),

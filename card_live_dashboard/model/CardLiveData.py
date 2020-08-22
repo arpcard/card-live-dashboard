@@ -115,6 +115,9 @@ class CardLiveData:
     def latest_update(self) -> datetime:
         return self.main_df['timestamp'].max()
 
+    def first_update(self) -> datetime:
+        return self.main_df['timestamp'].min()
+
     def value_counts(self, cols: List[str], include_df: pd.DataFrame = None) -> pd.DataFrame:
         """
         Given a list of columns, counts the number of files in the underlying dataframe for each category of that column.
