@@ -1,5 +1,7 @@
 from typing import Dict, List
 
+from datetime import datetime
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -131,8 +133,23 @@ def default_layout():
                                                dcc.Dropdown(id='time-period-items',
                                                             className='sidepanel-selection',
                                                             value='all',
-                                                            clearable=False)
-                                               ]),
+                                                            clearable=False),
+                                               dbc.Collapse(id='custom-time-period', is_open=False, children=[
+                                                   'Please select a custom date range:',
+                                                   dcc.DatePickerRange(
+                                                       id='date-picker-range',
+                                                       className='sidepanel-selection',
+                                                       display_format='MMM DD, YYYY',
+                                                       min_date_allowed=datetime(2020, 1, 1),
+                                                       max_date_allowed=datetime.now(),
+                                                       updatemode='bothdates',
+                                                       end_date=datetime.now(),
+                                                       with_portal=True,
+                                                       clearable=True,
+                                                       number_of_months_shown=2,
+                                                   ),
+                                               ])
+                                           ]),
                         ]),
                     ]),
                     html.P(className='text-center card-live-badges pb-5', children=[
@@ -179,16 +196,18 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  id='figure-geographic-map-id',
                                  fig=figures_dict['map']
                                  ),
-            single_figure_layout(title='Timeline',
+            single_figure_layout(title='Samples timeline',
                                  id='figure-timeline-id',
                                  fig=figures_dict['timeline'],
                                  dropdowns=figure_menus_layout(
                                      id_type='timeline-type-select',
                                      options_type=[
-                                        {'label': 'Cumulative', 'value': 'cumulative'},
-                                        {'label': 'Rate', 'value': 'rate'},
+                                        {'label': 'Cumulative counts', 'value': 'cumulative_counts'},
+                                        {'label': 'Cumulative percent', 'value': 'cumulative_percent'},
+                                        {'label': 'Counts', 'value': 'counts'},
+                                        {'label': 'Percent', 'value': 'percent'},
                                      ],
-                                     value_type='cumulative',
+                                     value_type='cumulative_counts',
                                      id_color='timeline-color-select',
                                      options_color=[
                                         {'label': 'Default', 'value': 'default'},

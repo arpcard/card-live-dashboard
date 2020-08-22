@@ -232,10 +232,39 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        if fig_type == 'cumulative':
-            cumulative = True
-        elif fig_type == 'rate':
-            cumulative = False
+        if fig_type == 'cumulative_counts' or fig_type == 'counts':
+            display_col = None
+            yaxis_title = 'Samples count'
+            tickformat = ''
+            histfunc = 'count'
+
+            hist_data = data.main_df
+
+            if fig_type == 'counts':
+                cumulative = False
+            elif fig_type == 'cumulative_counts':
+                cumulative = True
+            else:
+                raise Exception(f'Unknown value [fig_type={fig_type}]')
+        elif fig_type == 'cumulative_percent' or fig_type == 'percent':
+            display_col = 'time_fraction'
+            yaxis_title = 'Percent of samples'
+            tickformat = '.0%'
+            histfunc = 'sum'
+
+            # I add in a fraction of the total number of samples here
+            # This is so I can make the histogram report a percentage
+            # of values instead of a count (by taking the sum of
+            # (time_fraction) in a given time period).
+            hist_data = data.main_df.copy()
+            hist_data[display_col] = 1 / len(hist_data)
+
+            if fig_type == 'percent':
+                cumulative = False
+            elif fig_type == 'cumulative_percent':
+                cumulative = True
+            else:
+                raise Exception(f'Unknown value [fig_type={fig_type}]')
         else:
             raise Exception(f'Unknown value [fig_type={fig_type}]')
 
@@ -248,16 +277,9 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
             # when coloring by many categories
             marginal = None
 
-        # I add in a fraction of the total number of samples here
-        # This is so I can make the histogram report a percentage
-        # of values instead of a count (by taking the sum of
-        # (time_fraction) in a given time period).
-        hist_data = data.main_df.copy()
-        hist_data['time_fraction'] = 1/len(hist_data)
-
         category_orders = order_categories(hist_data, color_col_name)
 
-        fig = px.histogram(hist_data, x='timestamp', y='time_fraction',
+        fig = px.histogram(hist_data, x='timestamp', y=display_col,
                            nbins=50,
                            marginal=marginal,
                            cumulative=cumulative,
@@ -269,15 +291,16 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                                    'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
                                    'lmat_taxonomy': 'Organism (LMAT)'},
                            title='Samples by date',
-                           histfunc='sum',
+                           histfunc=histfunc,
                            )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
+                          yaxis={'title': yaxis_title, 'tickformat': tickformat}
                           )
 
         # This replaces the text in the hover 'sum of Percent of samples' to 'Percent of samples'
         for d in fig.data:
             d.hovertemplate = d.hovertemplate.replace('sum of ', '')
+            d.hovertemplate = d.hovertemplate.replace('count', 'Samples count')
 
     return fig
 
