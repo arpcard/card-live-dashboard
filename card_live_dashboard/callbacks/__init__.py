@@ -2,6 +2,8 @@ from typing import List, Set, Dict
 from datetime import datetime, timedelta
 from dash.dependencies import Input, Output, State
 import dash
+from dash.exceptions import PreventUpdate
+import re
 
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
@@ -54,9 +56,18 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         return is_open
 
     @app.callback(
+        Output('custom-time-period', 'is_open'),
+        [Input('time-period-items', 'value')]
+    )
+    def toggle_custom_time_period(time_period_items):
+        return time_period_items == 'custom'
+
+    @app.callback(
         [Output('global-sample-count', 'children'),
          Output('global-most-recent', 'children'),
          Output('time-period-items', 'options'),
+         Output('date-picker-range', 'min_date_allowed'),
+         Output('date-picker-range', 'max_date_allowed'),
          Output('organism-lmat-select', 'options'),
          Output('organism-rgi-kmer-select', 'options'),
          Output('selected-samples-count', 'children'),
@@ -76,6 +87,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('organism-lmat-select', 'value'),
          Input('organism-rgi-kmer-select', 'value'),
          Input('time-period-items', 'value'),
+         Input('date-picker-range', 'start_date'),
+         Input('date-picker-range', 'end_date'),
          Input('timeline-type-select', 'value'),
          Input('timeline-color-select', 'value'),
          Input('totals-type-select', 'value'),
@@ -87,6 +100,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                            amr_gene_families: List[str], resistance_mechanisms: List[str],
                            amr_genes: List[str], organism_lmat: str,
                            organism_rgi_kmer: str, time_dropdown: str,
+                           start_date: str, end_date: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
                            rgi_type_select: str, n_intervals):
@@ -104,6 +118,21 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         global_samples_count = len(data)
         global_last_updated = f'{data.latest_update(): %b %d, %Y}'
 
+        min_date_allowed = data.first_update()
+        max_date_allowed = datetime.now()
+
+        custom_date = {
+            'start': min_date_allowed,
+            'end': max_date_allowed
+        }
+
+        if start_date is not None:
+            start_date = datetime.strptime(re.split(r'[T ]', start_date)[0], '%Y-%m-%d')
+            custom_date['start'] = start_date
+        if end_date is not None:
+            end_date = datetime.strptime(re.split(r'[T ]', end_date)[0], '%Y-%m-%d')
+            custom_date['end'] = end_date
+
         time_subsets = apply_filters(data=data,
                                      rgi_cutoff_select=rgi_cutoff_select,
                                      drug_classes=drug_classes,
@@ -111,7 +140,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                                      resistance_mechanisms=resistance_mechanisms,
                                      amr_genes=amr_genes,
                                      organism_lmat=organism_lmat,
-                                     organism_rgi_kmer=organism_rgi_kmer)
+                                     organism_rgi_kmer=organism_rgi_kmer,
+                                     custom_date=custom_date)
 
         fig_settings = {
             'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
@@ -129,6 +159,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 'label': f'Last {value} ({time_subsets[value].samples_count()})',
                 'value': value,
             })
+        time_dropdown_text.append({'label': 'Custom', 'value': 'custom'})
 
         samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
@@ -148,6 +179,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
         return (global_samples_count,
                 global_last_updated,
                 time_dropdown_text,
+                min_date_allowed,
+                max_date_allowed,
                 organism_lmat_options,
                 organism_rgi_kmer_options,
                 samples_count_string,
@@ -164,7 +197,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
                   drug_classes: List[str], amr_gene_families: List[str],
                   resistance_mechanisms: List[str], amr_genes: List[str], organism_lmat: str,
-                  organism_rgi_kmer: str) -> Dict[str, CardLiveData]:
+                  organism_rgi_kmer: str, custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
@@ -184,6 +217,11 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
         '6 months': data.select(table='main', by='time', start=time_now - SIX_MONTHS, end=time_now),
         'year': data.select(table='main', by='time', start=time_now - YEAR, end=time_now),
     }
+
+    if custom_date is not None:
+        time_subsets['custom'] = data.select(table='main', by='time', start=custom_date['start'], end=custom_date['end'])
+    else:
+        time_subsets['custom'] = data
 
     return time_subsets
 
