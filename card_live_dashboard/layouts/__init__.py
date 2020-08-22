@@ -142,10 +142,11 @@ def default_layout():
                                                        display_format='MMM DD, YYYY',
                                                        min_date_allowed=datetime(2020, 1, 1),
                                                        max_date_allowed=datetime.now(),
-                                                       initial_visible_month=datetime.now(),
+                                                       updatemode='bothdates',
                                                        end_date=datetime.now(),
                                                        with_portal=True,
                                                        clearable=True,
+                                                       number_of_months_shown=2,
                                                    ),
                                                ])
                                            ]),
