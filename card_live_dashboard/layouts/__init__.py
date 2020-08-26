@@ -156,7 +156,7 @@ def default_layout():
                         html.Br(),
                         html.A(className='badge badge-primary',
                                children=[f'Version | {card_live_dashboard.__version__}'],
-                               href='https://devcard.mcmaster.ca:8888/apetkau/card-live-dashboard'),
+                               href='https://github.com/arpcard/card-live-dashboard'),
                     ]),
                     html.Div(className='py-5')
                 ]),
