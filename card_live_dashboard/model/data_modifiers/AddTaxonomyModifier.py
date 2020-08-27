@@ -38,8 +38,7 @@ class AddTaxonomyModifier(CardLiveDataModifier):
         lmat_df = data.lmat_df.copy()
         mlst_df = data.mlst_df.copy()
 
-        return CardLiveData(cardlive_home=data.cardlive_home,
-                            main_df=main_df,
+        return CardLiveData(main_df=main_df,
                             rgi_parser=RGIParser(rgi_df),
                             rgi_kmer_df=rgi_kmer_df,
                             mlst_df=mlst_df,

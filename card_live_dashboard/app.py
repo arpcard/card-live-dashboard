@@ -8,7 +8,7 @@ from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 import card_live_dashboard.layouts as layouts
 import card_live_dashboard.callbacks as callbacks
 
-DEFAULT_CARD_LIVE_HOME = getcwd()
+DEFAULT_CARD_LIVE_HOME = Path(getcwd())
 
 
 def build_app(card_live_home: Path = DEFAULT_CARD_LIVE_HOME) -> dash.dash.Dash:

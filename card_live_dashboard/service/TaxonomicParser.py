@@ -2,7 +2,6 @@ import pandas as pd
 from ete3 import NCBITaxa
 import logging
 import warnings
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 

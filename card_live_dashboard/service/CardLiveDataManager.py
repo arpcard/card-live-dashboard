@@ -4,9 +4,16 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.memory import MemoryJobStore
 import logging
+from ete3 import NCBITaxa
+import numpy as np
+from os import path
 
 from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.CardLiveData import CardLiveData
+from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
+from card_live_dashboard.model.data_modifiers.AddTaxonomyModifier import AddTaxonomyModifier
+from card_live_dashboard.model.data_modifiers.AddGeographicNamesModifier import AddGeographicNamesModifier
+from card_live_dashboard.service import region_codes
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +22,18 @@ class CardLiveDataManager:
     INSTANCE = None
 
     def __init__(self, cardlive_home: Path):
-        self._data_loader = CardLiveDataLoader(cardlive_home)
+        ncbi_db_path = cardlive_home / 'db' / 'taxa.sqlite'
+        card_live_data_dir = cardlive_home / 'data' / 'card_live'
+
+        ncbi_db = NCBITaxa(dbfile=ncbi_db_path)
+
+        self._data_loader = CardLiveDataLoader(card_live_data_dir)
+        self._data_loader.add_data_modifiers([
+            AntarcticaNAModifier(np.datetime64('2020-07-20')),
+            AddGeographicNamesModifier(region_codes),
+            AddTaxonomyModifier(ncbi_db),
+        ])
+
         self._card_live_data = self._data_loader.read_or_update_data()
 
         self._scheduler = BackgroundScheduler(

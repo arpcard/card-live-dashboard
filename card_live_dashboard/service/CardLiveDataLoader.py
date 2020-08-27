@@ -5,12 +5,10 @@ from pathlib import Path
 import json
 from os import path
 import logging
-from ete3 import NCBITaxa
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
-import card_live_dashboard.model.data_modifiers as data_modifiers
-from card_live_dashboard.model.data_modifiers.AddTaxonomyModifier import AddTaxonomyModifier
+from card_live_dashboard.model.data_modifiers.CardLiveDataModifier import CardLiveDataModifier
 
 logger = logging.getLogger(__name__)
 
@@ -29,17 +27,21 @@ class CardLiveDataLoader:
         'geo_area_code',
     ]
 
-    def __init__(self, cardlive_home: Path):
-        self._cardlive_home = cardlive_home
+    def __init__(self, card_live_data: Path):
+        self._directory = card_live_data
 
-        if self._cardlive_home is None:
-            raise Exception('Invalid value [cardlive_home=None]')
+        if self._directory is None:
+            raise Exception('Invalid value [card_live_data=None]')
 
-        self._directory = self._cardlive_home / 'data' / 'card_live'
+        self._data_modifiers = []
 
-        ncbi_db_path = self._cardlive_home / 'db' / 'taxa.sqllite'
-        ncbi_db = NCBITaxa(dbfile=ncbi_db_path)
-        self._taxonomy_modifier = AddTaxonomyModifier(ncbi_db)
+    def add_data_modifiers(self, data_modifiers: List[CardLiveDataModifier]) -> None:
+        """
+        Adds a list of new objects used to apply post modifications to the data.
+        :param data_modifiers: A list of data modifier objects.
+        :return: None.
+        """
+        self._data_modifiers.extend(data_modifiers)
 
     def read_or_update_data(self, existing_data: CardLiveData = None) -> CardLiveData:
         """
@@ -109,11 +111,9 @@ class CardLiveDataLoader:
                             mlst_df=mlst_df,
                             lmat_df=lmat_df)
 
-        # Make changes to underlying data
-        data = data_modifiers.antarctica_modifier.modify(data)
-        data = data_modifiers.geo_names_modifier.modify(data)
-
-        data = self._taxonomy_modifier.modify(data)
+        # apply data modifiers
+        for modifier in self._data_modifiers:
+            data = modifier.modify(data)
 
         return data
 
