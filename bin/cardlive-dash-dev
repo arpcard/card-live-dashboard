@@ -6,11 +6,11 @@ import card_live_dashboard.app
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        data_dir = Path(sys.argv[1])
+        card_live_home = Path(sys.argv[1])
     else:
-        data_dir = card_live_dashboard.app.DEFAULT_DATA_DIR
+        card_live_home = card_live_dashboard.app.DEFAULT_CARD_LIVE_HOME
 
-    app = card_live_dashboard.app.build_app(data_dir)
+    app = card_live_dashboard.app.build_app(card_live_home)
     app.run_server(debug = True,
                   port = 8050,
                   host = '0.0.0.0')

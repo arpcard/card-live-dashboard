@@ -2,11 +2,11 @@
 # Runs CARD:Live dashboard via gunicorn
 # This script used to keep track of standard options to gunicorn to run application.
 
-data_dir=$1
+card_live_home=$1
 
-if [ "${data_dir}" = "" ]
+if [ "${card_live_home}" = "" ]
 then
   gunicorn --workers 2 -b 0.0.0.0:8050 'card_live_dashboard.app:flask_app()' --timeout 180 --log-level debug
 else
-  gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(data_dir='${data_dir}')" --timeout 180 --log-level debug
+  gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')" --timeout 180 --log-level debug
 fi
