@@ -1,6 +1,9 @@
 import pandas as pd
+from unittest.mock import MagicMock
 
 from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
+
+
 
 
 def test_taxonomic_parser_simple():

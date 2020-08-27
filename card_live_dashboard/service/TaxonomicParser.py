@@ -2,14 +2,15 @@ import pandas as pd
 from ete3 import NCBITaxa
 import logging
 import warnings
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
 class TaxonomicParser:
 
-    def __init__(self, df_rgi_kmer: pd.DataFrame, df_lmat: pd.DataFrame):
-        self._ncbi_taxa = NCBITaxa()
+    def __init__(self, ncbi_taxa: NCBITaxa, df_rgi_kmer: pd.DataFrame, df_lmat: pd.DataFrame):
+        self._ncbi_taxa = ncbi_taxa
 
         self._df_rgi_kmer = df_rgi_kmer[['rgi_kmer.CARD*kmer Prediction']]
         self._df_lmat = df_lmat[['lmat.count', 'lmat.taxonomy_label', 'lmat.ncbi_taxon_id']].astype(

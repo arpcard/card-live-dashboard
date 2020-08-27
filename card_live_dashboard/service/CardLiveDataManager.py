@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 class CardLiveDataManager:
     INSTANCE = None
 
-    def __init__(self, card_live_dir: Path):
-        self._data_loader = CardLiveDataLoader(card_live_dir)
+    def __init__(self, cardlive_home: Path):
+        self._data_loader = CardLiveDataLoader(cardlive_home)
         self._card_live_data = self._data_loader.read_or_update_data()
 
         self._scheduler = BackgroundScheduler(
@@ -49,8 +49,8 @@ class CardLiveDataManager:
         return self._card_live_data
 
     @classmethod
-    def create_instance(cls, card_live_dir: Path) -> None:
-        cls.INSTANCE = CardLiveDataManager(card_live_dir)
+    def create_instance(cls, cardlive_home: Path) -> None:
+        cls.INSTANCE = CardLiveDataManager(cardlive_home)
 
     @classmethod
     def get_instance(cls) -> CardLiveDataManager:

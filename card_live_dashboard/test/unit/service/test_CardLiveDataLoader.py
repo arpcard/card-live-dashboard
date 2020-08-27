@@ -7,7 +7,7 @@ data_dir = Path(path.dirname(__file__), 'data')
 
 
 def test_read_one_file():
-    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    loader = CardLiveDataLoader(data_dir / 'home1')
     data = loader.read_data()
 
     assert 1 == len(data.main_df)
@@ -42,7 +42,7 @@ def test_read_one_file():
 
 
 def test_read_antarctica_switch():
-    loader = CardLiveDataLoader(data_dir.joinpath('data2'))
+    loader = CardLiveDataLoader(data_dir / 'home2')
     data = loader.read_data()
 
     assert 2 == len(data.main_df)
@@ -59,7 +59,7 @@ def test_read_antarctica_switch():
 
 
 def test_read_or_update_data_noupdate():
-    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    loader = CardLiveDataLoader(data_dir / 'home1')
     data = loader.read_or_update_data()
 
     assert 1 == len(data.main_df)
@@ -69,12 +69,12 @@ def test_read_or_update_data_noupdate():
 
 
 def test_read_or_update_data_withupdate():
-    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    loader = CardLiveDataLoader(data_dir / 'home1')
     data = loader.read_or_update_data()
 
     assert 1 == len(data.main_df)
 
-    loader = CardLiveDataLoader(data_dir.joinpath('data2'))
+    loader = CardLiveDataLoader(data_dir / 'home2')
     new_data = loader.read_or_update_data(data)
     assert data is not new_data
     assert 2 == len(new_data.main_df)

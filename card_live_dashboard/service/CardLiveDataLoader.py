@@ -5,10 +5,12 @@ from pathlib import Path
 import json
 from os import path
 import logging
+from ete3 import NCBITaxa
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
 import card_live_dashboard.model.data_modifiers as data_modifiers
+from card_live_dashboard.model.data_modifiers.AddTaxonomyModifier import AddTaxonomyModifier
 
 logger = logging.getLogger(__name__)
 
@@ -27,11 +29,17 @@ class CardLiveDataLoader:
         'geo_area_code',
     ]
 
-    def __init__(self, card_live_dir: Path):
-        self._directory = card_live_dir
+    def __init__(self, cardlive_home: Path):
+        self._cardlive_home = cardlive_home
 
-        if self._directory is None:
-            raise Exception('Invalid value [card_live_dir=None]')
+        if self._cardlive_home is None:
+            raise Exception('Invalid value [cardlive_home=None]')
+
+        self._directory = self._cardlive_home / 'data' / 'card_live'
+
+        ncbi_db_path = self._cardlive_home / 'db' / 'taxa.sqllite'
+        ncbi_db = NCBITaxa(dbfile=ncbi_db_path)
+        self._taxonomy_modifier = AddTaxonomyModifier(ncbi_db)
 
     def read_or_update_data(self, existing_data: CardLiveData = None) -> CardLiveData:
         """
@@ -104,7 +112,8 @@ class CardLiveDataLoader:
         # Make changes to underlying data
         data = data_modifiers.antarctica_modifier.modify(data)
         data = data_modifiers.geo_names_modifier.modify(data)
-        data = data_modifiers.taxonomy_modifier.modify(data)
+
+        data = self._taxonomy_modifier.modify(data)
 
         return data
 
