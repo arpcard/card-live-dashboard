@@ -42,5 +42,6 @@ setup(name='card-live-dashboard',
       include_package_data=True,
       scripts=['bin/cardlive-dash-dev',
                'bin/cardlive-dash-prod',
-               'bin/cardlive-dash-profiler'],
+               'bin/cardlive-dash-profiler',
+               'bin/cardlive-dash-init'],
 )
