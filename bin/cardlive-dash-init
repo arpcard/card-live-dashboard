@@ -4,6 +4,7 @@ import sys
 from os import path, mkdir, makedirs
 from pathlib import Path
 import logging
+import ete3.ncbi_taxonomy.ncbiquery
 
 script_name = path.basename(path.realpath(sys.argv[0]))
 logger = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ if __name__ == '__main__':
         cardlive_home_path = Path(args.cardlive_home_dir[0])
         cardlive_data_path = Path(cardlive_home_path, 'data', 'card_live')
         cardlive_db_path = Path(cardlive_home_path, 'db')
+        cardlive_taxa_file = Path(cardlive_db_path, 'taxa.sqlite')
 
         if not cardlive_home_path.exists():
             mkdir(cardlive_home_path)
@@ -35,6 +37,12 @@ if __name__ == '__main__':
         else:
             logger.warning(f'Database directory [{cardlive_db_path}] already exists.')
 
-        print(f'Finished initalizing CARD:Live home directory as [{cardlive_home_path}]')
+        if not cardlive_taxa_file.exists():
+            print(f'Initializing NCBI Taxonomy database in [{cardlive_db_path}]')
+            ete3.ncbi_taxonomy.ncbiquery.update_db(dbfile=str(cardlive_taxa_file))
+        else:
+            logger.warning(f'NCBI Taxonomy database [{cardlive_taxa_file}] already exists.')
+
+        print(f'Finished initializing CARD:Live home directory as [{cardlive_home_path}]')
         print(f'Please add CARD:Live JSON data to [{cardlive_data_path}]',
               f'and start the CARD:Live dashboard by running "cardlive-dash-prod {cardlive_home_path}"')

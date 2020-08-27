@@ -2,7 +2,7 @@ from typing import Union
 import dash
 import flask
 from pathlib import Path
-from os import path, getcwd
+from os import getcwd
 
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 import card_live_dashboard.layouts as layouts

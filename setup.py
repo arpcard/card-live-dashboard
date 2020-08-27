@@ -26,6 +26,7 @@ setup(name='card-live-dashboard',
       license='Apache v2.0',
       classifiers=classifiers,
       install_requires=[
+          'ete3',
           'apscheduler',
           'pandas',
           'geopandas',
