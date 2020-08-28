@@ -69,8 +69,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('time-period-items', 'options'),
          Output('date-picker-range', 'min_date_allowed'),
          Output('date-picker-range', 'max_date_allowed'),
-         Output('organism-lmat-select', 'options'),
-         Output('organism-rgi-kmer-select', 'options'),
+         Output('organism-select', 'options'),
          Output('selected-samples-count', 'children'),
          Output('drug-class-select', 'options'),
          Output('amr-gene-family-select', 'options'),
@@ -85,8 +84,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('amr-gene-family-select', 'value'),
          Input('resistance-mechanism-select', 'value'),
          Input('amr-gene-select', 'value'),
-         Input('organism-lmat-select', 'value'),
-         Input('organism-rgi-kmer-select', 'value'),
+         Input('organism-select', 'value'),
          Input('time-period-items', 'value'),
          Input('date-picker-range', 'start_date'),
          Input('date-picker-range', 'end_date'),
@@ -99,9 +97,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
                            amr_gene_families: List[str], resistance_mechanisms: List[str],
-                           amr_genes: List[str], organism_lmat: str,
-                           organism_rgi_kmer: str, time_dropdown: str,
-                           start_date: str, end_date: str,
+                           amr_genes: List[str], organism: str,
+                           time_dropdown: str, start_date: str, end_date: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
                            rgi_type_select: str, n_intervals):
@@ -140,8 +137,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                                      amr_gene_families=amr_gene_families,
                                      resistance_mechanisms=resistance_mechanisms,
                                      amr_genes=amr_genes,
-                                     organism_lmat=organism_lmat,
-                                     organism_rgi_kmer=organism_rgi_kmer,
+                                     organism=organism,
                                      custom_date=custom_date)
 
         fig_settings = {
@@ -164,10 +160,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
         samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
-        organism_lmat_options = build_options([organism_lmat],
+        organism_lmat_options = build_options([organism],
                                               time_subsets[time_dropdown].unique_column('lmat_taxonomy'))
-        organism_rgi_kmer_options = build_options([organism_rgi_kmer],
-                                                  time_subsets[time_dropdown].unique_column('rgi_kmer_taxonomy'))
         drug_class_options = build_options(drug_classes,
                                            time_subsets[time_dropdown].rgi_parser.all_drugs())
         amr_gene_families_options = build_options(amr_gene_families,
@@ -183,7 +177,6 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 min_date_allowed,
                 max_date_allowed,
                 organism_lmat_options,
-                organism_rgi_kmer_options,
                 samples_count_string,
                 drug_class_options,
                 amr_gene_families_options,
@@ -197,8 +190,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
                   drug_classes: List[str], amr_gene_families: List[str],
-                  resistance_mechanisms: List[str], amr_genes: List[str], organism_lmat: str,
-                  organism_rgi_kmer: str, custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
+                  resistance_mechanisms: List[str], amr_genes: List[str], organism: str,
+                  custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
@@ -206,8 +199,8 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
         .select(table='rgi', by='amr_gene_family', type='file', elements=amr_gene_families) \
         .select(table='rgi', by='resistance_mechanism', type='file', elements=resistance_mechanisms) \
         .select(table='rgi', by='amr_gene', type='file', elements=amr_genes) \
-        .select(table='main', by='lmat_taxonomy', taxonomy=organism_lmat) \
-        .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
+        .select(table='main', by='lmat_taxonomy', taxonomy=organism)# \
+        # .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
 
     time_subsets = {
         'all': data,

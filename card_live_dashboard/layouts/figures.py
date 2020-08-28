@@ -39,20 +39,20 @@ EMPTY_FIGURE_DICT = {
 TOTALS_COLUMN_SELECT_NAMES = {
     'default': 'geo_area_name_standard',
     'geographic': 'geo_area_name_standard',
-    'organism_lmat': 'lmat_taxonomy',
+    'organism': 'lmat_taxonomy',
     'organism_rgi_kmer': 'rgi_kmer_taxonomy'
 }
 
 TOTALS_COLUMN_DATAFRAME_NAMES = {
     'default': None,
     'geographic': 'geo_area_name_standard',
-    'organism_lmat': 'lmat_taxonomy',
+    'organism': 'lmat_taxonomy',
     'organism_rgi_kmer': 'rgi_kmer_taxonomy'
 }
 
 TOTALS_FIGURE_TITLES = {
     'geographic': 'Totals by geographic region',
-    'organism_lmat': 'Totals by organism (LMAT)',
+    'organism': 'Totals by organism (LMAT)',
     'organism_rgi_kmer': 'Totals by organism (RGI Kmer)'
 }
 
@@ -63,50 +63,6 @@ RGI_TITLES = {
     'amr_gene_family': 'AMR gene family',
     'resistance_mechanism': 'Resistance mechanism',
 }
-
-
-def taxonomic_comparison(df: pd.DataFrame):
-    if df.empty:
-        fig = EMPTY_FIGURE
-    else:
-        CATEGORY_LIMIT = 30
-        df = df.groupby('taxon').sum().sort_values(
-            by=['Total', 'taxon'], ascending=True)
-
-        if len(df) > CATEGORY_LIMIT:
-            df = df.reset_index()
-            label = 'Other'
-            df['selected'] = False
-            # CATEGORY_LIMIT - 1 so that the 'Other' label becomes the final category
-            df.loc[df.tail(CATEGORY_LIMIT - 1).index.tolist(), 'selected'] = True
-            df.loc[~df['selected'], 'taxon'] = label
-            df = df.drop(columns=['selected'])
-            df = df.groupby('taxon').sum().sort_values(
-                by=['Total', 'taxon'], ascending=True)
-
-            # Shift 'Other' label to bottom
-            df_old_index = df.index.tolist()
-            df_old_index.pop(df.index.get_loc(label))
-            df_new_index = [label] + df_old_index
-            df = df.reindex(df_new_index)
-
-        df = df.rename(columns={'count_both': 'Both LMAT and RGI Kmer',
-                                'rgi_counts': 'Unique to RGI Kmer',
-                                'lmat_counts': 'Unique to LMAT'})
-
-        stacked_columns = [e for e in list(df.columns) if e not in ('Total')]
-
-        fig = px.bar(df, y=df.index, x=stacked_columns, height=700,
-                     labels={'value': 'Number of genomes',
-                             'variable': 'Taxonomic software agreement',
-                             'taxon': 'Taxononmic category'},
-                     title='Breakdown of genome to taxonomic category assignments')
-        fig.update_layout(
-            yaxis=dict(tickfont=dict(size=14), dtick=1),
-            font={'size': 14}
-        )
-
-    return fig
 
 
 def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
@@ -138,7 +94,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      labels={'count': 'Samples count',
                              'geo_area_name_standard': 'Geographic region',
                              'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
-                             'lmat_taxonomy': 'Organism (LMAT)'},
+                             'lmat_taxonomy': 'Organism'},
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
         fig.update_layout(font={'size': 14},
@@ -289,7 +245,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                                    'timestamp': 'Date',
                                    'geo_area_name_standard': 'Geographic region',
                                    'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
-                                   'lmat_taxonomy': 'Organism (LMAT)'},
+                                   'lmat_taxonomy': 'Organism'},
                            title='Samples by date',
                            histfunc=histfunc,
                            )

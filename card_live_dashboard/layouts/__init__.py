@@ -111,16 +111,10 @@ def default_layout():
                         dbc.Button(id='organism-parameters-toggle', color='link',
                                    className='cardlive-collapse pl-0', children=[html.H3('Organism')]),
                         dbc.Collapse(id='organism-parameters', is_open=True, children=[
-                            html.Div(children=['Select an organism (LMAT): ',
-                                               dcc.Dropdown(id='organism-lmat-select',
+                            html.Div(children=['Select an organism: ',
+                                               dcc.Dropdown(id='organism-select',
                                                             className='sidepanel-selection',
-                                                            placeholder='LMAT organism',
-                                                            clearable=True)
-                                               ]),
-                            html.Div(children=['Select an organism (RGI Kmer): ',
-                                               dcc.Dropdown(id='organism-rgi-kmer-select',
-                                                            className='sidepanel-selection',
-                                                            placeholder='RGI Kmer organism',
+                                                            placeholder='Organism',
                                                             clearable=True)
                                                ]),
                         ]),
@@ -212,8 +206,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      options_color=[
                                         {'label': 'Default', 'value': 'default'},
                                         {'label': 'Geographic region', 'value': 'geographic'},
-                                        {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
-                                        {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'}
+                                        {'label': 'Organism', 'value': 'organism'},
                                      ],
                                      value_color='default'
                                  ),
@@ -225,16 +218,14 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      id_type='totals-type-select',
                                      options_type=[
                                          {'label': 'Geographic region', 'value': 'geographic'},
-                                         {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
-                                         {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'},
+                                         {'label': 'Organism', 'value': 'organism'},
                                      ],
                                      value_type='geographic',
                                      id_color='totals-color-select',
                                      options_color=[
                                          {'label': 'Default', 'value': 'default'},
                                          {'label': 'Geographic region', 'value': 'geographic'},
-                                         {'label': 'Organism (LMAT)', 'value': 'organism_lmat'},
-                                         {'label': 'Organism (RGI Kmer)', 'value': 'organism_rgi_kmer'}
+                                         {'label': 'Organism', 'value': 'organism'},
                                      ],
                                      value_color='default'
                                  ),
