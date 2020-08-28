@@ -1,13 +1,21 @@
 from pathlib import Path
 from os import path
+import numpy as np
 
 from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
+from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
+from card_live_dashboard.model.data_modifiers.AddGeographicNamesModifier import AddGeographicNamesModifier
+
+from card_live_dashboard.service import region_codes
 
 data_dir = Path(path.dirname(__file__), 'data')
 
 
 def test_read_one_file():
-    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    loader = CardLiveDataLoader(data_dir / 'data1')
+    loader.add_data_modifiers([
+        AddGeographicNamesModifier(region_codes),
+    ])
     data = loader.read_data()
 
     assert 1 == len(data.main_df)
@@ -17,8 +25,6 @@ def test_read_one_file():
     assert 'geo_area_code' in set(data.main_df.columns.tolist())
     assert 'geo_area_name_standard' in set(data.main_df.columns.tolist())
     assert ['Northern Africa'] == data.main_df['geo_area_name_standard'].tolist()
-    assert ['Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
-    assert ['Enterobacteriaceae'] == data.main_df['rgi_kmer_taxonomy'].tolist()
     assert 'matches' not in set(data.main_df.columns.tolist())
 
     assert 2 == len(data.rgi_df)
@@ -36,13 +42,16 @@ def test_read_one_file():
     assert 'timestamp' not in set(data.mlst_df.columns.tolist())
     assert 'geo_area_code' not in set(data.mlst_df.columns.tolist())
 
-    assert ['Salmonella enterica'] == data.lmat_df['lmat.taxonomy_label'].tolist()
     assert 'timestamp' not in set(data.lmat_df.columns.tolist())
     assert 'geo_area_code' not in set(data.lmat_df.columns.tolist())
 
 
 def test_read_antarctica_switch():
-    loader = CardLiveDataLoader(data_dir.joinpath('data2'))
+    loader = CardLiveDataLoader(data_dir / 'data2')
+    loader.add_data_modifiers([
+        AntarcticaNAModifier(np.datetime64('2020-07-20')),
+        AddGeographicNamesModifier(region_codes),
+    ])
     data = loader.read_data()
 
     assert 2 == len(data.main_df)
@@ -59,7 +68,7 @@ def test_read_antarctica_switch():
 
 
 def test_read_or_update_data_noupdate():
-    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    loader = CardLiveDataLoader(data_dir / 'data1')
     data = loader.read_or_update_data()
 
     assert 1 == len(data.main_df)
@@ -69,12 +78,12 @@ def test_read_or_update_data_noupdate():
 
 
 def test_read_or_update_data_withupdate():
-    loader = CardLiveDataLoader(data_dir.joinpath('data1'))
+    loader = CardLiveDataLoader(data_dir / 'data1')
     data = loader.read_or_update_data()
 
     assert 1 == len(data.main_df)
 
-    loader = CardLiveDataLoader(data_dir.joinpath('data2'))
+    loader = CardLiveDataLoader(data_dir / 'data2')
     new_data = loader.read_or_update_data(data)
     assert data is not new_data
     assert 2 == len(new_data.main_df)

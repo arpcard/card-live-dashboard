@@ -15,6 +15,20 @@ source card-live-venv
 pip install card-live-dashboard
 ```
 
+## Install patched version of ete3 toolkit
+
+Due to an issue with the ete3 toolkit (<https://github.com/etetoolkit/ete/issues/469>) you will have to install a patched version of this software. To do this please run:
+
+```bash
+pip install --upgrade https://github.com/apetkau/ete/archive/3.1.1-apetkau1.tar.gz
+```
+
+This will fix an issue that occurs when building the NCBI taxnomy database (when running `cardlive-dash-init`) like the following:
+
+```
+sqlite3.IntegrityError: UNIQUE constraint failed: synonym.spname, synonym.taxid 
+```
+
 ## Development
 
 If, instead, you want to install and do development on the code you can instead run (after creating a virtual environment):
@@ -27,20 +41,30 @@ This will make the installed application reflect any code changes made within `c
 
 # Running
 
+## Create CARD:Live Dashboard home directory
+
+Before running, you will have to create a CARD:Live dashboard home directory. This directory will be used to store the CARD:Live data as well as the NCBI taxnomy database. Please run the below command to create this directory:
+
+```bash
+cardlive-dash-init [cardlive-home]
+```
+
+Once this is created, please copy over the CARD:Live data (JSON files) to `[cardlive-home]/data/card_live`.
+
 ## Production
 
 To run the production server, please run:
 
 ```bash
-cardlive-dash-prod [data_dir]
+cardlive-dash-prod [cardlive-home]
 ```
 
-Where `[data_dir]` is the directory containing the CARD:Live data (JSON files).
+Where `[cardlive-home]` is the CARD:Live home directory.
 
 This will serve the CARD:Live dashboard on port 8050. Underneath, this runs [gunicorn][]. You can also run the `gunicorn` command directly to adjust the port, number of workers, etc.
 
 ```bash
-gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(data_dir='[data_dir]')" --timeout 180 --log-level debug
+gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(card_live_home='[cardlive-home]')" --timeout 180 --log-level debug
 ```
 
 ## Development
@@ -48,10 +72,10 @@ gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(data_dir
 To run the development server please run:
 
 ```bash
-cardlive-dash-dev
+cardlive-dash-dev [cardlive-home]
 ```
 
-This assumes that you've installed the application with `pip install -e card-live-dashboard` and that there exists a directory `card-live-dashboard/data/card_live` containing your data.
+This assumes that you've installed the application with `pip install -e card-live-dashboard`.
 
 **Note**: As per the [Dash documentation][dash-deployment] (which references the Flash documentation) it is not recommended to run the development (built-in) server for a production machine since it doesn't scale well. **Important**: also, since debug mode is turned on this will expose certain information about the underlying server. Please do not use development mode in production.
 
@@ -60,7 +84,7 @@ This assumes that you've installed the application with `pip install -e card-liv
 There is also a server used to profile requests coming to the server (for looking at time of requests). This can be run like:
 
 ```bash
-cardlive-dash-profiler
+cardlive-dash-profiler [cardlive-home]
 ```
 
 The same caveats as for the Development server still apply (it also turns on Debug mode and should not be run for a production server).

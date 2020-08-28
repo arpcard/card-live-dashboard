@@ -1,7 +1,8 @@
 # 0.2.0
 
 * Mapping region **Antarctica** to **N/A** if the date is before *2020-07-20*. This is because before that date CARD:Live defaulted to **Antarctica** (instead of no selected region) and so there were many results showing up as Antarctica when it was likely intended these should be N/A.
-* Added an organism select dropdown for both LMAT and RGI Kmer results.
+* Changed organism selection. Now there is the option to select **RGI Kmer** or **LMAT** organism results and this will impact all the figures.
+* Post-processing of LMAT organism results to make sure they do not go below the rank of species.
 * Fixed bug in select by drug class causing multiple selections to miss some samples if drug classes were found on different contigs.
 * Renamed *Besthit ARO* to *AMR gene*.
 * Added plot for viewing drug class counts and AMR genes.
