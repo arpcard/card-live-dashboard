@@ -249,6 +249,7 @@ class RGIParser:
         df_rgi_no_index = self._df_rgi.reset_index()
         exploded_df = df_rgi_no_index[col].replace(r'^\s*$', pd.NA, regex=True).dropna()
         exploded_df = exploded_df.replace(re.compile(f'\\s*{col}\\s*'), col, regex=True).dropna()
+        exploded_df = exploded_df.astype({col: 'object'})
         exploded_df = exploded_df.str.split(sep).apply(
                     lambda x: [y.strip() for y in x]).explode().rename(col + '_exploded').to_frame()
         exploded_df = df_rgi_no_index.merge(

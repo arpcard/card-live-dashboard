@@ -120,20 +120,23 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
         counts_df = counts_df.sort_values(by=['match_count', 'categories'], ascending=[True, False])
         counts_df = counts_df.rename(columns={'match_proportion': 'Match percent'})
 
-        title = RGI_TITLES[type_value]
+        if counts_df.empty:
+            fig = EMPTY_FIGURE
+        else:
+            title = RGI_TITLES[type_value]
 
-        fig = px.bar(counts_df, y='categories', x='Match percent',
-                     height=600,
-                     labels={'categories': 'Categories',
-                             'variable': 'Type',
-                             'match_count': 'Samples count'},
-                     hover_data=['match_count'],
-                     title=title,
-                     )
-        fig.update_layout(font={'size': 14},
-                          yaxis={'title': ''},
-                          xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
-                          )
+            fig = px.bar(counts_df, y='categories', x='Match percent',
+                         height=600,
+                         labels={'categories': 'Categories',
+                                 'variable': 'Type',
+                                 'match_count': 'Samples count'},
+                         hover_data=['match_count'],
+                         title=title,
+                         )
+            fig.update_layout(font={'size': 14},
+                              yaxis={'title': ''},
+                              xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
+                              )
     return fig
 
 
