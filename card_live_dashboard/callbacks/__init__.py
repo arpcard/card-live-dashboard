@@ -141,9 +141,17 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                                      amr_gene_families=amr_gene_families,
                                      resistance_mechanisms=resistance_mechanisms,
                                      amr_genes=amr_genes,
-                                     organism_identification_method=organism_identification_method,
-                                     organism=organism,
                                      custom_date=custom_date)
+
+        # I have to extract the list of available organism options prior to filtering the data by the selected organism
+        # Otherwise once a user selects an organism there will be no other options available
+        organism_column = ORGANISM_COLUMN[organism_identification_method]
+        organism_options = build_options([organism],
+                                         time_subsets[time_dropdown].unique_column(organism_column))
+
+        time_subsets = apply_organism_filter(time_subsets=time_subsets,
+                                             organism_identification_method=organism_identification_method,
+                                             organism=organism)
 
         fig_settings = build_fig_settings(timeline_type_select=timeline_type_select,
                                           timeline_color_select=timeline_color_select,
@@ -167,9 +175,6 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
         samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
-        organism_column = ORGANISM_COLUMN[organism_identification_method]
-        organism_options = build_options([organism],
-                                         time_subsets[time_dropdown].unique_column(organism_column))
         drug_class_options = build_options(drug_classes,
                                            time_subsets[time_dropdown].rgi_parser.all_drugs())
         amr_gene_families_options = build_options(amr_gene_families,
@@ -218,16 +223,15 @@ def build_fig_settings(timeline_type_select: str, timeline_color_select: str, to
 
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
                   drug_classes: List[str], amr_gene_families: List[str],
-                  resistance_mechanisms: List[str], amr_genes: List[str], organism_identification_method: str,
-                  organism: str, custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
+                  resistance_mechanisms: List[str], amr_genes: List[str],
+                  custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
         .select(table='rgi', by='drug', type='file', elements=drug_classes) \
         .select(table='rgi', by='amr_gene_family', type='file', elements=amr_gene_families) \
         .select(table='rgi', by='resistance_mechanism', type='file', elements=resistance_mechanisms) \
-        .select(table='rgi', by='amr_gene', type='file', elements=amr_genes) \
-        .select(table='main', by=ORGANISM_COLUMN[organism_identification_method], taxonomy=organism)
+        .select(table='rgi', by='amr_gene', type='file', elements=amr_genes)
 
     time_subsets = {
         'all': data,
@@ -247,6 +251,15 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
 
     return time_subsets
 
+
+def apply_organism_filter(time_subsets: Dict[str, CardLiveData],
+                          organism_identification_method: str, organism: str) -> Dict[str, CardLiveData]:
+    time_subsets_filtered = {}
+    for key in time_subsets:
+        time_subsets_filtered[key] = time_subsets[key].select(
+            table='main', by=ORGANISM_COLUMN[organism_identification_method], taxonomy=organism)
+
+    return time_subsets_filtered
 
 def build_options(selected_options: List[str], all_available_options: Set[str]):
     if selected_options is None or len(selected_options) == 0:
