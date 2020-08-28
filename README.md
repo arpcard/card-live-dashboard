@@ -20,7 +20,7 @@ pip install card-live-dashboard
 Due to an issue with the ete3 toolkit (<https://github.com/etetoolkit/ete/issues/469>) you will have to install a patched version of this software. To do this please run:
 
 ```bash
-pip install https://github.com/apetkau/ete/archive/3.1.1-apetkau1.tar.gz
+pip install --upgrade https://github.com/apetkau/ete/archive/3.1.1-apetkau1.tar.gz
 ```
 
 This will fix an issue that occurs when building the NCBI taxnomy database (when running `cardlive-dash-init`) like the following:
