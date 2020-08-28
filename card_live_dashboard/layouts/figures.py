@@ -76,7 +76,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        totals_df = data.value_counts(count_by_columns).reset_index()
+        totals_df = data.sample_counts(count_by_columns).reset_index()
 
         type_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[type_value]
         color_col_name = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
@@ -143,7 +143,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
 
 
 def choropleth_drug(data: CardLiveData, world: geopandas.GeoDataFrame):
-    df_geo = data.value_counts(['geo_area_code', 'geo_area_name_standard']).reset_index()
+    df_geo = data.sample_counts(['geo_area_code', 'geo_area_name_standard']).reset_index()
 
     # Remove N/A from counts so it doesn't mess with colors of map
     df_geo = df_geo[~df_geo['geo_area_name_standard'].str.contains('N/A')]

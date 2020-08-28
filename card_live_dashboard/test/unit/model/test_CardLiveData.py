@@ -417,7 +417,7 @@ def test_select_amr_gene_family_two():
 def test_value_counts_geo():
     data = DATA
 
-    counts = data.value_counts(['geo_area_code'])
+    counts = data.sample_counts(['geo_area_code'])
     assert len(counts) == 2, 'Invalid number of geographic areas'
     assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
     assert counts.loc[10, 'count'] == 2, 'Invalid count number'
@@ -427,7 +427,7 @@ def test_value_counts_geo():
 def test_value_counts_timestamp():
     data = DATA
 
-    counts = data.value_counts(['timestamp'])
+    counts = data.sample_counts(['timestamp'])
     assert len(counts) == 3, 'Invalid number of timestamps areas'
 
 
@@ -442,7 +442,7 @@ def test_value_counts_new_data():
               ]
         ).set_index('filename')
 
-    counts = data.value_counts(cols=['color'], include_df=new_data)
+    counts = data.sample_counts(cols=['color'], include_df=new_data)
     assert len(counts) == 2, 'Invalid number of unique categories'
     assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
     assert counts.loc['red', 'count'] == 2, 'Invalid count number'
@@ -461,7 +461,7 @@ def test_value_counts_new_data_multiple_files():
               ]
         ).set_index('filename')
 
-    counts = data.value_counts(cols=['color'], include_df=new_data)
+    counts = data.sample_counts(cols=['color'], include_df=new_data)
     assert len(counts) == 2, 'Invalid number of unique categories'
     assert {'count'} == set(counts.columns.tolist()), 'Invalid columns'
     assert counts.loc['red', 'count'] == 2, 'Invalid count number'
