@@ -111,6 +111,18 @@ def default_layout():
                         dbc.Button(id='organism-parameters-toggle', color='link',
                                    className='cardlive-collapse pl-0', children=[html.H3('Organism')]),
                         dbc.Collapse(id='organism-parameters', is_open=True, children=[
+                            html.Div(children=['Select an organism identification method: ',
+                                               dbc.RadioItems(
+                                                   id='organism-identification-method',
+                                                   className='sidepanel-selection-light',
+                                                   options=[
+                                                       {'label': 'LMAT', 'value': 'lmat'},
+                                                       {'label': 'RGI Kmer', 'value': 'rgi_kmer'},
+                                                   ],
+                                                   value='lmat',
+                                                   inline=True,
+                                               ),
+                                               ]),
                             html.Div(children=['Select an organism: ',
                                                dcc.Dropdown(id='organism-select',
                                                             className='sidepanel-selection',

@@ -2,21 +2,24 @@ from typing import List, Set, Dict
 from datetime import datetime, timedelta
 from dash.dependencies import Input, Output, State
 import dash
-from dash.exceptions import PreventUpdate
 import re
 
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.model.CardLiveData import CardLiveData
 import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model import world
-from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)
 MONTH = timedelta(days=31)
-THREE_MONTHS = timedelta(days=365/4) # 3 months is defined as a quarter year
-SIX_MONTHS = timedelta(days=365/2) # 6 months is defined as half a year
+THREE_MONTHS = timedelta(days=365 / 4)  # 3 months is defined as a quarter year
+SIX_MONTHS = timedelta(days=365 / 2)  # 6 months is defined as half a year
 YEAR = timedelta(days=365)
+
+ORGANISM_COLUMN = {
+    'lmat': 'lmat_taxonomy',
+    'rgi_kmer': 'rgi_kmer_taxonomy',
+}
 
 
 def build_callbacks(app: dash.dash.Dash) -> None:
@@ -84,6 +87,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('amr-gene-family-select', 'value'),
          Input('resistance-mechanism-select', 'value'),
          Input('amr-gene-select', 'value'),
+         Input('organism-identification-method', 'value'),
          Input('organism-select', 'value'),
          Input('time-period-items', 'value'),
          Input('date-picker-range', 'start_date'),
@@ -97,7 +101,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
                            amr_gene_families: List[str], resistance_mechanisms: List[str],
-                           amr_genes: List[str], organism: str,
+                           amr_genes: List[str], organism_identification_method: str, organism: str,
                            time_dropdown: str, start_date: str, end_date: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
@@ -137,16 +141,19 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                                      amr_gene_families=amr_gene_families,
                                      resistance_mechanisms=resistance_mechanisms,
                                      amr_genes=amr_genes,
+                                     organism_identification_method=organism_identification_method,
                                      organism=organism,
                                      custom_date=custom_date)
 
-        fig_settings = {
-            'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
-            'totals': {'type': totals_type_select, 'color': totals_color_select},
-            'rgi': {'type': rgi_type_select}
-        }
+        fig_settings = build_fig_settings(timeline_type_select=timeline_type_select,
+                                          timeline_color_select=timeline_color_select,
+                                          totals_type_select=totals_type_select,
+                                          totals_color_select=totals_color_select,
+                                          rgi_type_select=rgi_type_select,
+                                          organism_identification_method=organism_identification_method
+                                          )
 
-        main_pane_figures = build_main_pane(time_subsets[time_dropdown], fig_settings)
+        main_pane_figures = build_main_pane(time_subsets[time_dropdown], organism_identification_method, fig_settings)
 
         # Set time dropdown text to include count of samples in particular time period
         # Should produce a list of dictionaries like [{'label': 'All (500)', 'value': 'all'}, ...]
@@ -160,14 +167,16 @@ def build_callbacks(app: dash.dash.Dash) -> None:
 
         samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
 
-        organism_lmat_options = build_options([organism],
-                                              time_subsets[time_dropdown].unique_column('lmat_taxonomy'))
+        organism_column = ORGANISM_COLUMN[organism_identification_method]
+        organism_options = build_options([organism],
+                                         time_subsets[time_dropdown].unique_column(organism_column))
         drug_class_options = build_options(drug_classes,
                                            time_subsets[time_dropdown].rgi_parser.all_drugs())
         amr_gene_families_options = build_options(amr_gene_families,
                                                   time_subsets[time_dropdown].rgi_parser.all_amr_gene_family())
         resistance_mechanisms_options = build_options(resistance_mechanisms,
-                                                  time_subsets[time_dropdown].rgi_parser.all_resistance_mechanisms())
+                                                      time_subsets[
+                                                          time_dropdown].rgi_parser.all_resistance_mechanisms())
         amr_gene_options = build_options(amr_genes,
                                          time_subsets[time_dropdown].rgi_parser.all_amr_genes())
 
@@ -176,7 +185,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 time_dropdown_text,
                 min_date_allowed,
                 max_date_allowed,
-                organism_lmat_options,
+                organism_options,
                 samples_count_string,
                 drug_class_options,
                 amr_gene_families_options,
@@ -188,10 +197,29 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 main_pane_figures['rgi'])
 
 
+def build_fig_settings(timeline_type_select: str, timeline_color_select: str, totals_type_select: str,
+                       totals_color_select: str, rgi_type_select: str,
+                       organism_identification_method: str) -> Dict[str, Dict[str, str]]:
+    if timeline_color_select == 'organism':
+        timeline_color_select = f'{timeline_color_select}_{organism_identification_method}'
+    if totals_type_select == 'organism':
+        totals_type_select = f'{totals_type_select}_{organism_identification_method}'
+    if totals_color_select == 'organism':
+        totals_color_select = f'{totals_color_select}_{organism_identification_method}'
+
+    fig_settings = {
+        'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
+        'totals': {'type': totals_type_select, 'color': totals_color_select},
+        'rgi': {'type': rgi_type_select}
+    }
+
+    return fig_settings
+
+
 def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
                   drug_classes: List[str], amr_gene_families: List[str],
-                  resistance_mechanisms: List[str], amr_genes: List[str], organism: str,
-                  custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
+                  resistance_mechanisms: List[str], amr_genes: List[str], organism_identification_method: str,
+                  organism: str, custom_date: Dict[str, datetime]) -> Dict[str, CardLiveData]:
     time_now = datetime.now()
 
     data = data.select(table='rgi', by='cutoff', type='row', level=rgi_cutoff_select) \
@@ -199,8 +227,7 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
         .select(table='rgi', by='amr_gene_family', type='file', elements=amr_gene_families) \
         .select(table='rgi', by='resistance_mechanism', type='file', elements=resistance_mechanisms) \
         .select(table='rgi', by='amr_gene', type='file', elements=amr_genes) \
-        .select(table='main', by='lmat_taxonomy', taxonomy=organism)# \
-        # .select(table='main', by='rgi_kmer_taxonomy', taxonomy=organism_rgi_kmer)
+        .select(table='main', by=ORGANISM_COLUMN[organism_identification_method], taxonomy=organism)
 
     time_subsets = {
         'all': data,
@@ -213,7 +240,8 @@ def apply_filters(data: CardLiveData, rgi_cutoff_select: str,
     }
 
     if custom_date is not None:
-        time_subsets['custom'] = data.select(table='main', by='time', start=custom_date['start'], end=custom_date['end'])
+        time_subsets['custom'] = data.select(table='main', by='time', start=custom_date['start'],
+                                             end=custom_date['end'])
     else:
         time_subsets['custom'] = data
 
@@ -237,7 +265,7 @@ def build_options(selected_options: List[str], all_available_options: Set[str]):
         all_available_options_set.union(selected_options_set))]
 
 
-def build_main_pane(data: CardLiveData, fig_settings: Dict[str, Dict[str, str]]):
+def build_main_pane(data: CardLiveData, organism_identification_method: str, fig_settings: Dict[str, Dict[str, str]]):
     fig_map = figures.choropleth_drug(data, world)
     fig_histogram_rate = figures.build_time_histogram(data, fig_type=fig_settings['timeline']['type'],
                                                       color_by=fig_settings['timeline']['color'])

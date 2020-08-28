@@ -39,21 +39,21 @@ EMPTY_FIGURE_DICT = {
 TOTALS_COLUMN_SELECT_NAMES = {
     'default': 'geo_area_name_standard',
     'geographic': 'geo_area_name_standard',
-    'organism': 'lmat_taxonomy',
+    'organism_lmat': 'lmat_taxonomy',
     'organism_rgi_kmer': 'rgi_kmer_taxonomy'
 }
 
 TOTALS_COLUMN_DATAFRAME_NAMES = {
     'default': None,
     'geographic': 'geo_area_name_standard',
-    'organism': 'lmat_taxonomy',
+    'organism_lmat': 'lmat_taxonomy',
     'organism_rgi_kmer': 'rgi_kmer_taxonomy'
 }
 
 TOTALS_FIGURE_TITLES = {
     'geographic': 'Totals by geographic region',
-    'organism': 'Totals by organism (LMAT)',
-    'organism_rgi_kmer': 'Totals by organism (RGI Kmer)'
+    'organism_lmat': 'Totals by organism',
+    'organism_rgi_kmer': 'Totals by organism'
 }
 
 
