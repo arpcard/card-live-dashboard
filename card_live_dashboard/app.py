@@ -43,6 +43,6 @@ def flask_app(card_live_home: Union[str,Path] = DEFAULT_CARD_LIVE_HOME) -> flask
     :return: The Flask app server object.
     """
     if isinstance(card_live_home, str):
-        data_dir = Path(card_live_home)
+        card_live_home = Path(card_live_home)
 
     return build_app(card_live_home).server
