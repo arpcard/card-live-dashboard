@@ -6,7 +6,7 @@ card_live_home=$1
 
 if [ "${card_live_home}" = "" ]
 then
-  gunicorn --workers 2 -b 0.0.0.0:8050 'card_live_dashboard.app:flask_app()' --timeout 180 --log-level debug
+  gunicorn --workers 2 -b 0.0.0.0:8050 'card_live_dashboard.app:flask_app()' --timeout 600 --log-level debug
 else
-  gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')" --timeout 180 --log-level debug
+  gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')" --timeout 600 --log-level debug
 fi
