@@ -25,8 +25,6 @@ def test_read_one_file():
     assert 'geo_area_code' in set(data.main_df.columns.tolist())
     assert 'geo_area_name_standard' in set(data.main_df.columns.tolist())
     assert ['Northern Africa'] == data.main_df['geo_area_name_standard'].tolist()
-    # assert ['Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
-    # assert ['Enterobacteriaceae'] == data.main_df['rgi_kmer_taxonomy'].tolist()
     assert 'matches' not in set(data.main_df.columns.tolist())
 
     assert 2 == len(data.rgi_df)
@@ -44,7 +42,6 @@ def test_read_one_file():
     assert 'timestamp' not in set(data.mlst_df.columns.tolist())
     assert 'geo_area_code' not in set(data.mlst_df.columns.tolist())
 
-    # assert ['Salmonella enterica'] == data.lmat_df['lmat.taxonomy_label'].tolist()
     assert 'timestamp' not in set(data.lmat_df.columns.tolist())
     assert 'geo_area_code' not in set(data.lmat_df.columns.tolist())
 
