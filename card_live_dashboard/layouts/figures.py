@@ -1,4 +1,5 @@
 from typing import List, Dict
+from collections import OrderedDict
 import logging
 
 import pandas as pd
@@ -124,10 +125,12 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
         counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
         counts_df = counts_df.merge(categories_total, how='left', left_on='categories', right_index=True)
         counts_df['proportion'] = counts_df['count'] / selected_files_count
-        counts_df = counts_df.sort_values(by=['categories_total', 'count'], ascending=True)
 
-        pd.set_option('display.max_rows', counts_df.shape[0] + 1)
-        print(f'counts_df after=\n{counts_df}')
+        # Define order to display
+        categories_order = counts_df[['categories', 'categories_total']].sort_values(
+            by='categories_total', ascending=False)['categories'].tolist()
+        # Create a list of unique categories while still preserving order of the original list
+        categories_order = list(OrderedDict.fromkeys(categories_order))
 
         if counts_df.empty:
             fig = EMPTY_FIGURE
@@ -135,6 +138,9 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
             title = RGI_TITLES[type_value]
 
             fig = px.bar(counts_df, y='categories', x='proportion',
+                         category_orders={
+                             'categories': categories_order,
+                         },
                          height=600,
                          color=color_by_col,
                          labels={'categories': 'Categories',
