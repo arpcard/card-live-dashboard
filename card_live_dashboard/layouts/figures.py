@@ -56,7 +56,6 @@ TOTALS_FIGURE_TITLES = {
     'organism_rgi_kmer': 'Totals by organism'
 }
 
-
 RGI_TITLES = {
     'drug_class': 'Drug class resistances',
     'amr_gene': 'AMR gene',
@@ -93,7 +92,6 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      category_orders=category_orders,
                      labels={'count': 'Samples count',
                              'geo_area_name_standard': 'Geographic region',
-                             'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
                              'lmat_taxonomy': 'Organism'},
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
@@ -126,7 +124,9 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
         counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
         counts_df = counts_df.merge(categories_total, how='left', left_on='categories', right_index=True)
         counts_df['proportion'] = counts_df['count'] / selected_files_count
-        counts_df = counts_df.sort_values(by=['categories_total', 'categories'], ascending=True)
+        counts_df = counts_df.sort_values(by=['categories_total', 'count'], ascending=True)
+
+        pd.set_option('display.max_rows', counts_df.shape[0] + 1)
         print(f'counts_df after=\n{counts_df}')
 
         if counts_df.empty:
@@ -139,6 +139,9 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          color=color_by_col,
                          labels={'categories': 'Categories',
                                  'variable': 'Type',
+                                 'geo_area_name_standard': 'Geographic region',
+                                 'lmat_taxonomy': 'Organism',
+                                 'rgi_taxonomy': 'Organism',
                                  'match_count': 'Samples count'},
                          hover_data=['count'],
                          title=title,
