@@ -5,10 +5,9 @@
 * Post-processing of LMAT organism results to make sure they do not go below the rank of species.
 * Fixed bug in select by drug class causing multiple selections to miss some samples if drug classes were found on different contigs.
 * Renamed *Besthit ARO* to *AMR gene*.
-* Added plot for viewing drug class counts and AMR genes.
+* Added plot for viewing drug class counts, AMR genes, AMR gene families, and Resistance Mechanism.
 * Added `setup.py` install script.
 * Added both percent and count plots for timeline.
-* Added *AMR Gene Family* and *Resistance Mechanism* as selection criteria and as figures.
 * Added the ability to select a custom date range.
 
 # 0.1.0
