@@ -108,31 +108,39 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        totals_df = data.rgi_parser.explode_column('rgi_main.Drug Class')
-        print(totals_df.columns)
+        color_by = 'geographic'
+        color_by_col = TOTALS_COLUMN_SELECT_NAMES[color_by]
         totals_df = data.rgi_parser.get_column_values(data_type=type_value)
 
         # Data preparation
         totals_df.name = 'categories'
         totals_df = totals_df.reset_index().drop_duplicates().set_index('filename')
-        counts_df = totals_df.value_counts().to_frame().rename(columns={0: 'match_count'})
         selected_files_count = len(set(totals_df.index.tolist()))
-        counts_df['match_proportion'] = counts_df / selected_files_count
-        counts_df = counts_df.reset_index()
-        counts_df = counts_df.sort_values(by=['match_count', 'categories'], ascending=[True, False])
-        counts_df = counts_df.rename(columns={'match_proportion': 'Match percent'})
+
+        color_by_df = data.main_df[color_by_col]
+        totals_df = totals_df.merge(color_by_df, how='left', left_index=True, right_index=True)
+        totals_df = totals_df.reset_index()
+        categories_total = totals_df['categories'].value_counts().to_frame('categories_total')
+        counts_df = totals_df.groupby(['categories', color_by_col]).size().to_frame()
+        counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
+        counts_df = counts_df.merge(categories_total, how='left', left_on='categories', right_index=True)
+        print(counts_df)
+        counts_df['proportion'] = counts_df['count'] / selected_files_count
+        counts_df = counts_df.sort_values(by=['categories_total'], ascending=True)
+        print(counts_df)
 
         if counts_df.empty:
             fig = EMPTY_FIGURE
         else:
             title = RGI_TITLES[type_value]
 
-            fig = px.bar(counts_df, y='categories', x='Match percent',
+            fig = px.bar(counts_df, y='categories', x='proportion',
                          height=600,
+                         color=color_by_col,
                          labels={'categories': 'Categories',
                                  'variable': 'Type',
                                  'match_count': 'Samples count'},
-                         hover_data=['match_count'],
+                         hover_data=['count'],
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
