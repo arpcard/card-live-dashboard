@@ -93,7 +93,8 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      category_orders=category_orders,
                      labels={'count': 'Samples count',
                              'geo_area_name_standard': 'Geographic region',
-                             'lmat_taxonomy': 'Organism'},
+                             'lmat_taxonomy': 'Organism',
+                             'rgi_kmer_taxonomy': 'Organism'},
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
         fig.update_layout(font={'size': 14},
@@ -118,6 +119,8 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
         categories_total = totals_df['categories'].value_counts().to_frame('categories_total')
 
         if color_by_col is not None:
+            hover_data = ['count', 'categories_total', 'categories_total_percent']
+
             color_by_df = data.main_df[color_by_col]
             totals_df = totals_df.merge(color_by_df, how='left', left_index=True, right_index=True).reset_index()
             counts_df = totals_df.groupby(['categories', color_by_col]).size().to_frame()
@@ -128,11 +131,18 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                 color_by_col).agg('sum').sort_values(by='count', ascending=False)
             category_order[color_by_col] = color_counts_df.index.tolist()
         else:
+            hover_data = ['count']
+
             counts_df = totals_df.groupby('categories').size().to_frame()
             counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
 
         counts_df = counts_df.merge(categories_total, how='left', left_on='categories', right_index=True)
         counts_df['proportion'] = counts_df['count'] / selected_files_count
+
+        # I convert to percent (instead of proportion) here since plotly is not doing the auto-conversion of
+        # proportion to percents (unlike for 'proportion' which is the column displayed so plotly does auto-conversion)
+        counts_df['categories_total_percent'] = 100*(counts_df['categories_total'] / selected_files_count)
+        counts_df['categories_total_percent'] = counts_df['categories_total_percent'].apply(lambda x: f'{x:,.0f}%')
 
         # Define order to display
         display_category_order = counts_df[['categories', 'categories_total']].sort_values(
@@ -150,13 +160,19 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          category_orders=category_order,
                          height=600,
                          color=color_by_col,
-                         labels={'categories': 'Categories',
-                                 'variable': 'Type',
-                                 'geo_area_name_standard': 'Geographic region',
-                                 'lmat_taxonomy': 'Organism',
-                                 'rgi_taxonomy': 'Organism',
-                                 'match_count': 'Samples count'},
-                         hover_data=['count'],
+                         labels={
+                             'categories': 'Categories',
+                             'variable': 'Type',
+                             'count': 'Samples count',
+                             'categories_total': 'Total samples in category count',
+                             'categories_total_percent': 'Total samples in category percent',
+                             'proportion': 'Percent of samples',
+                             'geo_area_name_standard': 'Geographic region',
+                             'lmat_taxonomy': 'Organism',
+                             'rgi_kmer_taxonomy': 'Organism',
+                             'match_count': 'Samples count'
+                         },
+                         hover_data=hover_data,
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
@@ -273,7 +289,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                            labels={'time_fraction': 'Percent of samples',
                                    'timestamp': 'Date',
                                    'geo_area_name_standard': 'Geographic region',
-                                   'rgi_kmer_taxonomy': 'Organism (RGI Kmer)',
+                                   'rgi_kmer_taxonomy': 'Organism',
                                    'lmat_taxonomy': 'Organism'},
                            title='Samples by date',
                            histfunc=histfunc,
