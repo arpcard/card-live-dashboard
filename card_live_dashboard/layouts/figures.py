@@ -108,6 +108,8 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
         fig = EMPTY_FIGURE
     else:
         color_by_col = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
+        category_order = {}
+
         totals_df = data.rgi_parser.get_column_values(
             data_type=type_value, values_name='categories', drop_duplicates=True)
 
@@ -119,18 +121,25 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
             color_by_df = data.main_df[color_by_col]
             totals_df = totals_df.merge(color_by_df, how='left', left_index=True, right_index=True).reset_index()
             counts_df = totals_df.groupby(['categories', color_by_col]).size().to_frame()
+            counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
+
+            # Define the order of the color_by column so that the category with the highest count gets displayed first
+            color_counts_df = counts_df[[color_by_col, 'count']].groupby(
+                color_by_col).agg('sum').sort_values(by='count', ascending=False)
+            category_order[color_by_col] = color_counts_df.index.tolist()
         else:
             counts_df = totals_df.groupby('categories').size().to_frame()
+            counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
 
-        counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
         counts_df = counts_df.merge(categories_total, how='left', left_on='categories', right_index=True)
         counts_df['proportion'] = counts_df['count'] / selected_files_count
 
         # Define order to display
-        categories_order = counts_df[['categories', 'categories_total']].sort_values(
+        display_category_order = counts_df[['categories', 'categories_total']].sort_values(
             by='categories_total', ascending=False)['categories'].tolist()
         # Create a list of unique categories while still preserving order of the original list
-        categories_order = list(OrderedDict.fromkeys(categories_order))
+        display_category_order = list(OrderedDict.fromkeys(display_category_order))
+        category_order['categories'] = display_category_order
 
         if counts_df.empty:
             fig = EMPTY_FIGURE
@@ -138,9 +147,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
             title = RGI_TITLES[type_value]
 
             fig = px.bar(counts_df, y='categories', x='proportion',
-                         category_orders={
-                             'categories': categories_order,
-                         },
+                         category_orders=category_order,
                          height=600,
                          color=color_by_col,
                          labels={'categories': 'Categories',
