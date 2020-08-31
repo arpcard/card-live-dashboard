@@ -254,6 +254,13 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                          {'label': 'Resistance mechanism', 'value': 'resistance_mechanism'},
                                      ],
                                      value_type='drug_class',
+                                     id_color='rgi-color-select',
+                                     options_color=[
+                                         {'label': 'Default', 'value': 'default'},
+                                         {'label': 'Geographic region', 'value': 'geographic'},
+                                         {'label': 'Organism', 'value': 'organism'},
+                                     ],
+                                     value_color='default'
                                  ),
                              ),
         ])

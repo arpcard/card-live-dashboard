@@ -176,14 +176,14 @@ class RGIParser:
 
             return df_rgi_new[df_rgi_new['match']].index.tolist()
 
-    def get_column_values(self, data_type: str) -> pd.Series:
+    def get_column_values(self, data_type: str, values_name: str, drop_duplicates: bool = False) -> pd.Series:
         """
         Gets the values of a column given a particular data type.
         :param data_type: The data type to select.
+        :param values_name: The name of the new column of values.
+        :param drop_duplicates: Whether or not to drop duplicate rows.
         :return: The values of the column.
         """
-        additional_columns = ['geo_area_name']
-
         if data_type == 'drug_class':
             totals_df = self.explode_column('rgi_main.Drug Class')['rgi_main.Drug Class_exploded']
         elif data_type == 'amr_gene_family':
@@ -194,6 +194,11 @@ class RGIParser:
             totals_df = self._df_rgi['rgi_main.Best_Hit_ARO']
         else:
             raise Exception(f'Unknown value [type_value={data_type}]')
+
+        totals_df = totals_df.rename(values_name)
+
+        if drop_duplicates:
+            totals_df = totals_df.reset_index().drop_duplicates().set_index('filename')
 
         return totals_df
 

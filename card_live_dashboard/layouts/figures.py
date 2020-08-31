@@ -104,30 +104,30 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
     return fig
 
 
-def rgi_breakdown_figure(data: CardLiveData, type_value: str) -> go.Figure:
+def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
     if data.empty:
         fig = EMPTY_FIGURE
     else:
-        color_by = 'geographic'
-        color_by_col = TOTALS_COLUMN_SELECT_NAMES[color_by]
-        totals_df = data.rgi_parser.get_column_values(data_type=type_value)
+        color_by_col = TOTALS_COLUMN_DATAFRAME_NAMES[color_by_value]
+        totals_df = data.rgi_parser.get_column_values(
+            data_type=type_value, values_name='categories', drop_duplicates=True)
 
         # Data preparation
-        totals_df.name = 'categories'
-        totals_df = totals_df.reset_index().drop_duplicates().set_index('filename')
         selected_files_count = len(set(totals_df.index.tolist()))
-
-        color_by_df = data.main_df[color_by_col]
-        totals_df = totals_df.merge(color_by_df, how='left', left_index=True, right_index=True)
-        totals_df = totals_df.reset_index()
         categories_total = totals_df['categories'].value_counts().to_frame('categories_total')
-        counts_df = totals_df.groupby(['categories', color_by_col]).size().to_frame()
+
+        if color_by_col is not None:
+            color_by_df = data.main_df[color_by_col]
+            totals_df = totals_df.merge(color_by_df, how='left', left_index=True, right_index=True).reset_index()
+            counts_df = totals_df.groupby(['categories', color_by_col]).size().to_frame()
+        else:
+            counts_df = totals_df.groupby('categories').size().to_frame()
+
         counts_df = counts_df.rename(columns={0: 'count'}).reset_index()
         counts_df = counts_df.merge(categories_total, how='left', left_on='categories', right_index=True)
-        print(counts_df)
         counts_df['proportion'] = counts_df['count'] / selected_files_count
-        counts_df = counts_df.sort_values(by=['categories_total'], ascending=True)
-        print(counts_df)
+        counts_df = counts_df.sort_values(by=['categories_total', 'categories'], ascending=True)
+        print(f'counts_df after=\n{counts_df}')
 
         if counts_df.empty:
             fig = EMPTY_FIGURE
