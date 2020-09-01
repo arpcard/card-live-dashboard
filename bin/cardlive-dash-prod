@@ -11,5 +11,5 @@ then
   echo "Run the CARD:Live Dashboard using the specified CARD:Live home directory (created with 'cardlive-dash-init')."
   echo "Will server the webserver on ${BIND_ADDRESS} by default."
 else
-  gunicorn --workers 2 -b ${BIND_ADDRESS} "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')" --timeout 600 --access-log ${card_live_home}/access.log --log-level debug
+  gunicorn --workers 2 -b ${BIND_ADDRESS} "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')" --timeout 600 --access-logfile ${card_live_home}/access.log --log-level debug
 fi
