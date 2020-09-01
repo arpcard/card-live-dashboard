@@ -2,17 +2,21 @@
 
 This repository contains code for the CARD:Live Dashboard. This is used to summarize and display data from [CARD:Live][] in a dashboard.
 
+![card-live-overview.png][]
+
 # Install
 
 This application uses [Python Dash][] and so requires Python to be installed (Python 3). It is recommended that you use a Python virtual environment (or conda) to install. To set this up and install the application please run:
 
 ```bash
+git clone https://github.com/arpcard/card-live-dashboard
+cd card-live-dashboard
+
 # Setup virtual environment
 virtualenv card-live-venv
 source card-live-venv
 
-# Run from main project directory
-pip install card-live-dashboard
+pip install .
 ```
 
 ## Install patched version of ete3 toolkit
@@ -34,7 +38,10 @@ sqlite3.IntegrityError: UNIQUE constraint failed: synonym.spname, synonym.taxid
 If, instead, you want to install and do development on the code you can instead run (after creating a virtual environment):
 
 ```bash
-pip install -e card-live-dashboard
+# Change to main project directory
+cd card-live-dashboard
+
+pip install -e .
 ```
 
 This will make the installed application reflect any code changes made within `card-live-dashboard/`.
@@ -64,7 +71,7 @@ Where `[cardlive-home]` is the CARD:Live home directory.
 This will serve the CARD:Live dashboard on port 8050. Underneath, this runs [gunicorn][]. You can also run the `gunicorn` command directly to adjust the port, number of workers, etc.
 
 ```bash
-gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(card_live_home='[cardlive-home]')" --timeout 180 --log-level debug
+gunicorn --workers 2 -b 0.0.0.0:8050 "card_live_dashboard.app:flask_app(card_live_home='[cardlive-home]')" --timeout 600 --log-level debug
 ```
 
 ## Development
@@ -101,3 +108,4 @@ pytest
 [gunicorn]: https://docs.gunicorn.org
 [CARD:Live]: https://card.mcmaster.ca/live
 [Python Dash]: https://plotly.com/dash/
+[card-live-overview.png]: images/card-live-overview.png
