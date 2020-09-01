@@ -159,9 +159,13 @@ def default_layout():
                     ]),
                     html.P(className='text-center card-live-badges pb-5', children=[
                         html.Br(),
-                        html.A(className='badge badge-primary',
+                        html.A(className='badge badge-primary my-1',
                                children=[f'Version | {card_live_dashboard.__version__}'],
-                               href='https://github.com/arpcard/card-live-dashboard'),
+                               href='https://github.com/arpcard/card-live-dashboard/releases'),
+                        html.Br(),
+                        html.A(className='badge badge-primary my-1',
+                               children=[f'Code and Docs | GitHub'],
+                               href='https://github.com/arpcard/card-live-dashboard')
                     ]),
                     html.Div(className='py-5')
                 ]),
