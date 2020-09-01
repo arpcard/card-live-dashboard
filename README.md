@@ -19,20 +19,6 @@ source card-live-venv
 pip install .
 ```
 
-## Install patched version of ete3 toolkit
-
-Due to an issue with the ete3 toolkit (<https://github.com/etetoolkit/ete/issues/469>) you will have to install a patched version of this software. To do this please run:
-
-```bash
-pip install --upgrade https://github.com/apetkau/ete/archive/3.1.1-apetkau1.tar.gz
-```
-
-This will fix an issue that occurs when building the NCBI taxnomy database (when running `cardlive-dash-init`) like the following:
-
-```
-sqlite3.IntegrityError: UNIQUE constraint failed: synonym.spname, synonym.taxid 
-```
-
 ## Development
 
 If, instead, you want to install and do development on the code you can instead run (after creating a virtual environment):
