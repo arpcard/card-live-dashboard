@@ -25,13 +25,11 @@ class CardLiveDataManager:
         ncbi_db_path = cardlive_home / 'db' / 'taxa.sqlite'
         card_live_data_dir = cardlive_home / 'data' / 'card_live'
 
-        ncbi_db = NCBITaxa(dbfile=ncbi_db_path)
-
         self._data_loader = CardLiveDataLoader(card_live_data_dir)
         self._data_loader.add_data_modifiers([
             AntarcticaNAModifier(np.datetime64('2020-07-20')),
             AddGeographicNamesModifier(region_codes),
-            AddTaxonomyModifier(ncbi_db),
+            AddTaxonomyModifier(ncbi_db_path),
         ])
 
         self._card_live_data = self._data_loader.read_or_update_data()

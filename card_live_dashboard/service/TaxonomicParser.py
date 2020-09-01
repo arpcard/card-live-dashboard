@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 from ete3 import NCBITaxa
 import logging
 import warnings
@@ -8,8 +9,31 @@ logger = logging.getLogger(__name__)
 
 class TaxonomicParser:
 
-    def __init__(self, ncbi_taxa: NCBITaxa, df_rgi_kmer: pd.DataFrame, df_lmat: pd.DataFrame):
-        self._ncbi_taxa = ncbi_taxa
+    def __init__(self, df_rgi_kmer: pd.DataFrame, df_lmat: pd.DataFrame,
+                 ncbi_taxa: NCBITaxa = None, ncbi_taxa_file: Path = None):
+        """
+        Creates a new TaxonomicParser used to parse and interpret taxonomic assignments.
+        You must set one (but not both) of [ncbi_taxa] or [ncbi_taxa_file]. ncbi_taxa_file is the actual SQLite taxonomy
+        file for the ete3 toolkit. NCBITaxa is the ete3 object that reads the file. I have both options here as setting
+        the NCBITaxa object directly is useful for unit tests (where I can set a stub object) but I need to create a
+        new NCBITaxa object in production due to multithreading issues (two threads cannot reference the same SQLite
+        database).
+
+        :param df_rgi_kmer: The RGI Kmer data frame.
+        :param df_lmat: The LMAT data frame.
+        :param ncbi_taxa: An (optional) NCBITaxa object referencing the NCBI Taxonomy database.
+                          Cannot be set with ncbi_taxa_file.
+        :param ncbi_taxa_file: The (optional) file containing the NCBI Taxonomy database for the ete3 toolkit.
+                               Cannot be set with ncbi_taxa.
+        """
+        if ncbi_taxa is None and ncbi_taxa_file is None:
+            raise Exception('Must set one of [ncbi_taxa] or [ncbi_taxa_file]')
+        elif ncbi_taxa is not None and ncbi_taxa_file is not None:
+            raise Exception(f'Can only set one of ncbi_taxa=[{ncbi_taxa}] or ncbi_taxa_file=[{ncbi_taxa_file}]')
+        elif ncbi_taxa is not None:
+            self._ncbi_taxa = ncbi_taxa
+        else:
+            self._ncbi_taxa = NCBITaxa(dbfile=ncbi_taxa_file)
 
         self._df_rgi_kmer = df_rgi_kmer[['rgi_kmer.CARD*kmer Prediction']]
         self._df_lmat = df_lmat[['lmat.count', 'lmat.taxonomy_label', 'lmat.ncbi_taxon_id']].astype(

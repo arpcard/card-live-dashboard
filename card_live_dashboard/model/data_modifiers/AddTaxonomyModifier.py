@@ -1,5 +1,4 @@
 import logging
-from ete3 import NCBITaxa
 from pathlib import Path
 
 from card_live_dashboard.model.data_modifiers.CardLiveDataModifier import CardLiveDataModifier
@@ -12,18 +11,19 @@ logger = logging.getLogger(__name__)
 
 class AddTaxonomyModifier(CardLiveDataModifier):
 
-    def __init__(self, ncbi_taxa_db: NCBITaxa):
+    def __init__(self, ncbi_taxa_file: Path):
         """
         Builds a new modifier which will add in taxonomy categories.
 
-        :param ncbi_taxa_db: The ete3 NCBI taxa database object.
+        :param ncbi_taxa_file: The ete3 NCBI taxa SQLite database file.
         """
         super().__init__()
-        self._ncbi_taxa = ncbi_taxa_db
+        self._ncbi_taxa_file = ncbi_taxa_file
 
     def modify(self, data: CardLiveData) -> CardLiveData:
         logger.debug(f'Main df before {data.main_df}')
-        taxonomy_parser = TaxonomicParser(self._ncbi_taxa, df_rgi_kmer=data.rgi_kmer_df, df_lmat=data.lmat_df)
+        taxonomy_parser = TaxonomicParser(ncbi_taxa_file=self._ncbi_taxa_file, df_rgi_kmer=data.rgi_kmer_df,
+                                          df_lmat=data.lmat_df)
         matches_df = taxonomy_parser.create_file_matches().rename(
             columns={'lmat.taxonomy_label': 'lmat_taxonomy',
                      'rgi_kmer.taxonomy_label': 'rgi_kmer_taxonomy'
