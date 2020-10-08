@@ -5,6 +5,7 @@ from pathlib import Path
 from os import getcwd
 
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
+from card_live_dashboard.service.ConfigManager import ConfigManager
 import card_live_dashboard.layouts as layouts
 import card_live_dashboard.callbacks as callbacks
 
@@ -26,7 +27,12 @@ def build_app(card_live_home: Path = DEFAULT_CARD_LIVE_HOME) -> dash.dash.Dash:
                          'Please check for this directory or change card_live_home to something '
                          f'other than [{card_live_home}]'))
 
-    app = dash.Dash(name=__name__, external_stylesheets=layouts.external_stylesheets)
+    config_manager = ConfigManager(card_live_home)
+    config = config_manager.read_config()
+
+    app = dash.Dash(name=__name__,
+                    external_stylesheets=layouts.external_stylesheets,
+                    url_base_pathname=config['url_base_pathname'])
 
     CardLiveDataManager.create_instance(card_live_home)
 
@@ -46,3 +52,11 @@ def flask_app(card_live_home: Union[str,Path] = DEFAULT_CARD_LIVE_HOME) -> flask
         card_live_home = Path(card_live_home)
 
     return build_app(card_live_home).server
+
+
+def read_config(card_live_home: Path):
+    """
+    Reads the config file
+    :param card_live_home:
+    :return:
+    """
