@@ -1,4 +1,6 @@
 /.idea
+/config
+/cardlive.pid
 __pycache__
 /data
 /card_live_dashboard.egg-info

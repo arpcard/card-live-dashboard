@@ -1,0 +1,4 @@
+---
+## A URL path under which the application should run (e.g., http://localhost/app/).
+## Defaults to '/'. Uncomment if you want to run under a new path.
+#url_base_pathname: /app/

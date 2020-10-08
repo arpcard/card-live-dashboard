@@ -1,3 +1,10 @@
+# 0.3.0
+
+* Renamed scripts from `cardlive-dash-X` to `card-live-dash-X`.
+* Added configuration file `[cardlive-home]/config/cardlive.yaml` to specify a subpath to run the application.
+* Added a gunicorn config file `[cardlive-home]/config/gunicorn.conf.py` to contain all config for the production server.
+* Updated `card-live-dash-prod` script to allow start/status/stop commands.
+
 # 0.2.0
 
 * Mapping region **Antarctica** to **N/A** if the date is before *2020-07-20*. This is because before that date CARD:Live defaulted to **Antarctica** (instead of no selected region) and so there were many results showing up as Antarctica when it was likely intended these should be N/A.
