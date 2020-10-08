@@ -55,4 +55,4 @@ if __name__ == '__main__':
 
         print(f'Finished initializing CARD:Live home directory as [{cardlive_home_path}]')
         print(f'Please add CARD:Live JSON data to [{cardlive_data_path}]',
-              f'and start the CARD:Live dashboard by running "cardlive-dash-prod {cardlive_home_path}"')
+              f'and start the CARD:Live dashboard by running "card-live-dash-prod {cardlive_home_path}"')

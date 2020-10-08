@@ -8,7 +8,7 @@ if [ "${run_method}" = "" ] || [ "${card_live_home}" = "" ]
 then
   echo "Usage: `basename $0` {start, status, stop} [card_live_home]\n"
   echo "Starts, prints status, or stops the CARD:Live Dashboard application"
-  echo "Requires specifying the [card_live_home] directory created with 'cardlive-dash-init'"
+  echo "Requires specifying the [card_live_home] directory created with 'card-live-dash-init'"
   exit 0
 fi
 

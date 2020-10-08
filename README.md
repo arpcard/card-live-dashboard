@@ -9,14 +9,11 @@ This repository contains code for the CARD:Live Dashboard. This is used to summa
 This application uses [Python Dash][] and so requires Python to be installed (Python 3). It is recommended that you use a Python virtual environment (or conda) to install. To set this up and install the application please run:
 
 ```bash
-git clone https://github.com/arpcard/card-live-dashboard
-cd card-live-dashboard
-
 # Setup virtual environment
 virtualenv card-live-venv
 source card-live-venv
 
-pip install .
+pip install card-live-dashboard
 ```
 
 ## Development
@@ -24,6 +21,10 @@ pip install .
 If, instead, you want to install and do development on the code you can instead run (after creating a virtual environment):
 
 ```bash
+# Clone project
+git clone https://github.com/arpcard/card-live-dashboard
+cd card-live-dashboard
+
 # Change to main project directory
 cd card-live-dashboard
 
