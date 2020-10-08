@@ -1,6 +1,7 @@
 include LICENSE
 include README.md
 include MANIFEST.in
+include card_live_dashboard/service/*
 include card_live_dashboard/assets/*
 include card_live_dashboard/service/data/*
 recursive-include card_live_dashboard/test/unit/service/data/ *
