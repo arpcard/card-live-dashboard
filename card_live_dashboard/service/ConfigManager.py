@@ -41,14 +41,25 @@ class ConfigManager:
 
     def write_example_config(self):
         """
-        Writes an example configuration file to the given directory
+        Writes an example configuration file to the previously set home directory.
         :return: None.
         """
+        backup_timepart = datetime.now().strftime('%Y%m%d-%H%M%S')
+
         if self._config_file.exists():
-            timepart = datetime.now().strftime('%Y%m%d-%H%M%S')
-            backup_config = self._config_file / f'.{timepart}.bak'
+            backup_config = f'{self._config_file}.{backup_timepart}.bak'
             logger.warning(f'File [{self._config_file}] exists, backing up to [{backup_config}]')
             shutil.copy(self._config_file, backup_config)
 
         shutil.copy(Path(path.dirname(__file__)) / 'config' / 'cardlive.yaml', self._config_file)
         logger.info(f'Wrote example configuration to [{self._config_file}]')
+
+        gunicorn_conf = self._card_live_home / 'config' / 'gunicorn.conf.py'
+
+        if gunicorn_conf.exists():
+            backup_config = f'{gunicorn_conf}.{backup_timepart}.bak'
+            logger.warning(f'File [{gunicorn_conf}] exists, backing up to [{backup_config}]')
+            shutil.copy(gunicorn_conf, backup_config)
+
+        shutil.copy(Path(path.dirname(__file__)) / 'config' / 'gunicorn.conf.py', gunicorn_conf)
+        logger.info(f'Wrote example gunicorn configuration to [{gunicorn_conf}]')
