@@ -1,5 +1,5 @@
 # CARD:Live Dashboard
-[![pypi](https://badge.fury.io/py/card-live-dashboard.svg)](https://pypi.python.org/pypi/card-live-dashboard/)
+[![pypi](https://badge.fury.io/py/card-live-dashboard.svg)](https://badge.fury.io/py/card-live-dashboard)
 
 This repository contains code for the CARD:Live Dashboard. This is used to summarize and display data from [CARD:Live][] in a dashboard.
 
