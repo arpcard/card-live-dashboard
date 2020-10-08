@@ -2,14 +2,58 @@
 # Runs CARD:Live dashboard via gunicorn
 # This script used to keep track of standard options to gunicorn to run application.
 
-card_live_home=$1
-BIND_ADDRESS="0.0.0.0:8050"
-
-if [ "${card_live_home}" = "" ]
+run_method=$1
+card_live_home=$2
+if [ "${run_method}" = "" ] || [ "${card_live_home}" = "" ]
 then
-  echo "Usage: `basename $0` [card_live_home]\n"
-  echo "Run the CARD:Live Dashboard using the specified CARD:Live home directory (created with 'cardlive-dash-init')."
-  echo "Will server the webserver on ${BIND_ADDRESS} by default."
+  echo "Usage: `basename $0` {start, status, stop} [card_live_home]\n"
+  echo "Starts, prints status, or stops the CARD:Live Dashboard application"
+  echo "Requires specifying the [card_live_home] directory created with 'cardlive-dash-init'"
+  exit 0
+fi
+
+pidfile="${card_live_home}/cardlive.pid"
+
+if [ "${run_method}" = "start" ]
+then
+  if [ -f ${pidfile} ]
+  then
+    echo "CARD:Live already started (pid file [$pidfile] exists). Will not start again."
+    exit 1
+  else
+    echo "Starting CARD:Live using configuration settings from [${card_live_home}/config/gunicorn.conf.py]"
+    gunicorn -c "${card_live_home}/config/gunicorn.conf.py" "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')"
+  fi
+elif [ "${run_method}" = "status" ]
+then
+  if [ -f ${pidfile} ]
+  then
+    pid=`cat ${pidfile} | tr -d '[:space:]'`
+    echo "CARD:Live is running. Main process has pid [$pid]"
+    exit 0
+  else
+    echo "CARD:Live is not running. You can start with: `basename $0` start $card_live_home"
+    exit 0
+  fi
+elif [ "${run_method}" = "stop" ]
+then
+  if [ ! -f ${pidfile} ]
+  then
+    echo "CARD:Live not running from [${card_live_home}] (pid file [${pidfile}] does not exist)"
+    echo "Please try starting first with `basename $0` start ${card_live_home}"
+    exit 1
+  fi
+  pid=`cat ${pidfile} | tr -d '[:space:]'`
+  if [ "${pid}" = "" ]
+  then
+    echo "Cannot stop CARD:Live, pid file ${pidfile} is incorrect. Please kill processes manually."
+    exit 1
+  else
+    # Kill with SIGQUIT to immediatly shutdown <https://docs.gunicorn.org/en/stable/signals.html>
+    echo "Stopping main process with pid [$pid]"
+    kill -s 3 ${pid}
+  fi
 else
-  gunicorn --workers 2 -b ${BIND_ADDRESS} "card_live_dashboard.app:flask_app(card_live_home='${card_live_home}')" --timeout 600 --access-logfile ${card_live_home}/access.log --log-level debug
+  echo "Usage: `basename $0` {start, stop}\n"
+  echo "Starts, stops, or restarts the CARD:Live Dashboard application"
 fi
