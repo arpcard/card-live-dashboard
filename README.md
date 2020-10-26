@@ -1,5 +1,7 @@
 # CARD:Live Dashboard
 
+**A test server for the CARD:Live Dashboard is available at <https://bergen.mcmaster.ca/app2/>. Please let us know if you have any feedback (via a GitHub issue).**
+
 This repository contains code for the CARD:Live Dashboard. This is used to summarize and display data from [CARD:Live][] in a dashboard.
 
 ![card-live-overview.png][]
