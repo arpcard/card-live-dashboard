@@ -71,6 +71,9 @@ RGI_D_TICK = {
     'resistance_mechanism': 1,
 }
 
+# Spacing to put between tick mark labels and plot
+TICKSPACE = ' '
+
 
 def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
@@ -105,7 +108,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': ''}
+                          yaxis={'title': '', 'ticksuffix': TICKSPACE}
                           )
 
     return fig
@@ -184,7 +187,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
-                              yaxis={'title': '', 'dtick': rgi_d_tick},
+                    yaxis={'title': '', 'dtick': rgi_d_tick, 'ticksuffix': TICKSPACE},
                               xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                               )
     return fig
@@ -303,7 +306,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                            histfunc=histfunc,
                            )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': yaxis_title, 'tickformat': tickformat}
+                          yaxis={'title': yaxis_title, 'tickformat': tickformat, 'ticksuffix': TICKSPACE}
                           )
 
         # This replaces the text in the hover 'sum of Percent of samples' to 'Percent of samples'
