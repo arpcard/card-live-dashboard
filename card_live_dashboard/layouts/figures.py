@@ -64,6 +64,13 @@ RGI_TITLES = {
     'resistance_mechanism': 'Resistance mechanism',
 }
 
+RGI_D_TICK = {
+    'drug_class': 1,
+    'amr_gene': None,
+    'amr_gene_family': None,
+    'resistance_mechanism': 1,
+}
+
 
 def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
@@ -155,6 +162,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
             fig = EMPTY_FIGURE
         else:
             title = RGI_TITLES[type_value]
+            rgi_d_tick = RGI_D_TICK[type_value]
 
             fig = px.bar(counts_df, y='categories', x='proportion',
                          category_orders=category_order,
@@ -176,7 +184,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
-                              yaxis={'title': ''},
+                              yaxis={'title': '', 'dtick': rgi_d_tick},
                               xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                               )
     return fig
