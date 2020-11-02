@@ -187,7 +187,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
-                    yaxis={'title': '', 'dtick': rgi_d_tick, 'ticksuffix': TICKSPACE},
+                    yaxis={'title': '', 'dtick': rgi_d_tick, 'ticksuffix': TICKSPACE, 'automargin': True},
                               xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                               )
     return fig
