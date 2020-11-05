@@ -1,5 +1,7 @@
 # 0.4.0
 
+* Adding GitHub Action to test project. Fixing some small issues in the process.
+* Support only for Python 3.7+ (this was always the case, but now it's documented/tested).
 * Adding additional space between y-axis labels and plots.
 * Display all y-axis labels for certain plots.
 

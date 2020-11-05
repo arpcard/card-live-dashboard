@@ -1,4 +1,5 @@
 # CARD:Live Dashboard
+[![python-test](https://github.com/arpcard/card-live-dashboard/workflows/python-test/badge.svg?branch=development)](https://github.com/arpcard/card-live-dashboard/actions/)
 [![pypi](https://badge.fury.io/py/card-live-dashboard.svg)](https://badge.fury.io/py/card-live-dashboard)
 
 This repository contains code for the CARD:Live Dashboard. This is used to summarize and display data from [CARD:Live][] in a dashboard.
@@ -7,14 +8,14 @@ This repository contains code for the CARD:Live Dashboard. This is used to summa
 
 # Install
 
-This application uses [Python Dash][] and so requires Python to be installed (Python 3). It is recommended that you use a Python virtual environment (or conda) to install. To set this up and install the application please run:
+This application uses [Python Dash][] and so requires Python to be installed (Python 3.7+). It is recommended that you use a Python virtual environment (or conda) to install. To set this up and install the application please run:
 
 ```bash
 # Setup virtual environment
 virtualenv card-live-venv
 source card-live-venv
 
-pip install card-live-dashboard
+python -m pip install card-live-dashboard
 ```
 
 ## Development
@@ -29,7 +30,7 @@ cd card-live-dashboard
 # Change to main project directory
 cd card-live-dashboard
 
-pip install -e .
+python -m pip install -e .
 ```
 
 This will make the installed application reflect any code changes made within `card-live-dashboard/`.
