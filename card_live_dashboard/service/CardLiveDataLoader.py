@@ -50,6 +50,7 @@ class CardLiveDataLoader:
         :return: The original (unmodified) data object if no updates, otherwise a new data object with additional data.
         """
         input_files = list(Path(self._directory).glob('*'))
+        input_files.sort()
 
         if existing_data is None:
             return self.read_data(input_files)
@@ -81,6 +82,7 @@ class CardLiveDataLoader:
                 raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
             else:
                 input_files = list(Path(self._directory).glob('*'))
+                input_files.sort()
 
         json_data = []
         for input_file in input_files:

@@ -1,3 +1,7 @@
+# 0.4.0
+
+* Adding GitHub Action to test project. Fixing some small issues in the process.
+
 # 0.3.0
 
 * Renamed scripts from `cardlive-dash-X` to `card-live-dash-X`.
