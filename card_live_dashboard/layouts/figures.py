@@ -99,7 +99,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
 
         fig = px.bar(totals_df, y=type_col_name, x='count',
                      color=color_col_name,
-                     height=600,
+                     height=get_figure_height(len(totals_df[type_col_name].unique())),
                      category_orders=category_orders,
                      labels={'count': 'Samples count',
                              'geo_area_name_standard': 'Geographic region',
@@ -169,7 +169,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
 
             fig = px.bar(counts_df, y='categories', x='proportion',
                          category_orders=category_order,
-                         height=600,
+                         height=get_figure_height(len(counts_df['categories'].unique())),
                          color=color_by_col,
                          labels={
                              'categories': 'Categories',
@@ -334,3 +334,19 @@ def order_categories(df: pd.DataFrame, col: str, by_sum: bool = False, sum_col: 
         else:
             ordered_list = df.groupby(col).size().sort_values(ascending=False).index.tolist()
         return {col: ordered_list}
+
+
+def get_figure_height(number_categories: int) -> int:
+    """
+    Given a number of categories to plot gets an appropriate figure height.
+    :param number_categories: The number of categories to plot.
+    :return: A figure height to be used by plotly.
+    """
+    if number_categories < 10:
+        return 400
+    elif number_categories < 20:
+        return 500
+    elif number_categories < 30:
+        return 600
+    else:
+        return 800
