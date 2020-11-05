@@ -1,3 +1,8 @@
+# 0.4.0
+
+* Adding additional space between y-axis labels and plots.
+* Display all y-axis labels for certain plots.
+
 # 0.3.0
 
 * Renamed scripts from `cardlive-dash-X` to `card-live-dash-X`.
