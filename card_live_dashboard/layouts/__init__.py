@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from datetime import datetime
 
@@ -12,14 +12,13 @@ import card_live_dashboard.layouts.figures as figures
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
+LOADING = '[LOADING]'
 
 def default_layout():
     """
     Builds the default layout of the CARD:Live dashboard.
     :return: The default layout of the CARD:Live dashboard.
     """
-    LOADING = '[LOADING]'
-
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
             html.Div(className='card-live-panel col-sm-3', children=[
@@ -30,7 +29,10 @@ def default_layout():
                     html.Div(className='pt-2 pb-1', children=[
                         'Welcome to the ',
                         html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
-                        ' dashboard.'
+                        ' dashboard. This provides summaries of detected antimicrobial resistance for user-submitted',
+                        ' genomic samples to the online ',
+                        html.A(children=['RGI tool'], href='https://card.mcmaster.ca/analyze/rgi'),
+                        '.',
                     ]),
                     html.Div(className='card-live-badges pb-3', children=[
                         html.Span(className='badge badge-secondary', children=[
@@ -43,9 +45,7 @@ def default_layout():
                     html.Div([
                         html.H2('Selection criteria'),
                         html.P([
-                            'Please select from the options below to examine subsets of the ',
-                            html.A(children=['CARD:Live'], href='https://card.mcmaster.ca/live'),
-                            ' data.',
+                            'Please select from the options below to examine subsets of the samples.',
                             html.Div(className='card-live-badges pt-1', children=[
                                 html.Span(className='badge badge-secondary', children=[
                                     'Showing ', html.Span(id='selected-samples-count',
@@ -196,10 +196,12 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     return [
         html.Div(className='cardlive-figures', children=[
             single_figure_layout(title='Map',
+                                 description=['Geographic distribution of the submitted genomic samples.'],
                                  id='figure-geographic-map-id',
                                  fig=figures_dict['map']
                                  ),
             single_figure_layout(title='Samples timeline',
+                                 description=['Submission dates for genomic samples.'],
                                  id='figure-timeline-id',
                                  fig=figures_dict['timeline'],
                                  dropdowns=figure_menus_layout(
@@ -221,6 +223,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  ),
                              ),
             single_figure_layout(title='Samples total',
+                                 description=['Count of samples matching selection.'],
                                  id='figure-totals-id',
                                  fig=figures_dict['totals'],
                                  dropdowns=figure_menus_layout(
@@ -240,6 +243,10 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  ),
                              ),
             single_figure_layout(title='RGI results',
+                                 description=['Percent of selected samples (',
+                                     html.Span(id='sample-count-figure', children=[LOADING]),
+                                     ') with the chosen type of RGI results.'
+                                 ],
                                  id='figure-rgi-id',
                                  fig=figures_dict['rgi'],
                                  dropdowns=figure_menus_layout(
@@ -264,10 +271,11 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
     ]
 
 
-def single_figure_layout(title: str, id: str, fig: go.Figure, dropdowns: html.Div = None):
+def single_figure_layout(title: str, description: List[Union[str,html.Span]], id: str, fig: go.Figure, dropdowns: html.Div = None):
     component = dbc.Card(className='my-3', children=[
         dbc.CardHeader(children=[
-            html.H4(title),
+            html.H4(className='figure-title', children=[title]),
+            html.Span(className='figure-description', children=description),
             dropdowns,
         ]),
         dcc.Loading(type='circle', children=[

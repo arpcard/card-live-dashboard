@@ -4,6 +4,7 @@
 * Support only for Python 3.7+ (this was always the case, but now it's documented/tested).
 * Adding additional space between y-axis labels and plots.
 * Display all y-axis labels for certain plots.
+* Added additional description of results on dashboard.
 
 # 0.3.0
 
