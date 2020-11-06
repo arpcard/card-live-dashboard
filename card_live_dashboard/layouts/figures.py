@@ -64,6 +64,16 @@ RGI_TITLES = {
     'resistance_mechanism': 'Resistance mechanism',
 }
 
+RGI_D_TICK = {
+    'drug_class': 1,
+    'amr_gene': None,
+    'amr_gene_family': None,
+    'resistance_mechanism': 1,
+}
+
+# Spacing to put between tick mark labels and plot
+TICKSPACE = ' '
+
 
 def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
@@ -89,7 +99,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
 
         fig = px.bar(totals_df, y=type_col_name, x='count',
                      color=color_col_name,
-                     height=600,
+                     height=get_figure_height(len(totals_df[type_col_name].unique())),
                      category_orders=category_orders,
                      labels={'count': 'Samples count',
                              'geo_area_name_standard': 'Geographic region',
@@ -98,7 +108,7 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
                      title=TOTALS_FIGURE_TITLES[type_value],
                      )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': ''}
+                          yaxis={'title': '', 'ticksuffix': TICKSPACE}
                           )
 
     return fig
@@ -155,10 +165,11 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
             fig = EMPTY_FIGURE
         else:
             title = RGI_TITLES[type_value]
+            rgi_d_tick = RGI_D_TICK[type_value]
 
             fig = px.bar(counts_df, y='categories', x='proportion',
                          category_orders=category_order,
-                         height=600,
+                         height=get_figure_height(len(counts_df['categories'].unique())),
                          color=color_by_col,
                          labels={
                              'categories': 'Categories',
@@ -176,7 +187,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
-                              yaxis={'title': ''},
+                    yaxis={'title': '', 'dtick': rgi_d_tick, 'ticksuffix': TICKSPACE, 'automargin': True},
                               xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                               )
     return fig
@@ -295,7 +306,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
                            histfunc=histfunc,
                            )
         fig.update_layout(font={'size': 14},
-                          yaxis={'title': yaxis_title, 'tickformat': tickformat}
+                          yaxis={'title': yaxis_title, 'tickformat': tickformat, 'ticksuffix': TICKSPACE}
                           )
 
         # This replaces the text in the hover 'sum of Percent of samples' to 'Percent of samples'
@@ -323,3 +334,19 @@ def order_categories(df: pd.DataFrame, col: str, by_sum: bool = False, sum_col: 
         else:
             ordered_list = df.groupby(col).size().sort_values(ascending=False).index.tolist()
         return {col: ordered_list}
+
+
+def get_figure_height(number_categories: int) -> int:
+    """
+    Given a number of categories to plot gets an appropriate figure height.
+    :param number_categories: The number of categories to plot.
+    :return: A figure height to be used by plotly.
+    """
+    if number_categories < 10:
+        return 400
+    elif number_categories < 20:
+        return 500
+    elif number_categories < 30:
+        return 600
+    else:
+        return 800
