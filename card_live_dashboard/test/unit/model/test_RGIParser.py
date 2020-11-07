@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from card_live_dashboard.model.RGIParser import RGIParser
 
@@ -31,7 +31,6 @@ RGI_DF_NA = pd.DataFrame(
 ).set_index('filename')
 RGI_PARSER_NA = RGIParser(RGI_DF_NA)
 
-
 RGI_DF_ONLY_EMPTY_STRING = pd.DataFrame(
     columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
     data=[['file1', None, '', pd.NA],
@@ -40,15 +39,13 @@ RGI_DF_ONLY_EMPTY_STRING = pd.DataFrame(
 ).set_index('filename')
 RGI_PARSER_ONLY_EMPTY_STRING = RGIParser(RGI_DF_ONLY_EMPTY_STRING)
 
-
-RGI_DF_ONLY_NA= pd.DataFrame(
+RGI_DF_ONLY_NA = pd.DataFrame(
     columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
     data=[['file1', None, pd.NA, pd.NA],
           ['file2', None, np.nan, pd.NA]
           ]
 ).set_index('filename')
 RGI_PARSER_ONLY_NA = RGIParser(RGI_DF_ONLY_NA)
-
 
 RGI_DF_ONLY_NUMPY_NAN = pd.DataFrame(
     columns=['filename', 'rgi_main.Cut_Off', 'rgi_main.Drug Class', 'rgi_main.Best_Hit_ARO'],
@@ -184,7 +181,7 @@ def test_expand_drug_class_only_numpy_nan():
 
 def test_select_by_drugclass_single1():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class1'])
+                                                               elements=['class1'])
 
     assert 5 == len(new_parser.df_rgi)
     assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -195,7 +192,7 @@ def test_select_by_drugclass_single1():
 
 def test_select_by_drugclass_single2():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class2'])
+                                                               elements=['class2'])
 
     assert 5 == len(new_parser.df_rgi)
     assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -205,7 +202,7 @@ def test_select_by_drugclass_single2():
 
 def test_select_by_drugclass_single3():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class3'])
+                                                               elements=['class3'])
 
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
@@ -214,7 +211,7 @@ def test_select_by_drugclass_single3():
 
 def test_select_by_drugclass_single4():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class4'])
+                                                               elements=['class4'])
 
     assert 3 == len(new_parser.df_rgi)
     assert ['file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -223,7 +220,7 @@ def test_select_by_drugclass_single4():
 
 def test_select_by_drugclass_multiple_1_2():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class1', 'class2'])
+                                                               elements=['class1', 'class2'])
 
     assert 5 == len(new_parser.df_rgi)
     assert ['file1', 'file1', 'file2', 'file2', 'file2'] == new_parser.df_rgi.index.tolist()
@@ -233,7 +230,7 @@ def test_select_by_drugclass_multiple_1_2():
 
 def test_select_by_drugclass_multiple_1_3():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class1', 'class3'])
+                                                               elements=['class1', 'class3'])
 
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()
@@ -242,7 +239,7 @@ def test_select_by_drugclass_multiple_1_3():
 
 def test_select_by_drugclass_multiple_1_2_3():
     new_parser = RGI_PARSER.select_by_elements_in_column_split(type='file', column='rgi_main.Drug Class',
-                                                elements=['class1', 'class2', 'class3'])
+                                                               elements=['class1', 'class2', 'class3'])
 
     assert 2 == len(new_parser.df_rgi)
     assert ['file1', 'file1'] == new_parser.df_rgi.index.tolist()

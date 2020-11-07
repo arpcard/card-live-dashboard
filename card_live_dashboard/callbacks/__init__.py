@@ -1,13 +1,14 @@
-from typing import List, Set, Dict
-from datetime import datetime, timedelta
-from dash.dependencies import Input, Output, State
-import dash
 import re
+from datetime import datetime, timedelta
+from typing import List, Set, Dict
 
-from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
-from card_live_dashboard.model.CardLiveData import CardLiveData
+import dash
+from dash.dependencies import Input, Output, State
+
 import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model import world
+from card_live_dashboard.model.CardLiveData import CardLiveData
+from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)
@@ -267,10 +268,11 @@ def apply_organism_filter(time_subsets: Dict[str, CardLiveData],
 
     return time_subsets_filtered
 
+
 def build_options(selected_options: List[str], all_available_options: Set[str]):
     if selected_options is None or len(selected_options) == 0:
         selected_options_set = set()
-    elif len(selected_options) == 1 and selected_options[0] == None:
+    elif len(selected_options) == 1 and selected_options[0] is None:
         selected_options_set = set()
     else:
         selected_options_set = set(selected_options)

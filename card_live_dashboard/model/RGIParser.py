@@ -1,12 +1,11 @@
 from __future__ import annotations
-from typing import List, Set
-from typing import Callable
-import re
+
 import logging
+import re
+from typing import Callable
+from typing import List, Set
 
 import pandas as pd
-import numpy as np
-
 
 logger = logging.getLogger(__name__)
 
@@ -258,7 +257,7 @@ class RGIParser:
         exploded_df = exploded_df.replace(re.compile(f'\\s*{col}\\s*'), col, regex=True).dropna()
         exploded_df = exploded_df.astype({col: 'object'})
         exploded_df = exploded_df.str.split(sep).apply(
-                    lambda x: [y.strip() for y in x]).explode().rename(col + '_exploded').to_frame()
+            lambda x: [y.strip() for y in x]).explode().rename(col + '_exploded').to_frame()
         exploded_df = df_rgi_no_index.merge(
             exploded_df, how='left', left_index=True, right_index=True).set_index('filename')
 
@@ -288,7 +287,6 @@ class RGIParser:
         """
         return self._all_by_column_split('rgi_main.Resistance Mechanism')
 
-
     def all_amr_gene_family(self) -> Set[str]:
         """
         Gets a set of all possible resistance mechanisms.
@@ -296,7 +294,6 @@ class RGIParser:
         :return: A set of all resistance mechanisms.
         """
         return self._all_by_column_split('rgi_main.AMR Gene Family')
-
 
     def _all_by_column(self, col: str) -> Set[str]:
         """

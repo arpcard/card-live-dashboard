@@ -1,10 +1,11 @@
-from typing import Dict, Union, Callable
-from pathlib import Path
-import pandas as pd
-import numpy as np
-import geopandas
-import shapely.geometry.multipolygon as multipolygon
 import logging
+from pathlib import Path
+from typing import Dict, Union, Callable
+
+import geopandas
+import numpy as np
+import pandas as pd
+import shapely.geometry.multipolygon as multipolygon
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +199,7 @@ class GeographicRegionCodesService:
         geoms = france_shape.geoms
         for g in geoms:
             if np.isclose(g.area, GUF_AREA, atol=1e-02):
-                if not 'GUF' in split_regions:
+                if 'GUF' not in split_regions:
                     split_regions['GUF'] = g
                 else:
                     raise Exception('Already found French Guiana region')

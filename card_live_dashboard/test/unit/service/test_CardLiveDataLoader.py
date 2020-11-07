@@ -1,12 +1,12 @@
-from pathlib import Path
 from os import path
+from pathlib import Path
+
 import numpy as np
 
-from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
-from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
 from card_live_dashboard.model.data_modifiers.AddGeographicNamesModifier import AddGeographicNamesModifier
-
+from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
 from card_live_dashboard.service import region_codes
+from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
 
 data_dir = Path(path.dirname(__file__), 'data')
 
@@ -87,4 +87,3 @@ def test_read_or_update_data_withupdate():
     new_data = loader.read_or_update_data(data)
     assert data is not new_data
     assert 2 == len(new_data.main_df)
-

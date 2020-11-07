@@ -1,6 +1,8 @@
 from __future__ import annotations
-from typing import Set, List, Union
+
 from datetime import datetime
+from typing import Set, List, Union
+
 import pandas as pd
 
 from card_live_dashboard.model.RGIParser import RGIParser

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import argparse
+import logging
 import sys
 from os import path, mkdir, makedirs
 from pathlib import Path
-import logging
+
 import ete3.ncbi_taxonomy.ncbiquery
 
 from card_live_dashboard.service.ConfigManager import ConfigManager

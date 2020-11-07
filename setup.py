@@ -46,4 +46,4 @@ setup(name='card-live-dashboard',
                'bin/card-live-dash-prod',
                'bin/card-live-dash-profiler',
                'bin/card-live-dash-init'],
-)
+      )
