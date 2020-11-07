@@ -1,13 +1,14 @@
-from typing import List, Set, Dict
-from datetime import datetime, timedelta
-from dash.dependencies import Input, Output, State
-import dash
 import re
+from datetime import datetime, timedelta
+from typing import List, Set, Dict
 
-from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
-from card_live_dashboard.model.CardLiveData import CardLiveData
+import dash
+from dash.dependencies import Input, Output, State
+
 import card_live_dashboard.layouts.figures as figures
 from card_live_dashboard.model import world
+from card_live_dashboard.model.CardLiveData import CardLiveData
+from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 
 DAY = timedelta(days=1)
 WEEK = timedelta(days=7)
@@ -74,6 +75,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('date-picker-range', 'max_date_allowed'),
          Output('organism-select', 'options'),
          Output('selected-samples-count', 'children'),
+         Output('sample-count-figure', 'children'),
          Output('drug-class-select', 'options'),
          Output('amr-gene-family-select', 'options'),
          Output('resistance-mechanism-select', 'options'),
@@ -174,7 +176,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
             })
         time_dropdown_text.append({'label': 'Custom', 'value': 'custom'})
 
-        samples_count_string = f'{time_subsets[time_dropdown].samples_count()}/{global_samples_count}'
+        selected_samples_count_string = f'{time_subsets[time_dropdown].samples_count()}'
+        samples_count_string = f'{selected_samples_count_string}/{global_samples_count}'
 
         drug_class_options = build_options(drug_classes,
                                            time_subsets[time_dropdown].rgi_parser.all_drugs())
@@ -193,6 +196,7 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 max_date_allowed,
                 organism_options,
                 samples_count_string,
+                selected_samples_count_string,
                 drug_class_options,
                 amr_gene_families_options,
                 resistance_mechanisms_options,
@@ -264,10 +268,11 @@ def apply_organism_filter(time_subsets: Dict[str, CardLiveData],
 
     return time_subsets_filtered
 
+
 def build_options(selected_options: List[str], all_available_options: Set[str]):
     if selected_options is None or len(selected_options) == 0:
         selected_options_set = set()
-    elif len(selected_options) == 1 and selected_options[0] == None:
+    elif len(selected_options) == 1 and selected_options[0] is None:
         selected_options_set = set()
     else:
         selected_options_set = set(selected_options)

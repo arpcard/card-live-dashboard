@@ -1,9 +1,10 @@
 from datetime import datetime
-import pandas as pd
-import numpy as np
 
-from card_live_dashboard.model.RGIParser import RGIParser
+import numpy as np
+import pandas as pd
+
 from card_live_dashboard.model.CardLiveData import CardLiveData
+from card_live_dashboard.model.RGIParser import RGIParser
 from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
 
 TIME_FMT = '%Y-%m-%d %H:%M:%S'
@@ -29,7 +30,8 @@ RGI_DF = pd.DataFrame(
              'rgi_main.Resistance Mechanism', 'rgi_main.AMR Gene Family'],
     data=[['file1', 'Perfect', 'class1; class2', 'gene1', 'antibiotic efflux; antibiotic target alteration', 'family1'],
           ['file1', 'Strict', 'class1; class2; class3', 'gene2', 'antibiotic inactivation', 'family2'],
-          ['file2', 'Perfect', 'class1; class2; class4', 'gene1', 'antibiotic efflux; antibiotic target alteration', 'family1'],
+          ['file2', 'Perfect', 'class1; class2; class4', 'gene1', 'antibiotic efflux; antibiotic target alteration',
+           'family1'],
           ['file3', None, None, None, None, None],
           ]
 ).set_index('filename')
@@ -317,7 +319,8 @@ def test_select_rgi_resistance_mechanism_one2():
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
     assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'antibiotic inactivation', 'antibiotic efflux', 'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert {'antibiotic inactivation', 'antibiotic efflux',
+            'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
     assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 2 == len(data.lmat_df), 'Invalid number after selection'
     assert 2 == len(data.mlst_df), 'Invalid number after selection'
@@ -332,7 +335,8 @@ def test_select_rgi_resistance_mechanism_one3():
     assert 2 == len(data.main_df), 'Invalid number after selection'
     assert {'file1', 'file2'} == data.files(), 'Invalid files'
     assert 3 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'antibiotic inactivation', 'antibiotic efflux', 'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert {'antibiotic inactivation', 'antibiotic efflux',
+            'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
     assert 2 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 2 == len(data.lmat_df), 'Invalid number after selection'
     assert 2 == len(data.mlst_df), 'Invalid number after selection'
@@ -348,7 +352,8 @@ def test_select_rgi_resistance_mechanism_two():
     assert 1 == len(data.main_df), 'Invalid number after selection'
     assert {'file1'} == data.files(), 'Invalid files'
     assert 2 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
-    assert {'antibiotic inactivation', 'antibiotic efflux', 'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
+    assert {'antibiotic inactivation', 'antibiotic efflux',
+            'antibiotic target alteration'} == data.rgi_parser.all_resistance_mechanisms(), 'Invalid resistance mechanisms'
     assert 1 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 1 == len(data.lmat_df), 'Invalid number after selection'
     assert 1 == len(data.mlst_df), 'Invalid number after selection'
@@ -440,7 +445,7 @@ def test_value_counts_new_data():
               ['file2', 'blue'],
               ['file3', 'red'],
               ]
-        ).set_index('filename')
+    ).set_index('filename')
 
     counts = data.sample_counts(cols=['color'], include_df=new_data)
     assert len(counts) == 2, 'Invalid number of unique categories'
@@ -459,7 +464,7 @@ def test_value_counts_new_data_multiple_files():
               ['file2', 'blue'],
               ['file3', 'red'],
               ]
-        ).set_index('filename')
+    ).set_index('filename')
 
     counts = data.sample_counts(cols=['color'], include_df=new_data)
     assert len(counts) == 2, 'Invalid number of unique categories'
@@ -478,7 +483,8 @@ def test_select_organism_lmat_all():
     assert {'file1', 'file2', 'file3'} == data.files(), 'Invalid files'
     assert 4 == len(data.rgi_parser.df_rgi), 'Invalid number after selection'
     assert {'gene1', 'gene2'} == data.rgi_parser.all_amr_genes(), 'Invalid AMR genes'
-    assert ['Salmonella enterica', 'Enterobacteriaceae', 'Salmonella enterica'] == data.main_df['lmat_taxonomy'].tolist()
+    assert ['Salmonella enterica', 'Enterobacteriaceae', 'Salmonella enterica'] == data.main_df[
+        'lmat_taxonomy'].tolist()
     assert 3 == len(data.rgi_kmer_df), 'Invalid number after selection'
     assert 3 == len(data.lmat_df), 'Invalid number after selection'
     assert 3 == len(data.mlst_df), 'Invalid number after selection'

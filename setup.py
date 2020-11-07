@@ -11,7 +11,6 @@ License :: OSI Approved :: Apache Software License
 Intended Audience :: Science/Research
 Topic :: Scientific/Engineering
 Topic :: Scientific/Engineering :: Bio-Informatics
-Programming Language :: Python :: 3.6
 Programming Language :: Python :: 3.7
 Programming Language :: Python :: 3.8
 Operating System :: POSIX :: Linux
@@ -22,7 +21,7 @@ setup(name='card-live-dashboard',
       description='A dashboard to display data from CARD:Live',
       author='Aaron Petkau',
       author_email='aaron.petkau@gmail.com',
-      url='https://devcard.mcmaster.ca:8888/apetkau/card-live-dashboard',
+      url='https://github.com/arpcard/card-live-dashboard/',
       license='Apache v2.0',
       classifiers=classifiers,
       install_requires=[
@@ -38,11 +37,13 @@ setup(name='card-live-dashboard',
           'shapely',
           'gunicorn',
           'pytest',
+          'pyyaml',
+          'setproctitle',
       ],
       packages=find_packages(),
       include_package_data=True,
-      scripts=['bin/cardlive-dash-dev',
-               'bin/cardlive-dash-prod',
-               'bin/cardlive-dash-profiler',
-               'bin/cardlive-dash-init'],
-)
+      scripts=['bin/card-live-dash-dev',
+               'bin/card-live-dash-prod',
+               'bin/card-live-dash-profiler',
+               'bin/card-live-dash-init'],
+      )

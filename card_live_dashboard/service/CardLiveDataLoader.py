@@ -1,10 +1,12 @@
 from __future__ import annotations
-from typing import List
-import pandas as pd
-from pathlib import Path
+
 import json
-from os import path
 import logging
+from os import path
+from pathlib import Path
+from typing import List
+
+import pandas as pd
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
@@ -14,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 
 class CardLiveDataLoader:
-
     JSON_DATA_FIELDS = [
         'rgi_main',
         'rgi_kmer',
@@ -50,6 +51,7 @@ class CardLiveDataLoader:
         :return: The original (unmodified) data object if no updates, otherwise a new data object with additional data.
         """
         input_files = list(Path(self._directory).glob('*'))
+        input_files.sort()
 
         if existing_data is None:
             return self.read_data(input_files)
@@ -73,7 +75,8 @@ class CardLiveDataLoader:
         """
         Reads in the data and constructs a CardLiveData object.
         :param input_files: The (optional) list of input files. Leave as None to read from the configured directory.
-                            The optional list is used so I don't have to re-read the directory after running read_or_update_data().
+                            The optional list is used so I don't have to re-read the directory after running
+                            read_or_update_data().
         :return: The CardLiveData object.
         """
         if input_files is None:
@@ -81,6 +84,7 @@ class CardLiveDataLoader:
                 raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
             else:
                 input_files = list(Path(self._directory).glob('*'))
+                input_files.sort()
 
         json_data = []
         for input_file in input_files:
@@ -134,8 +138,8 @@ class CardLiveDataLoader:
         df = df.copy()
         df['analysis_valid'] = 'None'
         for col in analysis_cols:
-            df.loc[~df[col].isna() & ~(df['analysis_valid'] == 'None'), 'analysis_valid'] = df[
-                                                                                                'analysis_valid'] + ' and ' + col
+            df.loc[~df[col].isna() & ~(df['analysis_valid'] == 'None'), 'analysis_valid'] = df['analysis_valid']\
+                                                                                            + ' and ' + col
             df.loc[~df[col].isna() & (df['analysis_valid'] == 'None'), 'analysis_valid'] = col
         return df.replace(' and '.join(self.JSON_DATA_FIELDS), 'all')
 

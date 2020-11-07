@@ -1,9 +1,9 @@
 import logging
 from pathlib import Path
 
-from card_live_dashboard.model.data_modifiers.CardLiveDataModifier import CardLiveDataModifier
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
+from card_live_dashboard.model.data_modifiers.CardLiveDataModifier import CardLiveDataModifier
 from card_live_dashboard.service.TaxonomicParser import TaxonomicParser
 
 logger = logging.getLogger(__name__)
