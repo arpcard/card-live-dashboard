@@ -25,7 +25,7 @@ class AntarcticaNAModifier(CardLiveDataModifier):
 
         main_df = data.main_df.copy()
         main_df.loc[(main_df['geo_area_code'] == 10) &
-            (main_df['timestamp'] < self._date_threshold), 'geo_area_code'] = na_code
+                    (main_df['timestamp'] < self._date_threshold), 'geo_area_code'] = na_code
 
         rgi_df = data.rgi_df.copy()
         rgi_kmer_df = data.rgi_kmer_df.copy()
@@ -37,4 +37,3 @@ class AntarcticaNAModifier(CardLiveDataModifier):
                             rgi_kmer_df=rgi_kmer_df,
                             mlst_df=mlst_df,
                             lmat_df=lmat_df)
-

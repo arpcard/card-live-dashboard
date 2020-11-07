@@ -1,13 +1,14 @@
+from os import getcwd
+from pathlib import Path
 from typing import Union
+
 import dash
 import flask
-from pathlib import Path
-from os import getcwd
 
+import card_live_dashboard.callbacks as callbacks
+import card_live_dashboard.layouts as layouts
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.service.ConfigManager import ConfigManager
-import card_live_dashboard.layouts as layouts
-import card_live_dashboard.callbacks as callbacks
 
 DEFAULT_CARD_LIVE_HOME = Path(getcwd())
 
@@ -19,7 +20,8 @@ def build_app(card_live_home: Path = DEFAULT_CARD_LIVE_HOME) -> dash.dash.Dash:
     :return: The Dash application.
     """
     if not card_live_home.exists():
-        raise Exception(f'Error: card live home [{card_live_home}] does not exist. Please specify the appropriate directory.')
+        raise Exception(
+            f'Error: card live home [{card_live_home}] does not exist. Please specify the appropriate directory.')
 
     card_live_data_dir = Path(card_live_home, 'data', 'card_live')
     if not card_live_data_dir.exists():
@@ -43,7 +45,7 @@ def build_app(card_live_home: Path = DEFAULT_CARD_LIVE_HOME) -> dash.dash.Dash:
     return app
 
 
-def flask_app(card_live_home: Union[str,Path] = DEFAULT_CARD_LIVE_HOME) -> flask.Flask:
+def flask_app(card_live_home: Union[str, Path] = DEFAULT_CARD_LIVE_HOME) -> flask.Flask:
     """
     Builds and gets the Flask app object for deployment as a Flask app.
     :param card_live_home: The home directory for CARD:Live.

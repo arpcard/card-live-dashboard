@@ -1,6 +1,5 @@
-from typing import Dict, List, Union
-
 from datetime import datetime
+from typing import Dict, List, Union
 
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -13,6 +12,7 @@ import card_live_dashboard.layouts.figures as figures
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
 LOADING = '[LOADING]'
+
 
 def default_layout():
     """
@@ -40,7 +40,7 @@ def default_layout():
                             ' samples']),
                         ' ',
                         html.Span(className='badge badge-secondary',
-                                  children=[f'Most recent: ', html.Span(id='global-most-recent', children=[LOADING])]),
+                                  children=['Most recent: ', html.Span(id='global-most-recent', children=[LOADING])]),
                     ]),
                     html.Div([
                         html.H2('Selection criteria'),
@@ -60,7 +60,7 @@ def default_layout():
                                    className='cardlive-collapse pl-0', children=[
                                        html.H3(className='sidebar-title', children=['RGI']),
                                        html.Span(className='sidebar-description', children=['Filter by RGI results']),
-                                    ]),
+                                   ]),
                         dbc.Collapse(id='rgi-parameters', is_open=True, children=[
                             html.Div(children=['RGI results cutoff: ',
                                                dbc.RadioItems(
@@ -114,7 +114,7 @@ def default_layout():
                                    className='cardlive-collapse pl-0', children=[
                                        html.H3(className='sidebar-title', children=['Organism']),
                                        html.Span(className='sidebar-description', children=['Filter by organism']),
-                                    ]),
+                                   ]),
                         dbc.Collapse(id='organism-parameters', is_open=True, children=[
                             html.Div(children=['Organism identification method: ',
                                                dbc.RadioItems(
@@ -141,7 +141,7 @@ def default_layout():
                                    className='cardlive-collapse pl-0', children=[
                                        html.H3(className='sidebar-title', children=['Time']),
                                        html.Span(className='sidebar-description', children=['Filter by submission time']),
-                                    ]),
+                                   ]),
                         dbc.Collapse(id='time-parameters', is_open=True, children=[
                             html.Div(children=['Filter by submission time period: ',
                                                dcc.Dropdown(id='time-period-items',
@@ -163,7 +163,7 @@ def default_layout():
                                                        number_of_months_shown=2,
                                                    ),
                                                ])
-                                           ]),
+                                               ]),
                         ]),
                     ]),
                     html.P(className='text-center card-live-badges pb-5', children=[
@@ -173,7 +173,7 @@ def default_layout():
                                href='https://github.com/arpcard/card-live-dashboard/releases'),
                         html.Br(),
                         html.A(className='badge badge-primary my-1',
-                               children=[f'Code and Docs | GitHub'],
+                               children=['Code and Docs | GitHub'],
                                href='https://github.com/arpcard/card-live-dashboard')
                     ]),
                     html.Div(className='py-5')
@@ -216,21 +216,21 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  dropdowns=figure_menus_layout(
                                      id_type='timeline-type-select',
                                      options_type=[
-                                        {'label': 'Cumulative counts', 'value': 'cumulative_counts'},
-                                        {'label': 'Cumulative percent', 'value': 'cumulative_percent'},
-                                        {'label': 'Counts', 'value': 'counts'},
-                                        {'label': 'Percent', 'value': 'percent'},
+                                         {'label': 'Cumulative counts', 'value': 'cumulative_counts'},
+                                         {'label': 'Cumulative percent', 'value': 'cumulative_percent'},
+                                         {'label': 'Counts', 'value': 'counts'},
+                                         {'label': 'Percent', 'value': 'percent'},
                                      ],
                                      value_type='cumulative_counts',
                                      id_color='timeline-color-select',
                                      options_color=[
-                                        {'label': 'Default', 'value': 'default'},
-                                        {'label': 'Geographic region', 'value': 'geographic'},
-                                        {'label': 'Organism', 'value': 'organism'},
+                                         {'label': 'Default', 'value': 'default'},
+                                         {'label': 'Geographic region', 'value': 'geographic'},
+                                         {'label': 'Organism', 'value': 'organism'},
                                      ],
                                      value_color='default'
                                  ),
-                             ),
+                                 ),
             single_figure_layout(title='Samples total',
                                  description=['Count of samples matching selection.'],
                                  id='figure-totals-id',
@@ -250,12 +250,12 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      ],
                                      value_color='default'
                                  ),
-                             ),
+                                 ),
             single_figure_layout(title='RGI results',
                                  description=['Percent of selected samples (',
-                                     html.Span(id='sample-count-figure', children=[LOADING]),
-                                     ') with the chosen type of RGI results.'
-                                 ],
+                                              html.Span(id='sample-count-figure', children=[LOADING]),
+                                              ') with the chosen type of RGI results.'
+                                              ],
                                  id='figure-rgi-id',
                                  fig=figures_dict['rgi'],
                                  dropdowns=figure_menus_layout(
@@ -275,12 +275,13 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      ],
                                      value_color='default'
                                  ),
-                             ),
+                                 ),
         ])
     ]
 
 
-def single_figure_layout(title: str, description: List[Union[str,html.Span]], id: str, fig: go.Figure, dropdowns: html.Div = None):
+def single_figure_layout(title: str, description: List[Union[str, html.Span]], id: str, fig: go.Figure,
+                         dropdowns: html.Div = None):
     component = dbc.Card(className='my-3', children=[
         dbc.CardHeader(children=[
             html.H4(className='figure-title', children=[title]),
@@ -297,8 +298,9 @@ def single_figure_layout(title: str, description: List[Union[str,html.Span]], id
     return component
 
 
-def figure_menus_layout(id_type: str, options_type: List[Dict[str,str]], value_type: str,
-                        id_color: str = None, options_color: List[Dict[str,str]] = None, value_color: str = None) -> html.Div:
+def figure_menus_layout(id_type: str, options_type: List[Dict[str, str]], value_type: str,
+                        id_color: str = None, options_color: List[Dict[str, str]] = None,
+                        value_color: str = None) -> html.Div:
     elements = [html.Div(['Type:']), html.Div(className='ml-2', children=[dcc.Dropdown(
         id=id_type,
         options=options_type,

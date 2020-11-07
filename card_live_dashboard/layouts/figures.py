@@ -1,11 +1,11 @@
-from typing import List, Dict
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+from typing import List, Dict
 
+import geopandas
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import geopandas
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 
@@ -151,7 +151,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
 
         # I convert to percent (instead of proportion) here since plotly is not doing the auto-conversion of
         # proportion to percents (unlike for 'proportion' which is the column displayed so plotly does auto-conversion)
-        counts_df['categories_total_percent'] = 100*(counts_df['categories_total'] / selected_files_count)
+        counts_df['categories_total_percent'] = 100 * (counts_df['categories_total'] / selected_files_count)
         counts_df['categories_total_percent'] = counts_df['categories_total_percent'].apply(lambda x: f'{x:,.0f}%')
 
         # Define order to display
@@ -187,7 +187,7 @@ def rgi_breakdown_figure(data: CardLiveData, type_value: str, color_by_value: st
                          title=title,
                          )
             fig.update_layout(font={'size': 14},
-                    yaxis={'title': '', 'dtick': rgi_d_tick, 'ticksuffix': TICKSPACE, 'automargin': True},
+                              yaxis={'title': '', 'dtick': rgi_d_tick, 'ticksuffix': TICKSPACE, 'automargin': True},
                               xaxis={'title': 'Percent of samples', 'tickformat': '.0%'}
                               )
     return fig
@@ -317,7 +317,7 @@ def build_time_histogram(data: CardLiveData, fig_type: str, color_by: str):
     return fig
 
 
-def order_categories(df: pd.DataFrame, col: str, by_sum: bool = False, sum_col: str = None) -> Dict[str,List[str]]:
+def order_categories(df: pd.DataFrame, col: str, by_sum: bool = False, sum_col: str = None) -> Dict[str, List[str]]:
     """
     Reorders categories in the dataframe by the total counts in the passed column.
     :param df: The data frame.

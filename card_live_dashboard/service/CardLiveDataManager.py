@@ -1,19 +1,19 @@
 from __future__ import annotations
+
+import logging
 from pathlib import Path
-from apscheduler.schedulers.background import BackgroundScheduler
+
+import numpy as np
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.memory import MemoryJobStore
-import logging
-from ete3 import NCBITaxa
-import numpy as np
-from os import path
+from apscheduler.schedulers.background import BackgroundScheduler
 
-from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
 from card_live_dashboard.model.CardLiveData import CardLiveData
-from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
-from card_live_dashboard.model.data_modifiers.AddTaxonomyModifier import AddTaxonomyModifier
 from card_live_dashboard.model.data_modifiers.AddGeographicNamesModifier import AddGeographicNamesModifier
+from card_live_dashboard.model.data_modifiers.AddTaxonomyModifier import AddTaxonomyModifier
+from card_live_dashboard.model.data_modifiers.AntarcticaNAModifier import AntarcticaNAModifier
 from card_live_dashboard.service import region_codes
+from card_live_dashboard.service.CardLiveDataLoader import CardLiveDataLoader
 
 logger = logging.getLogger(__name__)
 

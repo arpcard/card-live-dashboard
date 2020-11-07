@@ -1,5 +1,5 @@
-from pathlib import Path
 from os import path
+from pathlib import Path
 
 root_path = Path(path.dirname(__file__)) / '..'
 
