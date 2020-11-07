@@ -5,6 +5,7 @@
 * Adding additional space between y-axis labels and plots.
 * Display all y-axis labels for certain plots.
 * Added additional documentation to dashboard and updated title/favicon.
+* Transitions to mobile view for larger displays.
 
 # 0.3.0
 

@@ -21,7 +21,7 @@ def default_layout():
     """
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
-            html.Div(className='card-live-panel col-sm-3', children=[
+            html.Div(className='card-live-panel col-lg-3', children=[
                 html.Div(className='sticky-top', children=[
                     html.H1([
                         'CARD:Live'
