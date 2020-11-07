@@ -45,11 +45,11 @@ a:focus {
     min-width: 200px;
 }
 
-.figure-title {
+.figure-title, .sidebar-title {
     display: inline-block;
     padding-right: 0.5em;
 }
 
-.figure-description {
+.figure-description, .sidebar-description {
     font-style: italic;
 }

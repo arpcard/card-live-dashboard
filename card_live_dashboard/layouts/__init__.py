@@ -57,9 +57,12 @@ def default_layout():
                     ]),
                     html.Div([
                         dbc.Button(id='rgi-parameters-toggle', color='link',
-                                   className='cardlive-collapse pl-0', children=[html.H3('RGI')]),
+                                   className='cardlive-collapse pl-0', children=[
+                                       html.H3(className='sidebar-title', children=['RGI']),
+                                       html.Span(className='sidebar-description', children=['Filter by RGI results']),
+                                    ]),
                         dbc.Collapse(id='rgi-parameters', is_open=True, children=[
-                            html.Div(children=['RGI cutoff: ',
+                            html.Div(children=['RGI results cutoff: ',
                                                dbc.RadioItems(
                                                    id='rgi-cutoff-select',
                                                    className='sidepanel-selection-light',
@@ -72,7 +75,7 @@ def default_layout():
                                                    inline=True,
                                                ),
                                                ]),
-                            html.Div(children=['Filter display by drug class: ',
+                            html.Div(children=['Filter samples by drug class: ',
                                                dcc.Dropdown(
                                                    id='drug-class-select',
                                                    className='sidepanel-selection',
@@ -80,7 +83,7 @@ def default_layout():
                                                    placeholder='Select a drug class',
                                                ),
                                                ]),
-                            html.Div(children=['Filter display by AMR gene family: ',
+                            html.Div(children=['Filter samples by AMR gene family: ',
                                                dcc.Dropdown(
                                                    id='amr-gene-family-select',
                                                    className='sidepanel-selection',
@@ -88,7 +91,7 @@ def default_layout():
                                                    placeholder='Select the AMR gene family',
                                                ),
                                                ]),
-                            html.Div(children=['Filter display by resistance mechanism: ',
+                            html.Div(children=['Filter samples by resistance mechanism: ',
                                                dcc.Dropdown(
                                                    id='resistance-mechanism-select',
                                                    className='sidepanel-selection',
@@ -96,7 +99,7 @@ def default_layout():
                                                    placeholder='Select the resistance mechanism',
                                                ),
                                                ]),
-                            html.Div(children=['Filter display by AMR gene: ',
+                            html.Div(children=['Filter samples by AMR gene: ',
                                                dcc.Dropdown(
                                                    id='amr-gene-select',
                                                    className='sidepanel-selection',
@@ -108,9 +111,12 @@ def default_layout():
                     ]),
                     html.Div([
                         dbc.Button(id='organism-parameters-toggle', color='link',
-                                   className='cardlive-collapse pl-0', children=[html.H3('Organism')]),
+                                   className='cardlive-collapse pl-0', children=[
+                                       html.H3(className='sidebar-title', children=['Organism']),
+                                       html.Span(className='sidebar-description', children=['Filter by organism']),
+                                    ]),
                         dbc.Collapse(id='organism-parameters', is_open=True, children=[
-                            html.Div(children=['Select an organism identification method: ',
+                            html.Div(children=['Organism identification method: ',
                                                dbc.RadioItems(
                                                    id='organism-identification-method',
                                                    className='sidepanel-selection-light',
@@ -132,9 +138,12 @@ def default_layout():
                     ]),
                     html.Div([
                         dbc.Button(id='time-parameters-toggle', color='link',
-                                   className='cardlive-collapse pl-0', children=[html.H3('Time')]),
+                                   className='cardlive-collapse pl-0', children=[
+                                       html.H3(className='sidebar-title', children=['Time']),
+                                       html.Span(className='sidebar-description', children=['Filter by submission time']),
+                                    ]),
                         dbc.Collapse(id='time-parameters', is_open=True, children=[
-                            html.Div(children=['Select a time period: ',
+                            html.Div(children=['Filter by submission time period: ',
                                                dcc.Dropdown(id='time-period-items',
                                                             className='sidepanel-selection',
                                                             value='all',
