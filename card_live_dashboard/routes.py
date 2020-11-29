@@ -1,7 +1,7 @@
-from os.path import basename
+from os.path import isfile, join
+from os import listdir
 from pathlib import Path
 from io import BytesIO
-from glob import glob
 import zipfile
 
 import flask
@@ -29,8 +29,8 @@ def create_flask_routes(flask_app: flask.app.Flask, base_pathname: str, card_liv
     def download_data():
         memory_file = BytesIO()
         with zipfile.ZipFile(memory_file, 'w', compression=zipfile.ZIP_STORED) as zf:
-            files = glob(str(card_live_data_dir / '*'))
+            files = [f for f in listdir(card_live_data_dir) if isfile(join(card_live_data_dir, f))]
             for file in files:
-                zf.write(file, arcname=basename(file))
+                zf.write(join(card_live_data_dir, file), arcname=file)
         memory_file.seek(0)
         return flask.send_file(memory_file, attachment_filename='card-live-data.zip', as_attachment=True)
