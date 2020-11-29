@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import io
 from pathlib import Path
 
 import numpy as np
@@ -59,6 +60,17 @@ class CardLiveDataManager:
             logger.info('An exeption occured when attempting to load new data. Skipping new data.')
             logger.exception(e)
         logger.debug('Finished updating CARD:Live data.')
+
+    def data_archive(self, file_names = None) -> io.BytesIO:
+        """
+        Get the CARD:Live JSON files as an in-memory file.
+        :param file_names: The file names to load into the archive.
+        :return: An io.BytesIO in-memory file containing all the data.
+        """
+        if file_names is None:
+            file_names = self.card_data.files()
+
+        return self._data_loader.data_archive(file_names)
 
     @property
     def card_data(self) -> CardLiveData:
