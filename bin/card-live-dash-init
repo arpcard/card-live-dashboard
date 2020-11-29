@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 import argparse
+import tempfile
+import requests
+import zipfile
 import logging
 import sys
-from os import path, mkdir, makedirs
+from os import path, mkdir, makedirs, listdir
 from pathlib import Path
 
 import ete3.ncbi_taxonomy.ncbiquery
@@ -12,9 +15,17 @@ from card_live_dashboard.service.ConfigManager import ConfigManager
 script_name = path.basename(path.realpath(sys.argv[0]))
 logger = logging.getLogger(__name__)
 
+DEFAULT_DATA_URL = 'https://bergen.mcmaster.ca/cardlive/data/current'
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog=script_name, description='Initialize the CARD:Live dashboard home directory.')
     parser.add_argument('cardlive_home_dir', nargs=1)
+    parser.add_argument('--cardlive-data-url', action='store', dest='cardlive_data_url', type=str,
+                        help='Override the default URL for downloading the CARD:Live data [{DEFAULT_DATA_URL}]',
+                        default=DEFAULT_DATA_URL, required=False)
+    parser.add_argument('--no-download-data', action='store_true', dest='no_download_data',
+                        help='Do not download CARD:Live data during initialization (leave data directory empty).',
+                        required=False)
 
     args = parser.parse_args()
     if len(args.cardlive_home_dir) != 1:
@@ -33,6 +44,23 @@ if __name__ == '__main__':
 
         if not cardlive_config_path.exists():
             mkdir(cardlive_config_path)
+
+        if args.no_download_data:
+            print(f'--no-download-data is set, will initialize an empty data directory [{cardlive_data_path}]')
+        else:
+            print(f'Downloading latest CARD:Live data from [{args.cardlive_data_url}]')
+            req = requests.get(args.cardlive_data_url)
+
+            data_file = tempfile.TemporaryFile()
+            data_file.write(req.content)
+            zip = zipfile.ZipFile(data_file)
+            zip.extractall(cardlive_data_path)
+            zip.close()
+            data_file.close()
+
+            listdir(cardlive_data_path)
+            extracted_files = [f for f in listdir(cardlive_data_path) if path.isfile(path.join(cardlive_data_path, f))]
+            print(f'Loaded {len(extracted_files)} samples into [{cardlive_data_path}]')
 
         print(f'Writing example configurations to [{cardlive_config_path}]')
         config_manager = ConfigManager(cardlive_home_path)
