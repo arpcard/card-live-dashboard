@@ -54,12 +54,19 @@ if __name__ == '__main__':
                 print(f'Downloading latest CARD:Live data from [{args.cardlive_data_url}]')
                 req = requests.get(args.cardlive_data_url)
 
-                data_file = tempfile.TemporaryFile()
-                data_file.write(req.content)
-                zip = zipfile.ZipFile(data_file)
-                zip.extractall(Path(cardlive_home_path, 'data'))
-                zip.close()
-                data_file.close()
+                with tempfile.TemporaryFile() as data_file:
+                    data_file.write(req.content)
+                    data_file.seek(0)
+
+                    # Code adapted from <https://stackoverflow.com/a/47632134> for stripping directory from paths
+                    with zipfile.ZipFile(data_file) as zf:
+                        for zip_info in zf.infolist():
+                            if zip_info.filename[-1] == '/':
+                                continue
+                            zip_info.filename = path.basename(zip_info.filename)
+                            zf.extract(zip_info, cardlive_data_path)
+
+                req = requests.get(args.cardlive_data_url)
 
                 listdir(cardlive_data_path)
                 extracted_files = [f for f in listdir(cardlive_data_path) if

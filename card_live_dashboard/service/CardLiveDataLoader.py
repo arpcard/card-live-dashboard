@@ -94,9 +94,12 @@ class CardLiveDataLoader:
         for input_file in input_files:
             filename = path.basename(input_file)
             with open(input_file) as f:
-                json_obj = json.load(f)
-                json_obj['filename'] = filename
-                json_data.append(json_obj)
+                try:
+                    json_obj = json.load(f)
+                    json_obj['filename'] = filename
+                    json_data.append(json_obj)
+                except Exception:
+                    logger.warning(f'File [{input_file}] is not a proper CARD:Live JSON file, skipping file.')
 
         full_df = pd.json_normalize(json_data).set_index('filename')
         full_df = self._replace_empty_list_na(full_df, self.JSON_DATA_FIELDS)
