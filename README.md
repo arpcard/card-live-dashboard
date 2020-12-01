@@ -152,4 +152,4 @@ pytest
 [gunicorn-conf-doc]: https://docs.gunicorn.org/en/latest/configure.html
 [CARD:Live]: https://card.mcmaster.ca/live
 [Python Dash]: https://plotly.com/dash/
-[card-live-overview.png]: images/card-live-overview.png
+[card-live-overview.png]: doc/images/card-live-overview.png
