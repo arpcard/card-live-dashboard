@@ -15,7 +15,7 @@ from card_live_dashboard.service.ConfigManager import ConfigManager
 script_name = path.basename(path.realpath(sys.argv[0]))
 logger = logging.getLogger(__name__)
 
-DEFAULT_DATA_URL = 'https://bergen.mcmaster.ca/cardlive/data/current'
+DEFAULT_DATA_URL = 'https://bergen.mcmaster.ca/cardlive/data/all'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog=script_name, description='Initialize the CARD:Live dashboard home directory.')

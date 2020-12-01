@@ -14,11 +14,15 @@ external_stylesheets = [dbc.themes.BOOTSTRAP]
 LOADING = '[LOADING]'
 
 
-def default_layout():
+def default_layout(base_pathname = '/'):
     """
     Builds the default layout of the CARD:Live dashboard.
+    :param base_pathname: The base pathname where the CARD:Live application is running.
     :return: The default layout of the CARD:Live dashboard.
     """
+    if base_pathname.endswith('/'):
+        base_pathname = base_pathname.rstrip('/')
+
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
             html.Div(className='card-live-panel col-lg-3', children=[
@@ -41,6 +45,9 @@ def default_layout():
                         ' ',
                         html.Span(className='badge badge-secondary',
                                   children=['Most recent: ', html.Span(id='global-most-recent', children=[LOADING])]),
+                        ' ',
+                        html.A(className='badge badge-primary', href=f'{base_pathname}/data/all',
+                               children=['Download results'])
                     ]),
                     html.Div([
                         html.H2('Selection criteria'),

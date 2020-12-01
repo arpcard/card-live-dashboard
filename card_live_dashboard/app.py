@@ -39,7 +39,7 @@ def build_app(card_live_home: Path = DEFAULT_CARD_LIVE_HOME) -> dash.dash.Dash:
 
     CardLiveDataManager.create_instance(card_live_home)
 
-    app.layout = layouts.default_layout()
+    app.layout = layouts.default_layout(config['url_base_pathname'])
     app.title = 'CARD:Live Dashboard'
     callbacks.build_callbacks(app)
 

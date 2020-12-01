@@ -33,8 +33,10 @@ class ConfigManager:
                 config = {}
 
             # Some basic syntax checking
-            if 'url_base_pathname' not in config:
+            if 'url_base_pathname' not in config or config['url_base_pathname'] == '':
                 config['url_base_pathname'] = '/'
+            elif not config['url_base_pathname'].startswith('/'):
+                config['url_base_pathname'] = '/' + config['url_base_pathname']
             elif not config['url_base_pathname'].endswith('/'):
                 config['url_base_pathname'] = config['url_base_pathname'] + '/'
 

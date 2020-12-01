@@ -16,13 +16,11 @@ def create_flask_routes(flask_app: flask.app.Flask, base_pathname: str, card_liv
     """
     if base_pathname is None:
         base_pathname = '/'
-    elif not base_pathname.startswith('/'):
-        base_pathname = '/' + base_pathname
 
     if base_pathname.endswith('/'):
         base_pathname = base_pathname.rstrip('/')
 
-    @flask_app.route(f'{base_pathname}/data/current')
+    @flask_app.route(f'{base_pathname}/data/all')
     def download_data():
         flask_app.logger.info(f'Request to download all data from [{card_live_data_dir}]')
         archive = CardLiveDataManager.get_instance().data_archive_generator()
