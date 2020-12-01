@@ -1,8 +1,8 @@
-from typing import List
-from os import path
 import io
 import zipfile
+from os import path
 from pathlib import Path
+from typing import List
 
 import numpy as np
 

@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from typing import Generator
-import zipstream
 import json
 import logging
 from os import path, listdir
 from pathlib import Path
+from typing import Generator
 from typing import List
 
 import pandas as pd
+import zipstream
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Generator
 import logging
 from pathlib import Path
+from typing import Generator
 
 import numpy as np
 from apscheduler.executors.pool import ThreadPoolExecutor
@@ -61,7 +61,7 @@ class CardLiveDataManager:
             logger.exception(e)
         logger.debug('Finished updating CARD:Live data.')
 
-    def data_archive_generator(self, file_names = None) -> Generator[bytes, None, None]:
+    def data_archive_generator(self, file_names=None) -> Generator[bytes, None, None]:
         """
         Get the CARD:Live JSON files as a zipstream generator.
         :param file_names: The file names to load into the archive.
