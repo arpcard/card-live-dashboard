@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from typing import Generator
 import logging
-import io
 from pathlib import Path
 
 import numpy as np
@@ -61,16 +61,16 @@ class CardLiveDataManager:
             logger.exception(e)
         logger.debug('Finished updating CARD:Live data.')
 
-    def data_archive(self, file_names = None) -> io.BytesIO:
+    def data_archive_generator(self, file_names = None) -> Generator[bytes, None, None]:
         """
-        Get the CARD:Live JSON files as an in-memory file.
+        Get the CARD:Live JSON files as a zipstream generator.
         :param file_names: The file names to load into the archive.
-        :return: An io.BytesIO in-memory file containing all the data.
+        :return: A generator which allows streaming of the zip file contents.
         """
         if file_names is None:
             file_names = self.card_data.files()
 
-        return self._data_loader.data_archive(file_names)
+        return self._data_loader.data_archive_generator(file_names)
 
     @property
     def card_data(self) -> CardLiveData:

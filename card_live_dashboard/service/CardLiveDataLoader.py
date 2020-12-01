@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import io
-import zipfile
+from typing import Generator
+import zipstream
 import json
 import logging
 from os import path, listdir
@@ -125,32 +125,32 @@ class CardLiveDataLoader:
 
         return data
 
-    def data_archive(self, file_names) -> io.BytesIO:
+    def data_archive_generator(self, file_names) -> Generator[bytes, None, None]:
         """
-        Get the CARD:Live JSON files as an in-memory file.
+        Get the CARD:Live JSON files as a zipstream generator
+        (code derived from https://pypi.org/project/zipstream-new/).
         :param file_names: The file names to load into the archive.
-        :return: An io.BytesIO in-memory file containing all the data.
+        :return: A generator which allows streaming of the zip file contents.
         """
-        # Some code derived from https://stackoverflow.com/a/27337047
-        memory_file = io.BytesIO()
-        with zipfile.ZipFile(memory_file, 'w', compression=zipfile.ZIP_STORED) as zf:
-            for file in file_names:
-                file_path = path.join(self._directory, file)
-                with open(file_path) as f:
-                    valid_file = False
-                    try:
-                        json_obj = json.load(f)
-                        valid_file = 'rgi_main' in json_obj
-                    except Exception:
-                        valid_file = False
-                    if valid_file:
-                        zf.write(file_path, arcname=file)
-                    else:
-                        logger.warning((f'File [{file_path}] is not a proper CARD:Live JSON file, '
-                                        'skipping file in download request.'))
-        memory_file.seek(0)
+        zf = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
 
-        return memory_file
+        for file in file_names:
+            file_path = path.join(self._directory, file)
+            valid_file = False
+            with open(file_path) as f:
+                try:
+                    json_obj = json.load(f)
+                    valid_file = 'rgi_main' in json_obj
+                except Exception:
+                    valid_file = False
+            if valid_file:
+                zf.write(file_path, arcname=f'card_live/{file}')
+                yield from zf.flush()
+            else:
+                logger.warning((f'File [{file_path}] is not a proper CARD:Live JSON file, '
+                                'skipping file in download request.'))
+
+        yield from zf
 
     def _rows_with_empty_list(self, df: pd.DataFrame, col_name: str):
         empty_rows = {}

@@ -25,5 +25,7 @@ def create_flask_routes(flask_app: flask.app.Flask, base_pathname: str, card_liv
     @flask_app.route(f'{base_pathname}/data/current')
     def download_data():
         flask_app.logger.info(f'Request to download all data from [{card_live_data_dir}]')
-        archive = CardLiveDataManager.get_instance().data_archive()
-        return flask.send_file(archive, attachment_filename='card-live-data.zip', as_attachment=True)
+        archive = CardLiveDataManager.get_instance().data_archive_generator()
+        response = flask.Response(archive, mimetype='application/zip')
+        response.headers['Content-Disposition'] = 'attachment; filename=card-live-data.zip'
+        return response
