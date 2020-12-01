@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog=script_name, description='Initialize the CARD:Live dashboard home directory.')
     parser.add_argument('cardlive_home_dir', nargs=1)
     parser.add_argument('--cardlive-data-url', action='store', dest='cardlive_data_url', type=str,
-                        help='Override the default URL for downloading the CARD:Live data [{DEFAULT_DATA_URL}]',
+                        help=f'Override the default URL for downloading the CARD:Live data [{DEFAULT_DATA_URL}]',
                         default=DEFAULT_DATA_URL, required=False)
     parser.add_argument('--no-download-data', action='store_true', dest='no_download_data',
                         help='Do not download CARD:Live data during initialization (leave data directory empty).',
