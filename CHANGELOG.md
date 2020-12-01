@@ -1,6 +1,7 @@
 # 0.5.0
 
-* Adding ability to download all data.
+* Added ability to download all data as a zip archive.
+* Added option to print version from commands. 
 
 # 0.4.0
 

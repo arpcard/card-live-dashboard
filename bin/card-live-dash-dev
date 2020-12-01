@@ -5,6 +5,7 @@ from os import path
 from pathlib import Path
 
 import card_live_dashboard.app
+from card_live_dashboard import __version__
 
 script_name = path.basename(path.realpath(sys.argv[0]))
 
@@ -12,6 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog=script_name,
                                      description='Run the CARD:Live Dashboard in development mode (don\'t use for production).')
     parser.add_argument('cardlive_home_dir', nargs=1)
+    parser.add_argument('--version', action='version', version=f'{script_name} {__version__}')
     args = parser.parse_args()
     if len(args.cardlive_home_dir) != 1:
         raise Exception('You must specify a valid cardlive_home_dir directory')

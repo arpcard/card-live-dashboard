@@ -18,7 +18,7 @@ Operating System :: POSIX :: Linux
 
 setup(name='card-live-dashboard',
       version=__version__,
-      description='A dashboard to display data from CARD:Live',
+      description='A dashboard to display antimicrobial resistance data from CARD:Live',
       author='Aaron Petkau',
       author_email='aaron.petkau@gmail.com',
       url='https://github.com/arpcard/card-live-dashboard/',
