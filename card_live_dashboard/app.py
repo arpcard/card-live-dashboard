@@ -7,6 +7,7 @@ import flask
 
 import card_live_dashboard.callbacks as callbacks
 import card_live_dashboard.layouts as layouts
+import card_live_dashboard.routes as routes
 from card_live_dashboard.service.CardLiveDataManager import CardLiveDataManager
 from card_live_dashboard.service.ConfigManager import ConfigManager
 
@@ -38,9 +39,11 @@ def build_app(card_live_home: Path = DEFAULT_CARD_LIVE_HOME) -> dash.dash.Dash:
 
     CardLiveDataManager.create_instance(card_live_home)
 
-    app.layout = layouts.default_layout()
+    app.layout = layouts.default_layout(config['url_base_pathname'])
     app.title = 'CARD:Live Dashboard'
     callbacks.build_callbacks(app)
+
+    routes.create_flask_routes(app.server, config['url_base_pathname'], card_live_data_dir)
 
     return app
 

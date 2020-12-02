@@ -7,6 +7,7 @@ from pathlib import Path
 from werkzeug.middleware.profiler import ProfilerMiddleware
 
 import card_live_dashboard.app
+from card_live_dashboard import __version__
 
 script_name = path.basename(path.realpath(sys.argv[0]))
 
@@ -18,6 +19,7 @@ if __name__ == '__main__':
         'This will print out profile statistics (run times) of each web request.'
     ))
     parser.add_argument('cardlive_home_dir', nargs=1)
+    parser.add_argument('--version', action='version', version=f'{script_name} {__version__}')
     args = parser.parse_args()
     if len(args.cardlive_home_dir) != 1:
         raise Exception('You must specify a valid cardlive_home_dir directory')

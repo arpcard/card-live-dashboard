@@ -14,11 +14,15 @@ external_stylesheets = [dbc.themes.BOOTSTRAP]
 LOADING = '[LOADING]'
 
 
-def default_layout():
+def default_layout(base_pathname='/'):
     """
     Builds the default layout of the CARD:Live dashboard.
+    :param base_pathname: The base pathname where the CARD:Live application is running.
     :return: The default layout of the CARD:Live dashboard.
     """
+    if base_pathname.endswith('/'):
+        base_pathname = base_pathname.rstrip('/')
+
     layout = html.Div(className='card-live-all container-fluid', children=[
         html.Div(className='row', children=[
             html.Div(className='card-live-panel col-lg-3', children=[
@@ -41,6 +45,9 @@ def default_layout():
                         ' ',
                         html.Span(className='badge badge-secondary',
                                   children=['Most recent: ', html.Span(id='global-most-recent', children=[LOADING])]),
+                        ' ',
+                        html.A(className='badge badge-primary', href=f'{base_pathname}/data/all',
+                               children=['Download results'])
                     ]),
                     html.Div([
                         html.H2('Selection criteria'),
@@ -58,9 +65,9 @@ def default_layout():
                     html.Div([
                         dbc.Button(id='rgi-parameters-toggle', color='link',
                                    className='cardlive-collapse pl-0', children=[
-                                       html.H3(className='sidebar-title', children=['RGI']),
-                                       html.Span(className='sidebar-description', children=['Filter by RGI results']),
-                                   ]),
+                                html.H3(className='sidebar-title', children=['RGI']),
+                                html.Span(className='sidebar-description', children=['Filter by RGI results']),
+                            ]),
                         dbc.Collapse(id='rgi-parameters', is_open=True, children=[
                             html.Div(children=['RGI results cutoff: ',
                                                dbc.RadioItems(
@@ -112,9 +119,9 @@ def default_layout():
                     html.Div([
                         dbc.Button(id='organism-parameters-toggle', color='link',
                                    className='cardlive-collapse pl-0', children=[
-                                       html.H3(className='sidebar-title', children=['Organism']),
-                                       html.Span(className='sidebar-description', children=['Filter by organism']),
-                                   ]),
+                                html.H3(className='sidebar-title', children=['Organism']),
+                                html.Span(className='sidebar-description', children=['Filter by organism']),
+                            ]),
                         dbc.Collapse(id='organism-parameters', is_open=True, children=[
                             html.Div(children=['Organism identification method: ',
                                                dbc.RadioItems(
@@ -139,9 +146,9 @@ def default_layout():
                     html.Div([
                         dbc.Button(id='time-parameters-toggle', color='link',
                                    className='cardlive-collapse pl-0', children=[
-                                       html.H3(className='sidebar-title', children=['Time']),
-                                       html.Span(className='sidebar-description', children=['Filter by submission time']),
-                                   ]),
+                                html.H3(className='sidebar-title', children=['Time']),
+                                html.Span(className='sidebar-description', children=['Filter by submission time']),
+                            ]),
                         dbc.Collapse(id='time-parameters', is_open=True, children=[
                             html.Div(children=['Filter by submission time period: ',
                                                dcc.Dropdown(id='time-period-items',

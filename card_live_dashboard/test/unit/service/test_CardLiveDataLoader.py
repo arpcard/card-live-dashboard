@@ -1,5 +1,8 @@
+import io
+import zipfile
 from os import path
 from pathlib import Path
+from typing import List
 
 import numpy as np
 
@@ -87,3 +90,48 @@ def test_read_or_update_data_withupdate():
     new_data = loader.read_or_update_data(data)
     assert data is not new_data
     assert 2 == len(new_data.main_df)
+
+
+def write_zip_to_memory_file(loader: CardLiveDataLoader, files: List[str]) -> io.BytesIO:
+    """
+    Helper method to generate an in-memory zip archive for testing zipping of files.
+    :param loader: The CardLiveDataLoader.
+    :param files: The files to zip.
+    :return: An in-memory file containing the zipped data.
+    """
+    memory_archive = io.BytesIO()
+    for chunk in loader.data_archive_generator(files):
+        memory_archive.write(chunk)
+    memory_archive.seek(0)
+
+    return memory_archive
+
+
+def test_data_archive_generator_one_file():
+    loader = CardLiveDataLoader(data_dir / 'data2')
+    memory_archive = write_zip_to_memory_file(loader, ['file1'])
+
+    with zipfile.ZipFile(memory_archive, 'r') as zf:
+        assert {'card_live/file1'} == set(zf.namelist())
+
+    memory_archive.close()
+
+
+def test_data_archive_generator_both_files():
+    loader = CardLiveDataLoader(data_dir / 'data2')
+    memory_archive = write_zip_to_memory_file(loader, ['file1', 'file2'])
+
+    with zipfile.ZipFile(memory_archive, 'r') as zf:
+        assert {'card_live/file1', 'card_live/file2'} == set(zf.namelist())
+
+    memory_archive.close()
+
+
+def test_data_archive_generator_skip_invalid_file():
+    loader = CardLiveDataLoader(data_dir / 'data3')
+    memory_archive = write_zip_to_memory_file(loader, ['file1', 'file-invalid'])
+
+    with zipfile.ZipFile(memory_archive, 'r') as zf:
+        assert {'card_live/file1'} == set(zf.namelist())
+
+    memory_archive.close()

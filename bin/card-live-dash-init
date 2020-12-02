@@ -2,19 +2,32 @@
 import argparse
 import logging
 import sys
-from os import path, mkdir, makedirs
+import tempfile
+import zipfile
+from os import path, mkdir, makedirs, listdir
 from pathlib import Path
 
 import ete3.ncbi_taxonomy.ncbiquery
+import requests
 
 from card_live_dashboard.service.ConfigManager import ConfigManager
+from card_live_dashboard import __version__
 
 script_name = path.basename(path.realpath(sys.argv[0]))
 logger = logging.getLogger(__name__)
 
+DEFAULT_DATA_URL = 'https://bergen.mcmaster.ca/cardlive/data/all'
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog=script_name, description='Initialize the CARD:Live dashboard home directory.')
     parser.add_argument('cardlive_home_dir', nargs=1)
+    parser.add_argument('--cardlive-data-url', action='store', dest='cardlive_data_url', type=str,
+                        help=f'Override the default URL for downloading the CARD:Live data [{DEFAULT_DATA_URL}]',
+                        default=DEFAULT_DATA_URL, required=False)
+    parser.add_argument('--no-download-data', action='store_true', dest='no_download_data',
+                        help='Do not download CARD:Live data during initialization (leave data directory empty).',
+                        required=False)
+    parser.add_argument('--version', action='version', version=f'{script_name} {__version__}')
 
     args = parser.parse_args()
     if len(args.cardlive_home_dir) != 1:
@@ -34,14 +47,36 @@ if __name__ == '__main__':
         if not cardlive_config_path.exists():
             mkdir(cardlive_config_path)
 
+        if not cardlive_data_path.exists():
+            makedirs(cardlive_data_path)
+
+            if args.no_download_data:
+                print(f'--no-download-data is set, will initialize an empty data directory [{cardlive_data_path}]')
+            else:
+                print(f'Downloading latest CARD:Live data from [{args.cardlive_data_url}]')
+                req = requests.get(args.cardlive_data_url)
+
+                with tempfile.TemporaryFile() as data_file:
+                    data_file.write(req.content)
+                    data_file.seek(0)
+
+                    # Code adapted from <https://stackoverflow.com/a/47632134> for stripping directory from paths
+                    with zipfile.ZipFile(data_file) as zf:
+                        for zip_info in zf.infolist():
+                            if zip_info.filename[-1] == '/':
+                                continue
+                            zip_info.filename = path.basename(zip_info.filename)
+                            zf.extract(zip_info, cardlive_data_path)
+
+                extracted_files = [f for f in listdir(cardlive_data_path) if
+                                   path.isfile(path.join(cardlive_data_path, f))]
+                print(f'Loaded {len(extracted_files)} samples into [{cardlive_data_path}]')
+        else:
+            logger.warning(f'Data directory [{cardlive_data_path}] already exists, will not overwrite with new data.')
+
         print(f'Writing example configurations to [{cardlive_config_path}]')
         config_manager = ConfigManager(cardlive_home_path)
         config_manager.write_example_config()
-
-        if not cardlive_data_path.exists():
-            makedirs(cardlive_data_path)
-        else:
-            logger.warning(f'Data directory [{cardlive_data_path}] already exists.')
 
         if not cardlive_db_path.exists():
             mkdir(cardlive_db_path)

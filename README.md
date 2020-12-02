@@ -47,7 +47,9 @@ Before running, you will have to create a CARD:Live dashboard home directory. Th
 card-live-dash-init [cardlive-home]
 ```
 
-Once this is created, please copy over the CARD:Live data (JSON files) to `[cardlive-home]/data/card_live`.
+By default this will download a copy of the most recent data from CARD:Live (available at <https://bergen.mcmaster.ca/cardlive/data/all>).
+
+If, instead, you wish to start with an empty data directory you can use `--no-download-data`. In this case, you will have to copy data to `[cardlive-home]/data/card_live` before the application starts up.
 
 ## Production
 
@@ -152,4 +154,4 @@ pytest
 [gunicorn-conf-doc]: https://docs.gunicorn.org/en/latest/configure.html
 [CARD:Live]: https://card.mcmaster.ca/live
 [Python Dash]: https://plotly.com/dash/
-[card-live-overview.png]: images/card-live-overview.png
+[card-live-overview.png]: doc/images/card-live-overview.png

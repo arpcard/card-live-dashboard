@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
-from os import path
+from os import path, listdir
 from pathlib import Path
-from typing import List
+from typing import Generator
+from typing import List, Set, Union
 
 import pandas as pd
+import zipstream
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
 from card_live_dashboard.model.RGIParser import RGIParser
@@ -50,7 +52,8 @@ class CardLiveDataLoader:
         :param existing_data: The existing data object (None if all data should be read).
         :return: The original (unmodified) data object if no updates, otherwise a new data object with additional data.
         """
-        input_files = list(Path(self._directory).glob('*'))
+        input_files = [Path(self._directory) / f for f in listdir(self._directory) if
+                       path.isfile(Path(self._directory) / f)]
         input_files.sort()
 
         if existing_data is None:
@@ -83,16 +86,20 @@ class CardLiveDataLoader:
             if not self._directory.exists():
                 raise Exception(f'Data directory [card_live_dir={self._directory}] does not exist')
             else:
-                input_files = list(Path(self._directory).glob('*'))
+                input_files = [Path(self._directory) / f for f in listdir(self._directory) if
+                               path.isfile(Path(self._directory) / f)]
                 input_files.sort()
 
         json_data = []
         for input_file in input_files:
             filename = path.basename(input_file)
             with open(input_file) as f:
-                json_obj = json.load(f)
-                json_obj['filename'] = filename
-                json_data.append(json_obj)
+                try:
+                    json_obj = json.load(f)
+                    json_obj['filename'] = filename
+                    json_data.append(json_obj)
+                except Exception:
+                    logger.warning(f'File [{input_file}] is not a proper CARD:Live JSON file, skipping file.')
 
         full_df = pd.json_normalize(json_data).set_index('filename')
         full_df = self._replace_empty_list_na(full_df, self.JSON_DATA_FIELDS)
@@ -121,6 +128,33 @@ class CardLiveDataLoader:
 
         return data
 
+    def data_archive_generator(self, file_names: Union[List[str], Set[str]]) -> Generator[bytes, None, None]:
+        """
+        Get the CARD:Live JSON files as a zipstream generator
+        (code derived from https://pypi.org/project/zipstream-new/).
+        :param file_names: The file names to load into the archive.
+        :return: A generator which allows streaming of the zip file contents.
+        """
+        zf = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+
+        for file in file_names:
+            file_path = path.join(self._directory, file)
+            valid_file = False
+            with open(file_path) as f:
+                try:
+                    json_obj = json.load(f)
+                    valid_file = 'rgi_main' in json_obj
+                except Exception:
+                    valid_file = False
+            if valid_file:
+                zf.write(file_path, arcname=f'card_live/{file}')
+                yield from zf.flush()
+            else:
+                logger.warning((f'File [{file_path}] is not a proper CARD:Live JSON file, '
+                                'skipping file in download request.'))
+
+        yield from zf
+
     def _rows_with_empty_list(self, df: pd.DataFrame, col_name: str):
         empty_rows = {}
         for index, row in df.iterrows():
@@ -138,7 +172,7 @@ class CardLiveDataLoader:
         df = df.copy()
         df['analysis_valid'] = 'None'
         for col in analysis_cols:
-            df.loc[~df[col].isna() & ~(df['analysis_valid'] == 'None'), 'analysis_valid'] = df['analysis_valid']\
+            df.loc[~df[col].isna() & ~(df['analysis_valid'] == 'None'), 'analysis_valid'] = df['analysis_valid'] \
                                                                                             + ' and ' + col
             df.loc[~df[col].isna() & (df['analysis_valid'] == 'None'), 'analysis_valid'] = col
         return df.replace(' and '.join(self.JSON_DATA_FIELDS), 'all')

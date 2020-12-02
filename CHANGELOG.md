@@ -1,3 +1,8 @@
+# 0.5.0
+
+* Added ability to download all data as a zip archive.
+* Added option to print version from commands. 
+
 # 0.4.0
 
 * Adding GitHub Action to test project. Fixing some small issues in the process.
