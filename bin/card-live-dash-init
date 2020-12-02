@@ -68,7 +68,6 @@ if __name__ == '__main__':
                             zip_info.filename = path.basename(zip_info.filename)
                             zf.extract(zip_info, cardlive_data_path)
 
-                listdir(cardlive_data_path)
                 extracted_files = [f for f in listdir(cardlive_data_path) if
                                    path.isfile(path.join(cardlive_data_path, f))]
                 print(f'Loaded {len(extracted_files)} samples into [{cardlive_data_path}]')
