@@ -140,6 +140,20 @@ card-live-dash-profiler [cardlive-home]
 
 The same caveats as for the Development server still apply (it also turns on Debug mode and should not be run for a production server).
 
+# Data
+
+If you wish to make use of the data, it is all available for download from the main application (<https://bergen.mcmaster.ca/cardlive/>):
+
+![data-download.png][]
+
+This will give you a zip file of the results (in JSON format) of RGI,LMAT,MLST tools.
+
+## API/Data processing tutorial
+
+If you wish to make use of the data (e.g., load into dataframes for plotting) then feel free to following along with the following Juptyer notebook for how to convert the JSON results files to a dataframe using the CARD:Live Dashboard API.
+
+* [CARD:Live API/Data Tutorial][]
+
 # Tests
 
 To run the tests, please first install the application (to get the dependencies installed) and run:
@@ -154,4 +168,6 @@ pytest
 [gunicorn-conf-doc]: https://docs.gunicorn.org/en/latest/configure.html
 [CARD:Live]: https://card.mcmaster.ca/live
 [Python Dash]: https://plotly.com/dash/
+[CARD:Live API/Data Tutorial]: doc/api/data-api-tutorial.ipynb
 [card-live-overview.png]: doc/images/card-live-overview.png
+[data-download.png]: doc/images/data-download.png
