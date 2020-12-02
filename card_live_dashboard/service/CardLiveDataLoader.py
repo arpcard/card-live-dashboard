@@ -5,7 +5,7 @@ import logging
 from os import path, listdir
 from pathlib import Path
 from typing import Generator
-from typing import List
+from typing import List, Set, Union
 
 import pandas as pd
 import zipstream
@@ -128,7 +128,7 @@ class CardLiveDataLoader:
 
         return data
 
-    def data_archive_generator(self, file_names) -> Generator[bytes, None, None]:
+    def data_archive_generator(self, file_names: Union[List[str], Set[str]]) -> Generator[bytes, None, None]:
         """
         Get the CARD:Live JSON files as a zipstream generator
         (code derived from https://pypi.org/project/zipstream-new/).
