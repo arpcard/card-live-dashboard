@@ -10,3 +10,6 @@ __pycache__
 /*.tab
 /taxdump.tar.gz
 /*.log
+.ipynb_checkpoints
+/doc/api/card-live-home
+taxdump.tar.gz
