@@ -3,7 +3,7 @@
 [![pypi](https://badge.fury.io/py/card-live-dashboard.svg)](https://badge.fury.io/py/card-live-dashboard)
 
 <p align="center">
-## [CARD:Live Dashboard][]
+    <h2><a href="https://bergen.mcmaster.ca/cardlive/">CARD:Live Dashboard</a></h2>
 </p>
 
 This repository contains code for the [CARD:Live Dashboard][]. This is used to summarize and display data from [CARD:Live][] in a dashboard.
