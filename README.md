@@ -2,11 +2,11 @@
 [![python-test](https://github.com/arpcard/card-live-dashboard/workflows/python-test/badge.svg?branch=development)](https://github.com/arpcard/card-live-dashboard/actions/)
 [![pypi](https://badge.fury.io/py/card-live-dashboard.svg)](https://badge.fury.io/py/card-live-dashboard)
 
-**Click here to access the [CARD:Live Dashboard][] server.**
-
-This repository contains code for the [CARD:Live Dashboard][]. This is used to summarize and display data from [CARD:Live][] in a dashboard.
+**Click this link to access the [CARD:Live Dashboard][] server.**
 
 ![card-live-overview.png][]
+
+This repository contains code for the [CARD:Live Dashboard][]. This is used to summarize and display data from [CARD:Live][] in a dashboard.
 
 # Install
 
