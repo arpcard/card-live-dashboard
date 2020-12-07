@@ -2,9 +2,7 @@
 [![python-test](https://github.com/arpcard/card-live-dashboard/workflows/python-test/badge.svg?branch=development)](https://github.com/arpcard/card-live-dashboard/actions/)
 [![pypi](https://badge.fury.io/py/card-live-dashboard.svg)](https://badge.fury.io/py/card-live-dashboard)
 
-<p align="center">
-    <h2><a href="https://bergen.mcmaster.ca/cardlive/">CARD:Live Dashboard</a></h2>
-</p>
+**Click here to access the [CARD:Live Dashboard][] server.**
 
 This repository contains code for the [CARD:Live Dashboard][]. This is used to summarize and display data from [CARD:Live][] in a dashboard.
 
@@ -163,6 +161,10 @@ To run the tests, please first install the application (to get the dependencies 
 ```bash
 pytest
 ```
+
+# Contact
+
+For more information you can contact <card@mcmaster.ca> or <aaron.petkau@gmail.com>.
 
 [dash-deployment]: https://dash.plotly.com/deployment
 [gunicorn]: https://docs.gunicorn.org
