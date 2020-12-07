@@ -4,7 +4,7 @@
 
 **Click this link to access the [CARD:Live Dashboard][] server.**
 
-![card-live-overview.png][]
+[![card-live-overview.png][]][CARD:Live Dashboard]
 
 This repository contains code for the [CARD:Live Dashboard][]. This is used to summarize and display data from [CARD:Live][] in a dashboard.
 
