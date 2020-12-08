@@ -20,6 +20,8 @@ source card-live-venv
 python -m pip install card-live-dashboard
 ```
 
+*Note: If you encounter an error related to __libgeos_c.so__, you may need to install this separately. One option is to install the `geos` package via conda (`conda install geos`) which should include __libgeos_c__. See issue [#18](https://github.com/arpcard/card-live-dashboard/issues/18)*.
+
 ## Development
 
 If, instead, you want to install and do development on the code you can instead run (after creating a virtual environment):
