@@ -156,6 +156,12 @@ If you wish to make use of the data (e.g., load into dataframes for plotting) th
 
 * [CARD:Live API/Data Tutorial][]
 
+For more general information on working with Plotly/Dash to construct figures (including producing the chropleth map) you can look at the below Juptyer notebook which was used for a previous CARD:Live presentation.
+
+* [Plotly/Dash tutorial][]
+
+A lot more details are found in the [Dash Documentation][Python Dash].
+
 # Tests
 
 To run the tests, please first install the application (to get the dependencies installed) and run:
@@ -178,3 +184,4 @@ For more information you can contact <card@mcmaster.ca> or <aaron.petkau@gmail.c
 [card-live-overview.png]: doc/images/card-live-overview.png
 [data-download.png]: doc/images/data-download.png
 [CARD:Live Dashboard]: https://bergen.mcmaster.ca/cardlive/
+[Plotly/Dash tutorial]: https://github.com/apetkau/cardlive-presentation-2020
