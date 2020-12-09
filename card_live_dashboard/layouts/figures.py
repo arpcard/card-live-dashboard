@@ -1,6 +1,7 @@
 import logging
 from collections import OrderedDict
 from typing import List, Dict
+import itertools
 
 import geopandas
 import upsetplot
@@ -122,52 +123,81 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
 
 
 def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
+    """
+    Generates an upset plot figure in plotly based on the presence/absence of
+    the selected category across filenames in the RGI output selected
+    :param data: a CardLiveData object from which the rgi_parser is called
+    :param type_value: The category in RGI to plot set membersips for
+    :return: A plotly figure object for displaying via dash, returned figure
+             is empty or gives a warning requesting further subsetting if
+             there is not enough or too much data to meaningfully generate
+             subsets
+    """
+
     if data.empty:
         fig = EMPTY_FIGURE
     else:
+        # get category set memberships from rgi data
         title = RGI_TITLES[type_value]
-        totals_df = data.rgi_parser.get_column_values(data_type=type_value, values_name='categories', drop_duplicates=True)
+        totals_df = data.rgi_parser.get_column_values(data_type=type_value,
+                                                      values_name='categories',
+                                                      drop_duplicates=True)
         totals_df = totals_df.dropna()
-        category_sets = totals_df.reset_index().groupby('filename').agg(lambda x: tuple(x)).applymap(list)
-        category_sets = category_sets['categories'].apply(lambda x: sorted(x)).sort_values().apply(tuple)
+        category_sets = totals_df.reset_index().groupby('filename')\
+                                        .agg(lambda x: tuple(x)).applymap(list)
+        category_sets = category_sets['categories']\
+                         .apply(lambda x: sorted(x)).sort_values().apply(tuple)
         category_sets = category_sets.value_counts()
 
-        total_categories = totals_df['categories'].nunique()
+        # convert to upset data
+        upset_data = upsetplot.from_memberships(category_sets.index,
+                                                category_sets.values)
+        upset_data = upsetplot.UpSet(upset_data,
+                                     sort_by='cardinality')
+
+        # get number of sets and categories into UpSet class
+        num_sets, num_categories = upset_data.intersections.reset_index().shape
 
         # if the data is empty
-        if category_sets.empty:
+        if num_sets == 0 or num_categories == 0:
             fig = EMPTY_FIGURE
         # or if there is way too much data to plot
-        elif totals_df['categories'].nunique() > 40:
+        elif num_categories > 40:
             fig = go.Figure(layout={
-                'xaxis': {'visible': False},
-                'yaxis': {'visible': False},
-                'annotations': [{
-                    'text': f"{total_categories} Total {title} types with current selection<br>Too much data to plot intersections, please subset further",
-                    'xref': 'paper',
-                    'yref': 'paper',
-                    'showarrow': False,
-                    'font': {
-                        'size': 28
-                    }
-                }]
-            })
-        else:
-            upset_data = upsetplot.from_memberships(category_sets.index, category_sets.values)
+                                'xaxis': {'visible': False},
+                                'yaxis': {'visible': False},
+                                'annotations': [{
+                                'text': f"{num_categories} total {title} "
+                                         "categories with current selection. "
+                                         "<br>Please subset input data "
+                                         "further to display set "
+                                         "intersections.",
+                                'xref': 'paper',
+                                'yref': 'paper',
+                                'showarrow': False,
+                                'font': {'size': 28}
+                                }]
+                            })
 
+        else:
 			# filter to top 25 sets by cardinality
-            if upset_data.shape[0] > 25:
+            if num_sets > 25:
                 truncated = True
-                upset_data = upset_data[:25]
+                upset_data.intersections = upset_data.intersections[:25]
             else:
                 truncated = False
 
-            upset_data = upsetplot.UpSet(upset_data, sort_by='cardinality')
+            # get the category names in each set for hover annotation
+            set_category_annotations = []
+            for mask in upset_data.intersections.index:
+                categories_in_set = itertools.compress(\
+                                          upset_data.intersections.index.names,
+                                          mask)
+                categories_in_set = "<br>".join(sorted(categories_in_set))
+                set_category_annotations.append(categories_in_set)
 
-            categories = ["<br>".join(sorted([cat for cat, presence in zip(upset_data.intersections.index.names, mask) if presence])) \
-			                                  for mask in upset_data.intersections.index]
-
-            set_intersections = upset_data.intersections.reset_index().drop(0, axis=1).astype(int).T.iloc[::-1]
+            set_intersections = upset_data.intersections.reset_index()\
+                                    .iloc[:, :-1].astype(int).T.iloc[::-1]
 
             # make grid for set memberships
             grid_x = []
@@ -198,8 +228,8 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
 
             # add barplot of intersection cardinalities
             fig.add_trace(go.Bar(y=upset_data.intersections.values,
-                                 x=categories,
-                                 name=f"{title} Set Cardinality",
+                                 x=set_category_annotations,
+                                 name=f"{title} set",
                                  showlegend=False,
                                  hovertemplate='Genomes w/ Set: %{y}<br>Set: [%{x}]',
                                  xaxis='x1',
@@ -207,10 +237,10 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
                           row=1, col=1),
 
             # add barplot of count of category values
-            fig.add_trace(go.Bar(y = upset_data.totals.iloc[::-1].index,
+            fig.add_trace(go.Bar(y=upset_data.totals.iloc[::-1].index,
                                  x=upset_data.totals.iloc[::-1],
                                  orientation='h',
-                                 name=f"{title} Unique Counts",
+                                 name=f"{title} Unique Count",
                                  showlegend=False,
                                  hovertemplate='Category: %{y}<br>Genomes: %{x}',
                                  yaxis='y2',
@@ -218,8 +248,8 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
                           row=2, col=2)
 
             # create the backgrid for the set memberships
-            fig.add_trace(go.Scatter(x = grid_x,
-                                     y = grid_y,
+            fig.add_trace(go.Scatter(x=grid_x,
+                                     y=grid_y,
                                      hoverinfo='skip',
                                      mode='markers',
                                      marker={'color': 'lightgrey'},
@@ -229,9 +259,9 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
                           row=2, col=1)
 
             # plot the set memberships
-            fig.add_trace(go.Scatter(x = membership_x,
-                                     y = membership_y,
-                                     name=f"{title} Set Intersections",
+            fig.add_trace(go.Scatter(x=membership_x,
+                                     y=membership_y,
+                                     name=f"{title} in set",
                                      hovertext=names,
                                      hovertemplate='%{hovertext}',
                                      mode='markers',
@@ -246,16 +276,18 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
             # across plots that still allows zooming but I can't figure it out
             # right now!
             if truncated:
-                plot_label = f"{title} UpSet Plot<br>(Truncated to 25 Most Common Intersections)"
+                plot_label = f"{title} UpSet Plot<br>(Truncated to 25 Most "\
+                              "Common Intersections)"
             else:
                 plot_label = f"{title} UpSet Plot<br>(All Intersections)"
 
             fig.update_layout(dict(
                 title = plot_label,
-                # cardinality
+
+                # tidy axes for cardinality plot
                 xaxis1 = dict(showticklabels=False,
                               fixedrange=True),
-                yaxis1 = dict(title="Cardinality",
+                yaxis1 = dict(title="Set Count",
                               fixedrange=True),
 
                 # grid
@@ -282,14 +314,14 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
                 ),
 
                 # category count
-                xaxis4 = dict(title="Unique Count",
+                xaxis4 = dict(title=f"Unique Count of<br>{title}",
                               fixedrange=True),
                 yaxis4 = dict(showticklabels=False,
                               fixedrange=True,
                               range=[0, len(set_intersections.index)+0.5])
             )
             )
-            fig.update_layout(height=get_figure_height(total_categories))
+            fig.update_layout(height=get_figure_height(num_categories))
 
     return fig
 
