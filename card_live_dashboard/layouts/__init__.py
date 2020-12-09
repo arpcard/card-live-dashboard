@@ -283,6 +283,11 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                      value_color='default'
                                  ),
                                  ),
+            single_figure_layout(title='RGI intersections',
+                                 description=['Patterns of co-occurrence of the above RGI result type across selected genomes'],
+                                 id='figure-rgi-intersections',
+                                 fig=figures_dict['rgi'],
+                                 ),
         ])
     ]
 

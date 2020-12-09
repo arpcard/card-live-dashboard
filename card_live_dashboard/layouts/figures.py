@@ -3,8 +3,10 @@ from collections import OrderedDict
 from typing import List, Dict
 
 import geopandas
+import upsetplot
 import pandas as pd
 import plotly.express as px
+import plotly.subplots as sbp
 import plotly.graph_objects as go
 
 from card_live_dashboard.model.CardLiveData import CardLiveData
@@ -26,6 +28,10 @@ EMPTY_FIGURE = go.Figure(layout={
     }]
 })
 
+
+
+
+
 # Create empty geographic map
 EMPTY_MAP = go.Figure(go.Scattergeo())
 
@@ -35,6 +41,7 @@ EMPTY_FIGURE_DICT = {
     'timeline': EMPTY_FIGURE,
     'totals': EMPTY_FIGURE,
     'rgi': EMPTY_FIGURE,
+    'intersections': EMPTY_FIGURE,
 }
 
 TOTALS_COLUMN_SELECT_NAMES = {
@@ -110,6 +117,179 @@ def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> g
         fig.update_layout(font={'size': 14},
                           yaxis={'title': '', 'ticksuffix': TICKSPACE}
                           )
+
+    return fig
+
+
+def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
+    if data.empty:
+        fig = EMPTY_FIGURE
+    else:
+        title = RGI_TITLES[type_value]
+        totals_df = data.rgi_parser.get_column_values(data_type=type_value, values_name='categories', drop_duplicates=True)
+        totals_df = totals_df.dropna()
+        category_sets = totals_df.reset_index().groupby('filename').agg(lambda x: tuple(x)).applymap(list)
+        category_sets = category_sets['categories'].apply(lambda x: sorted(x)).sort_values().apply(tuple)
+        category_sets = category_sets.value_counts()
+
+        total_categories = totals_df['categories'].nunique()
+
+        # if the data is empty
+        if category_sets.empty:
+            fig = EMPTY_FIGURE
+        # or if there is way too much data to plot
+        elif totals_df['categories'].nunique() > 40:
+            fig = go.Figure(layout={
+                'xaxis': {'visible': False},
+                'yaxis': {'visible': False},
+                'annotations': [{
+                    'text': f"{total_categories} Total {title} types with current selection<br>Too much data to plot intersections, please subset further",
+                    'xref': 'paper',
+                    'yref': 'paper',
+                    'showarrow': False,
+                    'font': {
+                        'size': 28
+                    }
+                }]
+            })
+        else:
+            upset_data = upsetplot.from_memberships(category_sets.index, category_sets.values)
+
+			# filter to top 25 sets by cardinality
+            if upset_data.shape[0] > 25:
+                truncated = True
+                upset_data = upset_data[:25]
+            else:
+                truncated = False
+
+            upset_data = upsetplot.UpSet(upset_data, sort_by='cardinality')
+
+            categories = ["<br>".join(sorted([cat for cat, presence in zip(upset_data.intersections.index.names, mask) if presence])) \
+			                                  for mask in upset_data.intersections.index]
+
+            set_intersections = upset_data.intersections.reset_index().drop(0, axis=1).astype(int).T.iloc[::-1]
+
+            # make grid for set memberships
+            grid_x = []
+            grid_y = []
+            membership_x = []
+            membership_y = []
+            names = []
+
+            y = 0
+            for row in set_intersections.iterrows():
+                x = 0
+                for membership in row[1]:
+                    grid_x.append(x)
+                    grid_y.append(y)
+                    if membership == 1:
+                        membership_x.append(x)
+                        membership_y.append(y)
+                        names.append(row[0])
+                    x+=1
+                y+=1
+
+            # create subplot layout
+            fig = sbp.make_subplots(rows=2, cols=2,
+                                    column_widths=[2, 0.2],
+                                    row_heights=[0.4, 2],
+                                    horizontal_spacing = 0.005,
+                                    vertical_spacing=0.01)
+
+            # add barplot of intersection cardinalities
+            fig.add_trace(go.Bar(y=upset_data.intersections.values,
+                                 x=categories,
+                                 name=f"{title} Set Cardinality",
+                                 showlegend=False,
+                                 hovertemplate='Genomes w/ Set: %{y}<br>Set: [%{x}]',
+                                 xaxis='x1',
+                                 yaxis='y1'),
+                          row=1, col=1),
+
+            # add barplot of count of category values
+            fig.add_trace(go.Bar(y = upset_data.totals.iloc[::-1].index,
+                                 x=upset_data.totals.iloc[::-1],
+                                 orientation='h',
+                                 name=f"{title} Unique Counts",
+                                 showlegend=False,
+                                 hovertemplate='Category: %{y}<br>Genomes: %{x}',
+                                 yaxis='y2',
+                                 xaxis='x2'),
+                          row=2, col=2)
+
+            # create the backgrid for the set memberships
+            fig.add_trace(go.Scatter(x = grid_x,
+                                     y = grid_y,
+                                     hoverinfo='skip',
+                                     mode='markers',
+                                     marker={'color': 'lightgrey'},
+                                     showlegend=False,
+                                     xaxis='x3',
+                                     yaxis='y3'),
+                          row=2, col=1)
+
+            # plot the set memberships
+            fig.add_trace(go.Scatter(x = membership_x,
+                                     y = membership_y,
+                                     name=f"{title} Set Intersections",
+                                     hovertext=names,
+                                     hovertemplate='%{hovertext}',
+                                     mode='markers',
+                                     marker={'color': 'blue'},
+                                     xaxis='x4',
+                                     yaxis='y4',
+                                     showlegend=False),
+                            row=2, col=1)
+
+            # tidy up layout, disable and align axes so everything joins
+            # there may be a better way to do this with shared/aligned axes
+            # across plots that still allows zooming but I can't figure it out
+            # right now!
+            if truncated:
+                plot_label = f"{title} UpSet Plot<br>(Truncated to 25 Most Common Intersections)"
+            else:
+                plot_label = f"{title} UpSet Plot<br>(All Intersections)"
+
+            fig.update_layout(dict(
+                title = plot_label,
+                # cardinality
+                xaxis1 = dict(showticklabels=False,
+                              fixedrange=True),
+                yaxis1 = dict(title="Cardinality",
+                              fixedrange=True),
+
+                # grid
+                xaxis2 = dict(showticklabels=False,
+                              fixedrange=True,
+                              range=[-0.5, len(set_intersections.columns)-0.5]),
+                yaxis2 = dict(showticklabels=False,
+                              fixedrange=True,
+                              range=[-0.5, len(set_intersections.index)+0.5]),
+
+                # membership
+                xaxis3 = dict(showticklabels=False,
+                              fixedrange=True,
+                              range=[-0.5, len(set_intersections.columns)-0.5]),
+                yaxis3 = dict(
+                    tickmode = 'array',
+                    tickvals = list(range(len(set_intersections.index))),
+                    ticktext = set_intersections.index,
+                    title=f"{title}",
+                    fixedrange=True,
+                    range=[-0.5, len(set_intersections.index)+0.5],
+                    tickfont=dict(size = 10),
+                    automargin=True,
+                ),
+
+                # category count
+                xaxis4 = dict(title="Unique Count",
+                              fixedrange=True),
+                yaxis4 = dict(showticklabels=False,
+                              fixedrange=True,
+                              range=[0, len(set_intersections.index)+0.5])
+            )
+            )
+            fig.update_layout(height=get_figure_height(total_categories))
 
     return fig
 
