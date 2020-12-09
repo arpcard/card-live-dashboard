@@ -240,7 +240,7 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
             fig.add_trace(go.Bar(y=upset_data.totals.iloc[::-1].index,
                                  x=upset_data.totals.iloc[::-1],
                                  orientation='h',
-                                 name=f"{title} Unique Count",
+                                 name=f"{title} unique count",
                                  showlegend=False,
                                  hovertemplate='Category: %{y}<br>Genomes: %{x}',
                                  yaxis='y2',
