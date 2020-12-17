@@ -82,6 +82,10 @@ RGI_D_TICK = {
 # Spacing to put between tick mark labels and plot
 TICKSPACE = ' '
 
+# upset max displayable configuration
+MAX_UPSET_CATEGORIES=40
+MAX_UPSET_INTERSECTIONS=25
+
 
 def totals_figure(data: CardLiveData, type_value: str, color_by_value: str) -> go.Figure:
     type_col = TOTALS_COLUMN_SELECT_NAMES[type_value]
@@ -162,7 +166,7 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
         if num_sets == 0 or num_categories == 0:
             fig = EMPTY_FIGURE
         # or if there is way too much data to plot
-        elif num_categories > 40:
+        elif num_categories > MAX_UPSET_CATEGORIES:
             fig = go.Figure(layout={
                                 'xaxis': {'visible': False},
                                 'yaxis': {'visible': False},
@@ -180,10 +184,10 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
                             })
 
         else:
-			# filter to top 25 sets by cardinality
-            if num_sets > 25:
+			# filter to top MAX_UPSET_INTERSECTIONS sets by cardinality
+            if num_sets > MAX_UPSET_INTERSECTIONS:
                 truncated = True
-                upset_data.intersections = upset_data.intersections[:25]
+                upset_data.intersections = upset_data.intersections[:MAX_UPSET_INTERSECTIONS]
             else:
                 truncated = False
 
@@ -276,7 +280,7 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
             # across plots that still allows zooming but I can't figure it out
             # right now!
             if truncated:
-                plot_label = f"{title} UpSet Plot<br>(Truncated to 25 Most "\
+                plot_label = f"{title} UpSet Plot<br>(Truncated to {MAX_UPSET_INTERSECTIONS} Most "\
                               "Common Intersections)"
             else:
                 plot_label = f"{title} UpSet Plot<br>(All Intersections)"
