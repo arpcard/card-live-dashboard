@@ -179,7 +179,7 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
                                 'xref': 'paper',
                                 'yref': 'paper',
                                 'showarrow': False,
-                                'font': {'size': 28}
+                                'font': {'size': 16}
                                 }]
                             })
 
@@ -210,18 +210,14 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
             membership_y = []
             names = []
 
-            y = 0
-            for row in set_intersections.iterrows():
-                x = 0
-                for membership in row[1]:
+            for (y, row) in enumerate(set_intersections.iterrows()):
+                for (x, membership) in enumerate(row[1]):
                     grid_x.append(x)
                     grid_y.append(y)
                     if membership == 1:
                         membership_x.append(x)
                         membership_y.append(y)
                         names.append(row[0])
-                    x+=1
-                y+=1
 
             # create subplot layout
             fig = sbp.make_subplots(rows=2, cols=2,
