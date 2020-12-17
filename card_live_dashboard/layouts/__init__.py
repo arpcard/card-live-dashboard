@@ -287,6 +287,16 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  description=['Patterns of co-occurrence of the above RGI result type across selected genomes'],
                                  id='figure-rgi-intersections',
                                  fig=figures_dict['rgi'],
+                                 dropdowns=figure_menus_layout(
+                                     id_type='rgi-intersection-type-select',
+                                     options_type=[
+                                         {'label': 'Drug class', 'value': 'drug_class'},
+                                         {'label': 'AMR gene', 'value': 'amr_gene'},
+                                         {'label': 'AMR gene family', 'value': 'amr_gene_family'},
+                                         {'label': 'Resistance mechanism', 'value': 'resistance_mechanism'},
+                                     ],
+                                     value_type='drug_class',
+                                     )
                                  ),
         ])
     ]
