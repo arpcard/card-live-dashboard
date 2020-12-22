@@ -133,12 +133,29 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
              there is not enough or too much data to meaningfully generate
              subsets
     """
+    # get the title based on type_value
+    title = RGI_TITLES[type_value]
+
+    # if data is empty or only contains one record then can't generate
+    # upset plots therefore plot empty figure
     if data.empty:
         fig = EMPTY_FIGURE
+    elif len(data) == 1:
+        fig = go.Figure(layout={
+                                'xaxis': {'visible': False},
+                                'yaxis': {'visible': False},
+                                'annotations': [{
+                                'text': f"Only a single value for {title} "
+                                         "with current selection. "
+                                         "<br>Can't plot intersections for "
+                                         "a single category (see above)",
+                                'xref': 'paper',
+                                'yref': 'paper',
+                                'showarrow': False,
+                                'font': {'size': 16}
+                                }]
+                            })
     else:
-        # get category set memberships from rgi data
-        title = RGI_TITLES[type_value]
-
         # prepare data
         upset_data = prepare_intersection_data(data, type_value)
 
@@ -176,7 +193,7 @@ def rgi_intersection_figure(data: CardLiveData, type_value: str) -> go.Figure:
 
             # generate plot
             fig = plotly_upset_plot(upset_data, title, truncated)
-            
+
             # size for display as appropriate for the number of categories
             fig.update_layout(height=get_figure_height(num_categories))
 
@@ -214,7 +231,7 @@ def prepare_intersection_data(data: CardLiveData, type_value: str) -> upsetplot.
 def plotly_upset_plot(upset_data: upsetplot.UpSet, title: str, truncated: bool) -> go.Figure:
     """
     Generate upset plot in plotly
-    :param upset_data: an upsetplot.UpSet class containing the intersections 
+    :param upset_data: an upsetplot.UpSet class containing the intersections
                         for a given set of RGI result categories
     :param title: a string containing the title for this upsetplot
     :param truncated: a boolean indicating if this upsetplot has been truncated
