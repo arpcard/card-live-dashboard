@@ -284,7 +284,7 @@ def figures_layout(figures_dict: Dict[str, go.Figure]):
                                  ),
                                  ),
             single_figure_layout(title='RGI intersections',
-                                 description=['Patterns of co-occurrence of the above RGI result type across selected genomes'],
+                                 description=['Patterns of co-occurrence of the selected RGI result type across genome subset'],
                                  id='figure-rgi-intersections',
                                  fig=figures_dict['rgi'],
                                  dropdowns=figure_menus_layout(
