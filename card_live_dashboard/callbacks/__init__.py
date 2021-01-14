@@ -83,7 +83,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Output('figure-geographic-map-id', 'figure'),
          Output('figure-timeline-id', 'figure'),
          Output('figure-totals-id', 'figure'),
-         Output('figure-rgi-id', 'figure')],
+         Output('figure-rgi-id', 'figure'),
+         Output('figure-rgi-intersections', 'figure')],
         [Input('rgi-cutoff-select', 'value'),
          Input('drug-class-select', 'value'),
          Input('amr-gene-family-select', 'value'),
@@ -99,7 +100,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
          Input('totals-type-select', 'value'),
          Input('totals-color-select', 'value'),
          Input('rgi-type-select', 'value'),
-         Input('rgi-color-select', 'value')]
+         Input('rgi-color-select', 'value'),
+         Input('rgi-intersection-type-select', 'value')]
     )
     def update_all_figures(rgi_cutoff_select: str, drug_classes: List[str],
                            amr_gene_families: List[str], resistance_mechanisms: List[str],
@@ -107,7 +109,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                            time_dropdown: str, start_date: str, end_date: str,
                            timeline_type_select: str, timeline_color_select: str,
                            totals_type_select: str, totals_color_select: str,
-                           rgi_type_select: str, rgi_color_select: str):
+                           rgi_type_select: str, rgi_color_select: str,
+                           rgi_intersection_type_select: str):
         """
         Main callback/controller for updating all figures based on user selections.
         :param rgi_cutoff_select: The selected RGI cutoff ('all' for all values).
@@ -161,8 +164,8 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                                           totals_color_select=totals_color_select,
                                           rgi_type_select=rgi_type_select,
                                           rgi_color_select=rgi_color_select,
-                                          organism_identification_method=organism_identification_method
-                                          )
+                                          organism_identification_method=organism_identification_method,
+                                          rgi_intersection_type_select=rgi_intersection_type_select)
 
         main_pane_figures = build_main_pane(time_subsets[time_dropdown], organism_identification_method, fig_settings)
 
@@ -204,12 +207,14 @@ def build_callbacks(app: dash.dash.Dash) -> None:
                 main_pane_figures['map'],
                 main_pane_figures['timeline'],
                 main_pane_figures['totals'],
-                main_pane_figures['rgi'])
+                main_pane_figures['rgi'],
+                main_pane_figures['intersections'])
 
 
 def build_fig_settings(timeline_type_select: str, timeline_color_select: str, totals_type_select: str,
                        totals_color_select: str, rgi_type_select: str, rgi_color_select: str,
-                       organism_identification_method: str) -> Dict[str, Dict[str, str]]:
+                       organism_identification_method: str,
+                       rgi_intersection_type_select: str) -> Dict[str, Dict[str, str]]:
     if timeline_color_select == 'organism':
         timeline_color_select = f'{timeline_color_select}_{organism_identification_method}'
     if totals_type_select == 'organism':
@@ -222,7 +227,8 @@ def build_fig_settings(timeline_type_select: str, timeline_color_select: str, to
     fig_settings = {
         'timeline': {'type': timeline_type_select, 'color': timeline_color_select},
         'totals': {'type': totals_type_select, 'color': totals_color_select},
-        'rgi': {'type': rgi_type_select, 'color': rgi_color_select}
+        'rgi': {'type': rgi_type_select, 'color': rgi_color_select},
+        'intersections': {'type': rgi_intersection_type_select},
     }
 
     return fig_settings
@@ -296,9 +302,12 @@ def build_main_pane(data: CardLiveData, organism_identification_method: str, fig
     fig_rgi = figures.rgi_breakdown_figure(data, type_value=fig_settings['rgi']['type'],
                                            color_by_value=fig_settings['rgi']['color'])
 
+    fig_intersections = figures.rgi_intersection_figure(data,
+                                                        type_value=fig_settings['intersections']['type'])
     return {
         'map': fig_map,
         'timeline': fig_histogram_rate,
         'totals': fig_totals,
         'rgi': fig_rgi,
+        'intersections': fig_intersections,
     }
