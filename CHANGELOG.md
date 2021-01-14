@@ -1,3 +1,7 @@
+# 0.6.0
+
+* Added user-configurable plotly-based upset plot to display RGI category intersections
+
 # 0.5.0
 
 * Added ability to download all data as a zip archive.
