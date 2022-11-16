@@ -70,7 +70,7 @@ mkdir [cardlive-home]/data/card_live
 find [cardlive-home]/data/card_live.all/ | shuf | head -n 500 | xargs -I {} ln {} [cardlive-home]/data/card_live/
 ```
 
-Make sure to replace `[cardlive-home] with your chosen directory name when running `card-live-dash-init`.
+Make sure to replace `[cardlive-home]` with your chosen directory name when running `card-live-dash-init`.
 
 ## Production
 
