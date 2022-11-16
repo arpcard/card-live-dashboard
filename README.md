@@ -53,6 +53,25 @@ By default this will download a copy of the most recent data from CARD:Live (ava
 
 If, instead, you wish to start with an empty data directory you can use `--no-download-data`. In this case, you will have to copy data to `[cardlive-home]/data/card_live` before the application starts up.
 
+### Data for development
+
+If you are intending to do development or wishing to test out CARD:Live, it is recommended you downsample the data prior to running the application. This will make everything run quicker and smoother.
+
+To do this, please run the following commands:
+
+```bash
+# Rename full data directory
+mv [cardlive-home]/data/card_live [cardlive-home]/data/card_live.all
+
+# Create new directory for downsampled data
+mkdir [cardlive-home]/data/card_live
+
+# Select a random subset of 500 samples and link them in the appropriate directory
+find [cardlive-home]/data/card_live.all/ | shuf | head -n 500 | xargs -I {} ln {} [cardlive-home]/data/card_live/
+```
+
+Make sure to replace `[cardlive-home] with your chosen directory name when running `card-live-dash-init`.
+
 ## Production
 
 ### Running
