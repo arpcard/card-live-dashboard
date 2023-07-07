@@ -18,6 +18,7 @@ virtualenv card-live-venv
 source card-live-venv
 
 python -m pip install card-live-dashboard
+python -m pip install 'pandas<2.0.0' # Resolves deprecation of DataFrame.append in pandas
 ```
 
 *Note: If you encounter an error related to __libgeos_c.so__, you may need to install this separately. One option is to install the `geos` package via conda (`conda install geos`) which should include __libgeos_c__. See issue [#18](https://github.com/arpcard/card-live-dashboard/issues/18)*.
@@ -35,6 +36,7 @@ cd card-live-dashboard
 cd card-live-dashboard
 
 python -m pip install -e .
+python -m pip install 'pandas<2.0.0' # Resolves deprecation of DataFrame.append in pandas
 ```
 
 This will make the installed application reflect any code changes made within `card-live-dashboard/`.
