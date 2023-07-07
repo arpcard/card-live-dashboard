@@ -29,6 +29,7 @@ jobs:
         pip install flake8 pytest
         # Install dependencies for testing
         python -m pip install .
+        python -m pip install 'pandas<2.0.0'
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
